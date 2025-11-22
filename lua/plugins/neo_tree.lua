@@ -1,0 +1,3 @@
+-- Neo-tree plugin
+
+return {}
