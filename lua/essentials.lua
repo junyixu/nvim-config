@@ -159,7 +159,7 @@ vim.o.inccommand = 'split'
 vim.o.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.o.scrolloff = 10
+-- vim.o.scrolloff = 10
 
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
@@ -184,53 +184,14 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- ============================================================================
--- Claude Code 快捷键映射
--- ============================================================================
--- 功能：将生成的文件行号引用复制到剪贴板（智能检测环境）
--- 使用：
---   Normal 模式: <leader>y  -> 复制当前行引用
---   Visual 模式: <leader>y  -> 复制选中行范围引用
---
--- 实际效果：
---   - 执行函数生成引用格式（如 @unix.vim:123-456）
---   - 在tmux中：自动复制到tmux剪贴板（可用 tmux paste-buffer 粘贴）
---   - 非tmux环境：自动复制到系统剪贴板（+ 寄存器）
---   - 可直接粘贴到 Claude Code 对话中进行精准讨论
--- ============================================================================
--- vim.keymap.set('n', '<leader>y', function()
---   local ref = vim.fn['claude#get_line_reference']()
---   vim.fn['utils#copy_to_smart_clipboard'](ref)
--- end, { desc = '将生成的文件行号引用复制到剪贴板' })
-
---
--- vim.keymap.set(
---   'v',
---   '<leader>y',
---   ':<C-u>call utils#copy_to_smart_clipboard(claude#get_line_reference())<CR>',
---   { desc = '将生成的文件行号引用复制到剪贴板' }
--- )
-
--- vim.keymap.set('v', '<leader>y', function()
---   local ref = vim.fn['claude#get_line_reference']()
---   vim.fn['utils#copy_to_smart_clipboard'](ref)
---   vim.api.nvim_input '<Esc>'
--- end, { desc = '将生成的文件行号引用复制到剪贴板' })
-
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+-- vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+-- vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+-- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 vim.keymap.set('n', '<M-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<M-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
@@ -244,11 +205,13 @@ vim.keymap.set('n', '<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
 vim.keymap.set('n', 'sq', '<CMD>q<CR>', { desc = 'Quit the current window' })
 vim.keymap.set('n', '<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 
+vim.keymap.set('n', 'cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
+
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
--- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
--- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
--- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
--- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+vim.keymap.set('n', '<M-H>', '<C-w>H', { desc = 'Move window to the left' })
+vim.keymap.set('n', '<M-L>', '<C-w>L', { desc = 'Move window to the right' })
+vim.keymap.set('n', '<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
+vim.keymap.set('n', '<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -263,6 +226,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.hl.on_yank()
   end,
 })
+-- 等价于
 --  augroup kickstart-highlight-yank
 --     autocmd!
 --     autocmd TextYankPost * silent! lua vim.hl.on_yank()

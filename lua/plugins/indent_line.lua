@@ -1,3 +1,5 @@
--- Indent line plugin
-
-return {}
+return {
+  'lukas-reineke/indent-blankline.nvim',
+  main = 'ibl',
+  opts = {},
+}
