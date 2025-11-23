@@ -9,8 +9,8 @@ require'lspconfig'.julials.setup({
         "--project="..server_path,
         "--startup-file=no",
         "--history-file=no",
-        "--trace-compile=/home/junyi/.julia/environments/nvim-lspconfig/packagecompiler/tracecompilelsp.jl",
-        -- "--trace-compile=./tracecompilelsp.jl",
+        "--sysimage=/home/junyi/.julia/environments/nvim-lspconfig/packagecompiler/julials.so",
+        "--sysimage-native-code=yes",
         "-e", [[
           using Pkg;
           Pkg.instantiate()
