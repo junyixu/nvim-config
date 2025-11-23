@@ -77,7 +77,6 @@ noremap <buffer> <localleader>s :call slime#send(expand("<cword>").".shape\r")<C
 let g:jupyter_ascending_default_mappings=0
 nmap <buffer> <localLeader>x <Plug>JupyterExecute
 nmap <buffer> <localLeader>X <Plug>JupyterExecuteAll
-source $HOME/.vim/ycmMaps.vim
 nnoremap <leader>r :AsyncRun! -mode=hide  manim -pql % DifferentRotations<cr>
 
 source $HOME/.vim/my_maps/GreekLetter4Programming.vim 

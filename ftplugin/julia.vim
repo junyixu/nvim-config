@@ -54,7 +54,6 @@ command! JuliaInsertModeCreateCell :execute 'normal! I# %% '
 nnoremap <buffer><silent> <M-c> :JuliaNormalModeCreateCell<CR>
 vnoremap <buffer><silent> <M-c> :<C-u>JuliaVisualModeCreateCell<CR>
 
-source $HOME/.vim/ycmMaps.vim
 noremap <buffer><localleader>fb <Cmd>call julia#toggle_function_blockassign()<CR>
 xmap <silent><buffer> <CR> <Plug>SlimeRegionSend
 xmap <silent><buffer> <localleader>r :<c-u>call slime#send("@paste" . "\r")<CR>

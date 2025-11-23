@@ -6,5 +6,3 @@ setlocal formatoptions-=o
 " 但我可能用了别的什么插件，不需要 setlocal suffixesadd=.jl 也能用
 setlocal path+=$HOME/scripts/julia/modules
 setlocal path+=$HOME/.julia/packages/**/*
-
-let g:ycm_disable_signature_help = 1
