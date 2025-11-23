@@ -71,7 +71,10 @@ return {
           --   end,
           -- },
         },
-        opts = {},
+        config = function()
+          -- Load snippets from ~/.config/nvim/luasnippets/
+          require('luasnip.loaders.from_lua').load({ paths = vim.fn.stdpath 'config' .. '/luasnippets' })
+        end,
       },
       'folke/lazydev.nvim',
     },
