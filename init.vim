@@ -1,7 +1,8 @@
 lua << EOF
 require 'essentials'
 require 'lazy_nvim'
-require'lspconfig'.julials.setup{}
+vim.lsp.config("julials", {})
+vim.lsp.enable({"julials"})
 EOF
 
 " ============================================================================
