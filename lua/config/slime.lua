@@ -1,36 +1,52 @@
 -- lua/config/slime.lua
+-- 注意: 此文件当前未被使用，配置已移至 lua/plugins/quarto_nvim.lua
+-- 保留此文件作为参考
 
--- 1. 设置 Slime 的目标会话类型 (Target)
--- 对于 NeoVim 内置终端，我们使用 'nvim'
-vim.g.slime_target = 'nvim'
+-- vim-slime 针对 NeoVim 内置终端的正确配置
+-- 参考文档: https://github.com/jpalardy/vim-slime/blob/main/assets/doc/targets/neovim.md
 
--- 2. 设置 Slime 的传输机制 (Transport)
--- 对于 NeoVim 内置终端，我们使用 'socket' (这是 nvim 目标默认使用的，但明确设置更好)
--- vim.g.slime_transport = 'socket' -- 实际上对于 target='nvim' 来说，这是默认行为，可以省略。
+-- 1. 设置 Slime 的目标类型 (必须在插件加载前设置)
+-- 注意: 正确的值是 'neovim' 而不是 'nvim'
+-- vim.g.slime_target = 'neovim'
 
--- 3. 配置目标终端的名称 (Session Name)
--- 这是 Slime 识别目标终端的关键。
--- 默认情况下，Slime 会寻找一个名为 'v:term' 的终端缓冲区。
--- 如果你希望使用自定义名称，可以设置：
--- vim.g.slime_session = 'my_repl_session'
+-- 2. 可选配置
+-- 自动建议最近打开的终端作为默认值
+-- vim.g.slime_suggest_default = true
 
--- 4. 优化发送行为 (可选)
--- 自动发送回车键 (CR)
--- vim.g.slime_dont_ask_for_session = 1
-vim.g.slime_autocall_CR = 1
+-- 使用菜单选择终端 (设为 true 可以从列表中选择)
+-- vim.g.slime_menu_config = false
 
--- 5. 映射快捷键 (可选，但强烈推荐)
--- Slime 默认使用 Leader s 和 Leader c，但如果你喜欢自定义，可以这样做：
-vim.keymap.set('n', '<Leader>ss', '<Plug>SlimeParagraph', { desc = 'Slime: Send Paragraph' })
-vim.keymap.set('v', '<Leader>ss', '<Plug>SlimeRegion', { desc = 'Slime: Send Region' })
-vim.keymap.set('n', '<Leader>sc', '<Plug>SlimeConfig', { desc = 'Slime: Configure Target' })
+-- 使用 PID 而不是 job ID (默认使用 job ID)
+-- vim.g.slime_input_pid = false
 
--- 针对特定文件类型配置 (例如 Python)
--- 如果你希望 Python 文件默认发送到特定的 REPL (例如 ipython)
--- vim.api.nvim_create_autocmd('FileType', {
---   pattern = 'python',
---   callback = function()
---     vim.g.slime_target = 'nvim'
---     vim.g.slime_session = 'ipython_repl'
+-- 忽略未列出的终端缓冲区
+-- vim.g.slime_neovim_ignore_unlisted = false
+
+-- bracketed-paste 模式 (某些 REPL 需要，但可能与 ipython 冲突)
+-- vim.g.slime_bracketed_paste = 1
+
+-- 3. 推荐的键映射
+-- 发送 motion/textobject
+-- vim.keymap.set('n', '<Leader>s', '<Plug>SlimeMotionSend', { remap = true, desc = 'Slime: Send Motion' })
+-- 发送当前行
+-- vim.keymap.set('n', '<Leader>ss', '<Plug>SlimeLineSend', { remap = true, desc = 'Slime: Send Line' })
+-- 发送段落
+-- vim.keymap.set('n', '<Leader>sp', '<Plug>SlimeParagraphSend', { remap = true, desc = 'Slime: Send Paragraph' })
+-- 发送选中区域
+-- vim.keymap.set('v', '<Leader>s', '<Plug>SlimeRegionSend', { remap = true, desc = 'Slime: Send Region' })
+-- 配置目标终端
+-- vim.keymap.set('n', '<Leader>sc', '<Plug>SlimeConfig', { remap = true, desc = 'Slime: Configure Target' })
+
+-- 4. 自动配置函数 (高级用法)
+-- 可以定义一个 Lua 函数来自动查找并配置终端
+-- vim.g.slime_get_jobid = function()
+--   for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+--     if vim.api.nvim_get_option_value('buftype', {buf = bufnr}) == "terminal" then
+--       local chan = vim.api.nvim_get_option_value("channel", {buf = bufnr})
+--       if chan and chan > 0 then
+--         return chan
+--       end
+--     end
 --   end
--- })
+--   return nil
+-- end
