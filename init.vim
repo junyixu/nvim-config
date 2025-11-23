@@ -1,8 +1,7 @@
 lua << EOF
 require 'essentials'
 require 'lazy_nvim'
-
-julia_config={
+require'lspconfig'.julials.setup({
       on_new_config = function(new_config,new_root_dir)
       server_path = "/home/junyi/.julia/packages/LanguageServer/Fwm1f/src/"
       cmd = {
@@ -10,8 +9,8 @@ julia_config={
         "--project="..server_path,
         "--startup-file=no",
         "--history-file=no",
-        -- "--trace-compile=/home/junyi/.julia/environments/nvim-lspconfig/packagecompiler/tracecompilelsp.jl",
-        "--trace-compile=./tracecompilelsp.jl",
+        "--trace-compile=/home/junyi/.julia/environments/nvim-lspconfig/packagecompiler/tracecompilelsp.jl",
+        -- "--trace-compile=./tracecompilelsp.jl",
         "-e", [[
           using Pkg;
           Pkg.instantiate()
@@ -19,7 +18,7 @@ julia_config={
           depot_path = get(ENV, "JULIA_DEPOT_PATH", "")
           project_path = dirname(something(Base.current_project(pwd()), Base.load_path_expand(LOAD_PATH[2])))
           # Make sure that we only load packages from this environment specifically.
-          @info "Running language mark server" env=Base.load_path()[1] pwd() project_path depot_path
+          @info "Running mark language server" env=Base.load_path()[1] pwd() project_path depot_path
           server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, depot_path);
           server.runlinter = true;
           run(server);
@@ -28,10 +27,7 @@ julia_config={
     new_config.cmd = cmd
     on_attach=require'completion'.on_attach
     end
-}
-
-vim.lsp.config("julials", julia_config)
-vim.lsp.enable({"julials"})
+})
 EOF
 
 " ============================================================================
