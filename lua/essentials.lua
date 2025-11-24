@@ -141,6 +141,10 @@ vim.o.timeoutlen = 300
 vim.o.splitright = true
 vim.o.splitbelow = true
 
+--  设置 diffopt 选项，确保包含 'vertical'
+-- 'vertical' 告诉 Vim 在 diff 模式下优先使用垂直分屏 (vsplit)
+vim.opt.diffopt:append 'vertical'
+
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
