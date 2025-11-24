@@ -12,16 +12,8 @@ local snip_table = {
     i(1),
     t { '', '\\end{bmatrix}' },
   }, {
-    condition = function()
-      local val = is_math()
-      print('mark', val)
-      return val
-    end,
-    show_condition = function()
-      local val = is_math()
-      print('mark2', val)
-      return val
-    end,
+    condition = is_math,
+    show_condition = is_math,
   }),
 
   -- Julia code block
