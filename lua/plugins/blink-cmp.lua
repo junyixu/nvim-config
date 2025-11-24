@@ -12,8 +12,6 @@ return {
   --- @module 'blink.cmp'
   --- @type blink.cmp.Config
   opts = {
-    keymap = { preset = 'default' },
-    appearance = { nerd_font_variant = 'mono' },
     completion = {
       documentation = { auto_show = false, auto_show_delay_ms = 500 },
     },
@@ -22,9 +20,7 @@ return {
       providers = {
         lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
       },
-      snippets = { score_offset = 1 },
     },
-    opts_extend = { 'sources.default' },
     snippets = { preset = 'luasnip' },
     fuzzy = { implementation = 'prefer_rust_with_warning' },
     signature = { enabled = true },
