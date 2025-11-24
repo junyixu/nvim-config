@@ -160,7 +160,12 @@ return {
           quarto = { 'markdown', 'r', 'julia', 'python' },
         },
       }
-      vim.keymap.set({ 'i' }, '<C-f>', function()
+      vim.keymap.set({ 'n' }, '<leader>es', function()
+        local filetype = vim.bo.filetype
+        local snippet_path = vim.fn.stdpath 'config' .. '/lua/luasnippets/' .. filetype .. '.lua'
+        vim.cmd('vsplit ' .. snippet_path)
+      end, { silent = true, desc = 'auto pick filetype and edit the snippet' })
+      vim.keymap.set({ 'i' }, '<Tab>', function()
         ls.expand()
       end, { silent = true, desc = 'expand autocomplete' })
       vim.keymap.set({ 'i', 's' }, '<Tab>', function()
