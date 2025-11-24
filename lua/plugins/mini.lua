@@ -26,6 +26,10 @@ return {
     vim.api.nvim_set_keymap('x', 's', [[:<C-u>lua MiniSurround.add('visual')<CR>]], { noremap = true })
     vim.api.nvim_set_keymap('n', 'yss', 'ys_', { noremap = false })
 
+    require('mini.pairs').setup {
+      modes = { insert = true, command = false, terminal = false },
+    }
+
     local statusline = require 'mini.statusline'
     statusline.setup { use_icons = vim.g.have_nerd_font }
     ---@diagnostic disable-next-line: duplicate-set-field
