@@ -162,6 +162,9 @@ return {
       }
       vim.keymap.set({ 'n' }, '<leader>es', function()
         local filetype = vim.bo.filetype
+        if filetype == 'quarto' then
+          filetype = 'markdown'
+        end
         local snippet_path = vim.fn.stdpath 'config' .. '/lua/luasnippets/' .. filetype .. '.lua'
         vim.cmd('vsplit ' .. snippet_path)
       end, { silent = true, desc = 'auto pick filetype and edit the snippet' })
