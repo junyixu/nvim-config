@@ -1,13 +1,12 @@
 -- Markdown/Quarto snippets
 -- LuaSnip will automatically load s, t, i, etc. from snip_env
 
-local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
-local is_math = ts_utils.in_mathzone
-
--- local is_math = ts_utils.in_mathzone
 -- local function is_math()
 --   return vim.api.nvim_eval 'vimtex#syntax#in_mathzone()' == 1
 -- end
+--
+local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
+local is_math = ts_utils.in_mathzone
 
 return {
   -- Python code block
@@ -31,8 +30,16 @@ return {
     i(1),
     t { '', '\\end{bmatrix}' },
   }, {
-    show_condition = is_math_show,
-    condition = is_math,
+    condition = function()
+      local val = is_math()
+      print('mark', val)
+      return val
+    end,
+    show_condition = function()
+      local val = is_math()
+      print('mark2', val)
+      return val
+    end,
   }),
 
   -- s('mat', {

@@ -113,7 +113,6 @@ return {
         ft = 'tex', -- Optional: lazy load only for .tex files if `lazy = true`
       },
     },
-    -- dependencies = { 'L3MON4D3/LuaSnip' },
     config = function()
       require('luasnip-latex-snippets').setup { use_treesitter = true, allow_on_markdown = true }
     end,
@@ -161,13 +160,13 @@ return {
           quarto = { 'markdown', 'r', 'julia', 'python' },
         },
       }
-      vim.keymap.set({ 'i' }, '<tab>', function()
+      vim.keymap.set({ 'i' }, '<C-f>', function()
         ls.expand()
       end, { silent = true, desc = 'expand autocomplete' })
-      vim.keymap.set({ 'i', 's' }, '<C-j>', function()
+      vim.keymap.set({ 'i', 's' }, '<Tab>', function()
         ls.jump(1)
       end, { silent = true, desc = 'next autocomplete' })
-      vim.keymap.set({ 'i', 's' }, '<C-L>', function()
+      vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
         ls.jump(-1)
       end, { silent = true, desc = 'previous autocomplete' })
       vim.keymap.set({ 'i', 's' }, '<C-E>', function()
