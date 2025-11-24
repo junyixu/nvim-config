@@ -1,40 +1,61 @@
--- Quarto snippets
+-- Markdown/Quarto snippets
 -- LuaSnip will automatically load s, t, i, etc. from snip_env
 
--- Check if cursor is in LaTeX math environment
--- local ls = require 'luasnip'
-local utils = require 'luasnip-latex-snippets.util.utils'
-local not_math = utils.not_math() -- pass true if using Treesitter
-local is_math = utils.is_math()
+local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
+local is_math = ts_utils.in_mathzone
 
--- set a higher priority (defaults to 0 for most snippets)
--- local snip = ls.parser.parse_snippet({ trig = 'mk', name = 'Math', condition = not_math, priority = 10 }, '$ ${1:${TM_SELECTED_TEXT}} $$0')
---
--- ls.add_snippets('tex', { snip }, {
---   type = 'autosnippets',
--- })
+-- local is_math = ts_utils.in_mathzone
+-- local function is_math()
+--   return vim.api.nvim_eval 'vimtex#syntax#in_mathzone()' == 1
+-- end
 
 return {
-  -- R code block
-  s('r', {
-    t { '```{r}', '' },
+  -- Python code block
+  s('py', {
+    t { '```{python}', '' },
     i(1),
     t { '', '```' },
   }),
 
   -- Julia code block
-  s('j', {
+  s('jl', {
     t { '```{julia}', '' },
     i(1),
     t { '', '```' },
   }),
 
-  -- LaTeX bmatrix (only in math environment)
+  -- LaTeX bmatrix
+
   s('mat', {
     t { '\\begin{bmatrix}', '\t' },
     i(1),
     t { '', '\\end{bmatrix}' },
   }, {
+    show_condition = is_math_show,
     condition = is_math,
   }),
+
+  -- s('mat', {
+  --   t { '\\begin{bmatrix}', '\t' },
+  --   i(1),
+  --   t { '', '\\end{bmatrix}' },
+  -- }, {
+  --   {
+  --     show_condition = function()
+  --       return false
+  --     end,
+  --   },
+  -- }),
+  --
+  --postfixes for vectors, hats, etc. The match pattern is '\\' plus the default (so that hats get put on greek letters,e.g.)
+  postfix(
+    { trig = 'hat', match_pattern = [[[\\%w%.%_%-%"%']+$]], snippetType = 'autosnippet', dscr = 'postfix hat when in math mode' },
+    { l('\\hat{' .. l.POSTFIX_MATCH .. '}') },
+    { condition = is_math }
+  ),
+  postfix(
+    { trig = 'vec', match_pattern = [[[\\%w%.%_%-%"%']+$]], snippetType = 'autosnippet', dscr = 'postfix vec when in math mode' },
+    { l('\\vec{' .. l.POSTFIX_MATCH .. '}') },
+    { condition = is_math }
+  ),
 }
