@@ -6,9 +6,9 @@ local t = ls.text_node
 local i = ls.insert_node
 local s = ls.snippet
 
-local M = {
+local snip_table = {
   s('mat', {
-    t { '\\begin{bmatrix}', '\t' },
+    t { '\\begin{bmatrix}', '' },
     i(1),
     t { '', '\\end{bmatrix}' },
   }, {
@@ -32,4 +32,4 @@ local M = {
   }),
 }
 
-return M
+return snip_table
