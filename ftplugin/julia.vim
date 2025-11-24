@@ -13,6 +13,10 @@ setlocal tags+=$HOME/.vim/julia/julia-tags/Statistics_tags
 " setlocal tags+=$HOME/.julia/packages/RowEchelon/tags
 " setlocal tags+=$HOME/.local/stow/julia-1.7.2/share/julia/stdlib/v1.7/tags
 " }}}
+" Julia formatters emit spaces; match that so Tree-sitter inserts spaces too
+setlocal expandtab
+setlocal shiftwidth=4
+setlocal softtabstop=4
 setlocal iskeyword+=!
 " setlocal iskeyword+=∂
 
