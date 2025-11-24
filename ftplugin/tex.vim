@@ -26,18 +26,18 @@ vnoremap <buffer><silent> <localleader>e "zc\emph{<C-R>z}<ESC>
 nnoremap <buffer> <localleader><tab> nla
 inoremap <buffer><silent> <C-j> <esc>l%%a
 
-call textobj#user#plugin('tex', {
-\  'double-quote': {
-\     '*pattern*': ['``', "''"],
-\     'select-a': 'aQ',
-\     'select-i': 'iQ',
-\   },
-\  'biglimiter': {
-\     '*pattern*': ['\\{', '\\}'],
-\     'select-a': 'aU',
-\     'select-i': 'iU',
-\   },
-\ })
+" call textobj#user#plugin('tex', {
+" \  'double-quote': {
+" \     '*pattern*': ['``', "''"],
+" \     'select-a': 'aQ',
+" \     'select-i': 'iQ',
+" \   },
+" \  'biglimiter': {
+" \     '*pattern*': ['\\{', '\\}'],
+" \     'select-a': 'aU',
+" \     'select-i': 'iU',
+" \   },
+" \ })
 
 
 call vimtex#imaps#add_map({
@@ -177,5 +177,5 @@ inoremap <buffer> <silent> <M-j> <Esc>/<++><CR>c4l
 nnoremap <buffer><silent> <localleader>f :call tex#sec2file()<CR>
 
 source $HOME/.vim/my_maps/GreekLetter4Writting.vim 
-source $HOME/.vim/ycmMaps.vim
+" source $HOME/.vim/ycmMaps.vim
 vmap <localleader>c c$\ce{"}$<ESC>
