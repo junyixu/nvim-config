@@ -10,6 +10,7 @@ return {
     return 'make install_jsregexp'
   end)(),
   config = function()
+    require('luasnip.loaders.from_lua').load { paths = vim.fn.stdpath 'config' .. '/luasnippets' }
     local ls = require 'luasnip'
     local filetype_funcs = require 'luasnip.extras.filetype_functions'
 
