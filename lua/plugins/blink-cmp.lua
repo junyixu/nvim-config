@@ -7,7 +7,6 @@ return {
   dependencies = {
     'L3MON4D3/LuaSnip',
     'folke/lazydev.nvim',
-    'micangl/cmp-vimtex',
   },
   --- @module 'blink.cmp'
   --- @type blink.cmp.Config
