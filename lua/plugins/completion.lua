@@ -143,7 +143,7 @@ return {
     },
     config = function()
       -- Load snippets from ~/.config/nvim/luasnippets/
-      require('luasnip.loaders.from_lua').load { paths = vim.fn.stdpath 'config' .. '/luasnippets' }
+      -- require('luasnip.loaders.from_lua').load { paths = vim.fn.stdpath 'config' .. '/luasnippets' }
 
       local ls = require 'luasnip'
       local filetype_funcs = require 'luasnip.extras.filetype_functions'
@@ -161,7 +161,7 @@ return {
           quarto = { 'markdown', 'r', 'julia', 'python' },
         },
       }
-      vim.keymap.set({ 'i' }, '<C-k>', function()
+      vim.keymap.set({ 'i' }, '<tab>', function()
         ls.expand()
       end, { silent = true, desc = 'expand autocomplete' })
       vim.keymap.set({ 'i', 's' }, '<C-j>', function()
