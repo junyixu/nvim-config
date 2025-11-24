@@ -205,6 +205,9 @@ vim.keymap.set('n', '<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
 vim.keymap.set('n', 'sq', '<CMD>q<CR>', { desc = 'Quit the current window' })
 vim.keymap.set('n', '<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 
+vim.keymap.set('n', '<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
+vim.keymap.set('n', '<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
+
 vim.keymap.set('n', 'cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
