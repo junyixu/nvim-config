@@ -96,13 +96,6 @@ local snip_table = {
       return false
     end,
   }),
-
-  -- Julia code block
-  s('jl', {
-    t { '```{julia}', '' },
-    i(1),
-    t { '', '```' },
-  }),
 }
 
 return snip_table

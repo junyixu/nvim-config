@@ -2,10 +2,10 @@ require 'essentials'
 require 'lazy_nvim'
 vim.lsp.enable 'julials'
 
-local ls = require 'luasnip'
+-- local ls = require 'luasnip'
 -- ls.add_snippets('markdown', require 'luasnippets.markdown')
 -- ls.add_snippets('markdown', require('luasnip-latex-snippets.math_iA').retrieve())
-ls.add_snippets('tex', require 'luasnippets.markdown')
+-- ls.add_snippets('tex', require 'luasnippets.markdown')
 --
 -- local utils = require 'luasnip-latex-snippets.util.utils'
 -- is_math = utils.with_opts(utils.is_math, true) -- true to use treesitter

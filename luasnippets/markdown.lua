@@ -1,15 +1,16 @@
--- Markdown/Quarto snippets
--- LuaSnip will automatically load s, t, i, etc. from snip_env
+local ls = require 'luasnip'
 
--- local function is_math()
---   return vim.api.nvim_eval 'vimtex#syntax#in_mathzone()' == 1
--- end
---
-local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
-local is_math = ts_utils.in_mathzone
+local t = ls.text_node
+local i = ls.insert_node
+local d = ls.dynamic_node
+local sn = ls.snippet_node
+local f = ls.function_node
+local s = ls.snippet
 
-return {
-  -- Python code block
+local inline_math = ls.parser.parse_snippet({ trig = 'mk', name = 'Math', priority = 10, snippetType = 'autosnippet' }, '$ ${1:${TM_SELECTED_TEXT}} $$0')
+
+local snip_table = {
+  -- python code block
   s('py', {
     t { '```{python}', '' },
     i(1),
@@ -22,47 +23,7 @@ return {
     i(1),
     t { '', '```' },
   }),
-
-  -- LaTeX bmatrix
-
-  s('mat', {
-    t { '\\begin{bmatrix}', '\t' },
-    i(1),
-    t { '', '\\end{bmatrix}' },
-  }, {
-    condition = function()
-      local val = is_math()
-      print('mark', val)
-      return val
-    end,
-    show_condition = function()
-      local val = is_math()
-      print('mark2', val)
-      return val
-    end,
-  }),
-
-  -- s('mat', {
-  --   t { '\\begin{bmatrix}', '\t' },
-  --   i(1),
-  --   t { '', '\\end{bmatrix}' },
-  -- }, {
-  --   {
-  --     show_condition = function()
-  --       return false
-  --     end,
-  --   },
-  -- }),
-  --
-  --postfixes for vectors, hats, etc. The match pattern is '\\' plus the default (so that hats get put on greek letters,e.g.)
-  postfix(
-    { trig = 'hat', match_pattern = [[[\\%w%.%_%-%"%']+$]], snippetType = 'autosnippet', dscr = 'postfix hat when in math mode' },
-    { l('\\hat{' .. l.POSTFIX_MATCH .. '}') },
-    { condition = is_math }
-  ),
-  postfix(
-    { trig = 'vec', match_pattern = [[[\\%w%.%_%-%"%']+$]], snippetType = 'autosnippet', dscr = 'postfix vec when in math mode' },
-    { l('\\vec{' .. l.POSTFIX_MATCH .. '}') },
-    { condition = is_math }
-  ),
+  inline_math,
 }
+
+return snip_table
