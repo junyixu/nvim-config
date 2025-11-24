@@ -1,3 +1,0 @@
--- Autopairs plugin
-
-return {}
