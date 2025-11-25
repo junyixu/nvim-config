@@ -176,6 +176,24 @@ vim.o.wrapscan = false
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- • vim.api.nvim_replace_termcodes 的原型是 nvim_replace_termcodes(str, from_part,
+--   do_lt, special)，那三个 true 分别对应：
+--
+--   - from_part = true：允许输入字符串中带有 <...> 这种特殊按键表示（比如 <Esc>、<C-
+--     i>），函数会把它们替换成真实的终端序列。
+--   - do_lt = true：处理字符串里的 <lt>，即把 <lt> 解析成字面 <，否则 <lt> 会被当作普
+--     通文本原样保留。
+--   - special = true：把 <BS>、<Tab> 等特殊键名也按 <...> 规则解析；如果设为 false，
+--     这些只会被当作普通文本。
+-- 这样写配置时依旧用 <Tab>、<C-i>，而 kitty 发出的实际序列自动映射回这些“虚拟键”
+if vim.env.TERM == 'xterm-kitty' then
+  local term = vim.api.nvim_replace_termcodes
+  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), '<Tab>', { noremap = false })
+  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[105;5u', true, true, true), '<C-i>', { noremap = false })
+  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[13;2u', true, true, true), '<CR>', { noremap = false })
+  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[109;5u', true, true, true), '<C-m>', { noremap = false })
+end
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
