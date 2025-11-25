@@ -170,6 +170,9 @@ vim.o.cursorline = true
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
+-- Stop `/` from wrapping back to the start of the file
+vim.o.wrapscan = false
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
