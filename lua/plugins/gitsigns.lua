@@ -54,5 +54,12 @@ return {
       end,
       desc = 'Preview Hunk',
     },
+    {
+      '<leader>gb',
+      function()
+        require('gitsigns').toggle_current_line_blame()
+      end,
+      desc = 'Toggle Current Line Blame',
+    },
   },
 }
