@@ -13,30 +13,17 @@ return {
       local env = snip.env
       local selected_lines = env.LS_SELECT_RAW
 
-      if not selected_lines then
-        return {
-          'begin',
-          'end',
-        }
+      -- 如果是字符串（说明在生成docstring）或者没有选中内容
+      if type(selected_lines) == 'string' or not selected_lines then
+        return { 'begin', 'end' }
       end
 
       local result = { 'begin' }
-
-      -- 处理不同类型：table 或 string
-      if type(selected_lines) == 'table' then
-        -- 如果是表格，遍历所有行
-        for _, line in ipairs(selected_lines) do
-          table.insert(result, '    ' .. line)
-        end
-      elseif type(selected_lines) == 'string' then
-        -- 如果是字符串，分割为行
-        for line in selected_lines:gmatch '[^\n]+' do
-          table.insert(result, '    ' .. line)
-        end
+      -- 遍历表格中的所有行
+      for _, line in ipairs(selected_lines) do
+        table.insert(result, '    ' .. line)
       end
-
       table.insert(result, 'end')
-
       return result
     end, {}),
   }),
