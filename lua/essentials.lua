@@ -153,26 +153,22 @@ vim.o.confirm = true
 vim.o.wrapscan = false
 
 -- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
+-- See `:help vim.keymap.set()`
 
--- • vim.api.nvim_replace_termcodes 的原型是 nvim_replace_termcodes(str, from_part,
---   do_lt, special)，那三个 true 分别对应：
+-- if vim.env.TERM == 'xterm-kitty' then
+--   local term = vim.api.nvim_replace_termcodes
+--   -- vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), '<Tab>', { noremap = false })
+--   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[105;5u', true, true, true), '<C-i>', { noremap = false })
+--   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[13;2u', true, true, true), '<CR>', { noremap = false })
+--   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[109;5u', true, true, true), '<C-m>', { noremap = false })
+-- end
+-- vim.cmd [[
+-- let &t_TI = "\<Esc>[>4;2m"
+-- let &t_TE = "\<Esc>[>4;m"
+-- "nnoremap <Tab>f :tabnext<CR>
+-- "nnoremap <C-I>f :tabprev<CR>
+-- ]]
 --
---   - from_part = true：允许输入字符串中带有 <...> 这种特殊按键表示（比如 <Esc>、<C-
---     i>），函数会把它们替换成真实的终端序列。
---   - do_lt = true：处理字符串里的 <lt>，即把 <lt> 解析成字面 <，否则 <lt> 会被当作普
---     通文本原样保留。
---   - special = true：把 <BS>、<Tab> 等特殊键名也按 <...> 规则解析；如果设为 false，
---     这些只会被当作普通文本。
--- 这样写配置时依旧用 <Tab>、<C-i>，而 kitty 发出的实际序列自动映射回这些“虚拟键”
-if vim.env.TERM == 'xterm-kitty' then
-  local term = vim.api.nvim_replace_termcodes
-  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), '<Tab>', { noremap = false })
-  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[105;5u', true, true, true), '<C-i>', { noremap = false })
-  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[13;2u', true, true, true), '<CR>', { noremap = false })
-  vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[109;5u', true, true, true), '<C-m>', { noremap = false })
-end
-
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -186,16 +182,16 @@ vim.keymap.set('n', '<leader>qf', vim.diagnostic.setloclist, { desc = 'Open diag
 --
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+-- vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
--- vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
--- vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
--- vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
--- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 vim.keymap.set('n', '<M-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<M-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
@@ -217,7 +213,7 @@ vim.keymap.set('n', '<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
 vim.keymap.set('n', 'cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
-vim.keymap.set('n', '<M-H>', '<C-w>H', { desc = 'Move window to the left' })
+vim.keymap.set('n', 'M-H>', '<C-w>H', { desc = 'Move window to the left' })
 vim.keymap.set('n', '<M-L>', '<C-w>L', { desc = 'Move window to the right' })
 vim.keymap.set('n', '<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
 vim.keymap.set('n', '<M-K>', '<C-w>K', { desc = 'Move window to the upper' })

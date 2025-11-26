@@ -22,16 +22,6 @@ if fcitx.loaded then
     group = group,
     callback = guard(fcitx.fcitx2zh),
   })
-  vim.api.nvim_create_autocmd('CmdlineEnter', {
-    group = group,
-    pattern = { '/', '?' },
-    callback = guard(fcitx.fcitx2zh),
-  })
-  vim.api.nvim_create_autocmd('CmdlineLeave', {
-    group = group,
-    pattern = { '/', '?' },
-    callback = guard(fcitx.fcitx2en),
-  })
 end
 
 -- local ls = require 'luasnip'
