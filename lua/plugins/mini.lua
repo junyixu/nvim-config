@@ -3,7 +3,22 @@
 return {
   'echasnovski/mini.nvim',
   config = function()
-    require('mini.ai').setup { n_lines = 500 }
+    local ai = require 'mini.ai'
+    ai.setup {
+      custom_textobjects = {
+        -- camelCase / snake_case subword (doc example from mini-ai.txt)
+        v = {
+          {
+            '%u[%l%d]+%f[^%l%d]',
+            '%f[%S][%l%d]+%f[^%l%d]',
+            '%f[%P][%l%d]+%f[^%l%d]',
+            '^[%l%d]+%f[^%l%d]',
+          },
+          '^().*()$',
+        },
+      },
+      n_lines = 500,
+    }
     require('mini.surround').setup {
       custom_surroundings = {
         ['('] = { output = { left = '( ', right = ' )' } },
