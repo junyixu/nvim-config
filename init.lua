@@ -3,7 +3,7 @@ require 'lazy_nvim'
 vim.lsp.enable 'julials'
 
 local fcitx = require 'fcitx'
-if fcitx and fcitx.loaded then
+if fcitx.loaded then
   local group = vim.api.nvim_create_augroup('FcitxToggle', { clear = true })
   local function guard(fn)
     return function()
@@ -12,8 +12,9 @@ if fcitx and fcitx.loaded then
       end
     end
   end
+  local leave_event = vim.fn.exists '##InsertLeavePre' == 1 and 'InsertLeavePre' or 'InsertLeave'
 
-  vim.api.nvim_create_autocmd('InsertLeavePre', {
+  vim.api.nvim_create_autocmd(leave_event, {
     group = group,
     callback = guard(fcitx.fcitx2en),
   })

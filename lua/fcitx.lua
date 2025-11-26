@@ -1,10 +1,11 @@
-local vim = vim
 local M = { loaded = false }
 _G.fcitx_loaded = false
 
 local function warn(msg)
-  if vim and vim.api and vim.api.nvim_echo then
-    vim.api.nvim_echo({ { msg, 'WarningMsg' } }, true, {})
+  if vim and vim.notify then
+    vim.schedule(function()
+      vim.notify(msg, vim.log.levels.WARN)
+    end)
   else
     print(msg)
   end
@@ -12,7 +13,7 @@ end
 
 local ok, ldbus = pcall(require, 'ldbus')
 if not ok then
-  warn('fcitx.vim not loaded: ' .. tostring(ldbus))
+  warn('fcitx unavailable: ' .. tostring(ldbus))
   return M
 end
 
@@ -22,163 +23,118 @@ local controller = {
   interface = 'org.fcitx.Fcitx.Controller1',
 }
 
-local FcitxComm = {}
-FcitxComm.__index = FcitxComm
-
-function FcitxComm.new()
-  local bus, err = ldbus.bus.get 'session'
-  if not bus then
-    error(err or 'failed to connect to the DBus session bus')
-  end
-  return setmetatable({ bus = bus }, FcitxComm)
+local function set_loaded(value)
+  local flag = not not value
+  M.loaded = flag
+  _G.fcitx_loaded = flag
 end
 
-function FcitxComm:_call(method)
-  local msg, err = ldbus.message.new_method_call(controller.bus_name, controller.path, controller.interface, method)
-  if not msg then
-    error(err or ('failed to build DBus message: ' .. method))
+local function new_connection()
+  local conn, err = ldbus.bus.get 'session'
+  if not conn then
+    return nil, err or 'failed to connect to the DBus session bus'
   end
-  local reply, send_err = self.bus:send_with_reply_and_block(msg)
+  return conn
+end
+
+local bus, initial_err = new_connection()
+if not bus then
+  warn('fcitx unavailable: ' .. initial_err)
+  set_loaded(false)
+  return M
+end
+set_loaded(true)
+
+local function send(method)
+  local function attempt()
+    local msg, msg_err = ldbus.message.new_method_call(
+      controller.bus_name,
+      controller.path,
+      controller.interface,
+      method
+    )
+    if not msg then
+      return nil, msg_err or ('failed to build DBus message: ' .. method)
+    end
+    local reply, call_err = bus:send_with_reply_and_block(msg)
+    if not reply then
+      return nil, call_err or ('DBus call failed: ' .. method)
+    end
+    return reply
+  end
+
+  local reply, err = attempt()
+  if reply then
+    return reply
+  end
+
+  local conn, conn_err = new_connection()
+  if not conn then
+    set_loaded(false)
+    return nil, conn_err or err
+  end
+
+  bus = conn
+  set_loaded(true)
+  reply, err = attempt()
   if not reply then
-    error(send_err or ('DBus call failed: ' .. method))
+    return nil, err
   end
   return reply
 end
 
-function FcitxComm:_call_value(method)
-  local reply = self:_call(method)
-  local iter = reply:iter_init()
-  if not iter then
+local function send_value(method)
+  local reply, err = send(method)
+  if not reply then
+    warn('fcitx call failed: ' .. (err or method))
     return nil
   end
-  return iter:get_basic()
+  local iter = reply:iter_init()
+  return iter and iter:get_basic() or nil
 end
 
-function FcitxComm:status()
-  local state = tonumber(self:_call_value 'State') or 0
-  return state == 2
-end
-
-function FcitxComm:activate()
-  self:_call 'Activate'
-end
-
-function FcitxComm:deactivate()
-  self:_call 'Deactivate'
-end
-
-function FcitxComm:current()
-  return self:_call_value 'CurrentInputMethod' or ''
-end
-
-function FcitxComm:current_and_rime()
-  return self:current()
-end
-
-local Fcitx
-local fcitx_loaded = false
-
-local function set_loaded(value)
-  fcitx_loaded = not not value
-  M.loaded = fcitx_loaded
-  _G.fcitx_loaded = fcitx_loaded
-end
-
-local function is_silent()
-  if not vim or not vim.g then
+local function call(method)
+  local reply, err = send(method)
+  if not reply then
+    warn('fcitx call failed: ' .. (err or method))
     return false
   end
-  local value = vim.g.silent_unsupported
-  if value == nil then
-    return false
-  end
-  if type(value) == 'number' then
-    return value ~= 0
-  end
-  if type(value) == 'string' then
-    return value ~= '' and value ~= '0'
-  end
-  return not not value
-end
-
-local function init_connection()
-  local ok_conn, conn_or_err = pcall(FcitxComm.new)
-  if not ok_conn then
-    set_loaded(false)
-    if not is_silent() then
-      warn(('fcitx.vim not loaded: %s'):format(tostring(conn_or_err)))
-    end
-    return nil, conn_or_err
-  end
-  Fcitx = conn_or_err
-  set_loaded(true)
   return true
 end
 
-local function may_reconnect(fn)
-  return function(...)
-    if not fcitx_loaded or not Fcitx then
-      return
-    end
-    for _ = 1, 2 do
-      local ok_call, result = pcall(fn, ...)
-      if ok_call then
-        return result
-      end
-      warn(('fcitx.vim: %s'):format(tostring(result)))
-      local reconnect_ok = init_connection()
-      if not reconnect_ok then
-        break
-      end
-    end
+function M.is_active()
+  if not M.loaded then
+    return false
   end
+  local state = tonumber(send_value('State')) or 0
+  return state == 2
 end
 
-local function fcitx2en_impl()
-  if not Fcitx then
+function M.fcitx2en()
+  if not M.loaded then
     return
   end
-  if Fcitx:status() then
+  if M.is_active() then
     vim.b.inputtoggle = 1
-    Fcitx:deactivate()
+    call('Deactivate')
   end
 end
 
-local function fcitx2zh_impl()
-  if not Fcitx then
+function M.fcitx2zh()
+  if not M.loaded then
     return
   end
   local toggle = vim.b.inputtoggle
-  if toggle ~= nil then
-    if toggle == 1 then
-      Fcitx:activate()
-      vim.b.inputtoggle = 0
-    end
-  else
+  if toggle == 1 then
+    call('Activate')
+    vim.b.inputtoggle = 0
+  elseif toggle == nil then
     vim.b.inputtoggle = 0
   end
 end
 
-local function fcitx_current_im_impl()
-  if not Fcitx then
-    return ''
-  end
-  return Fcitx:current()
+function M.current()
+  return send_value('CurrentInputMethod') or ''
 end
-
-local function fcitx_current_im_and_rime_impl()
-  if not Fcitx then
-    return ''
-  end
-  return Fcitx:current_and_rime()
-end
-
-M.fcitx2en = may_reconnect(fcitx2en_impl)
-M.fcitx2zh = may_reconnect(fcitx2zh_impl)
-M.fcitx_current_im = may_reconnect(fcitx_current_im_impl)
-M.fcitx_current_im_and_rime = may_reconnect(fcitx_current_im_and_rime_impl)
-M.reconnect = init_connection
-
-init_connection()
 
 return M
