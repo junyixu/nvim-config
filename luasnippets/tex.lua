@@ -90,12 +90,7 @@ local snip_table = {
     i(1),
     t '}',
     i(0),
-  }, {
-    condition = is_math,
-    show_condition = function()
-      return false
-    end,
-  }),
+  }, { condition = is_math }),
 }
 
 return snip_table
