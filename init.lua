@@ -2,28 +2,6 @@ require 'essentials'
 require 'lazy_nvim'
 vim.lsp.enable 'julials'
 
-local fcitx = require 'fcitx'
-if fcitx.loaded then
-  local group = vim.api.nvim_create_augroup('FcitxToggle', { clear = true })
-  local function guard(fn)
-    return function()
-      if vim.fn.reg_executing() == '' then
-        fn()
-      end
-    end
-  end
-  local leave_event = vim.fn.exists '##InsertLeavePre' == 1 and 'InsertLeavePre' or 'InsertLeave'
-
-  vim.api.nvim_create_autocmd(leave_event, {
-    group = group,
-    callback = guard(fcitx.fcitx2en),
-  })
-  vim.api.nvim_create_autocmd('InsertEnter', {
-    group = group,
-    callback = guard(fcitx.fcitx2zh),
-  })
-end
-
 -- local ls = require 'luasnip'
 -- ls.add_snippets('markdown', require 'luasnippets.markdown')
 -- ls.add_snippets('markdown', require('luasnip-latex-snippets.math_iA').retrieve())
