@@ -2,9 +2,17 @@ local job_id = 0
 local term_bufnr = nil
 local term_width = 80
 
-local function open_or_focus_term()
-  if not term_bufnr or not vim.api.nvim_buf_is_valid(term_bufnr) then
-    vim.notify('Julia terminal is not running yet', vim.log.levels.INFO, { title = 'ftplugin/julia.lua' })
+local function ensure_term_running()
+  if term_bufnr and vim.api.nvim_buf_is_valid(term_bufnr) then
+    return true
+  end
+
+  vim.notify('Julia terminal is not running yet', vim.log.levels.INFO, { title = 'ftplugin/julia.lua' })
+  return false
+end
+
+local function show_term_window()
+  if not ensure_term_running() then
     return
   end
 
@@ -19,6 +27,38 @@ local function open_or_focus_term()
   vim.cmd.wincmd 'L'
   vim.api.nvim_win_set_buf(0, term_bufnr)
   vim.api.nvim_win_set_width(0, term_width)
+  vim.cmd.wincmd 'p'
+end
+
+local function hide_term_window()
+  if not ensure_term_running() then
+    return
+  end
+
+  local win = vim.fn.bufwinid(term_bufnr)
+  if win == -1 then
+    return
+  end
+
+  if #vim.api.nvim_list_wins() == 1 then
+    vim.notify('Cannot hide the Julia terminal when it is the only window', vim.log.levels.WARN, { title = 'ftplugin/julia.lua' })
+    return
+  end
+
+  vim.api.nvim_win_close(win, true)
+end
+
+local function toggle_term_window()
+  if not ensure_term_running() then
+    return
+  end
+
+  local win = vim.fn.bufwinid(term_bufnr)
+  if win == -1 then
+    show_term_window()
+  else
+    hide_term_window()
+  end
 end
 
 vim.keymap.set('n', '<space>st', function()
@@ -34,5 +74,5 @@ vim.keymap.set('n', '<space>st', function()
 end, { buffer = true, desc = 'open a term' })
 
 vim.keymap.set('n', '<M-=>', function()
-  open_or_focus_term()
-end, { buffer = true, desc = 'focus julia term' })
+  toggle_term_window()
+end, { buffer = true, desc = 'toggle julia term' })
