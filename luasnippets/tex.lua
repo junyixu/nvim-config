@@ -1,13 +1,27 @@
+---@diagnostic disable: undefined-global
+
 local ls = require 'luasnip'
 local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
 local is_math = ts_utils.in_mathzone
 
-local t = ls.text_node
 local i = ls.insert_node
 local d = ls.dynamic_node
 local sn = ls.snippet_node
 local f = ls.function_node
 local s = ls.snippet
+-- local math_iA = require 'luasnip-latex-snippets.math_iA'
+--
+local utils = require 'luasnip-latex-snippets.util.utils'
+local pipe, no_backslash = utils.pipe, utils.no_backslash
+
+local decorator = {
+  wordTrig = false,
+  hidden = true,
+  condition = pipe { is_math, no_backslash },
+}
+
+local parse_snippet = ls.extend_decorator.apply(ls.parser.parse_snippet, decorator) --[[@as function]]
+local ms = ls.extend_decorator.apply(ls.snippet, decorator) --[[@as function]]
 
 local function paren_fraction(_, snip)
   local stripped = snip.captures[1] or ''
@@ -48,8 +62,14 @@ local function paren_fraction(_, snip)
   })
 end
 
-local snip_table = {
-  s('mat', {
+local math_snip_table = {
+  ms(
+    { trig = '([^%s]+)t', regTrig = true, priority = 1 },
+    fmta('(<>)^(<>) <> hello', { f(function(_, s)
+      return s.captures[1]
+    end), i(1), i(2) })
+  ),
+  s({ trig = 'mat', priority = 100, name = 'bmatrix' }, {
     t { '\\begin{bmatrix}', '' },
     i(1),
     t { '', '\\end{bmatrix}' },
@@ -57,7 +77,9 @@ local snip_table = {
     condition = is_math,
     show_condition = is_math,
   }),
+}
 
+local snip_table = {
   -- Transform (...)/ into \frac{...}{•} in math zones
   s({
     trig = '(^.*\\))/',
@@ -93,4 +115,4 @@ local snip_table = {
   }, { condition = is_math }),
 }
 
-return snip_table
+return vim.tbl_extend('force', snip_table, math_snip_table)
