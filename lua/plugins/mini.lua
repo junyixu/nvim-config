@@ -5,6 +5,19 @@ return {
   config = function()
     local ai = require 'mini.ai'
     ai.setup {
+      -- custom_textobjects = {
+      --   -- camelCase / snake_case subword (doc example from mini-ai.txt)
+      --   v = {
+      --     {
+      --       '__*[%l%d]+%f[^%l%d]',
+      --       '%u[%l%d]+%f[^%l%d]',
+      --       '%f[%S][%l%d]+%f[^%l%d]',
+      --       '%f[%w][%l%d]+%f[^%l%d]',
+      --       '^[%l%d]+%f[^%l%d]',
+      --     },
+      --     '^(%_*)().*()(%_*)$',
+      --   },
+      -- },
       custom_textobjects = {
         -- camelCase / snake_case subword (doc example from mini-ai.txt)
         v = {
