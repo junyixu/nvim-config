@@ -33,7 +33,7 @@ return {
     ls.setup {
       update_events = { 'TextChanged', 'TextChangedI' },
       enable_autosnippets = true,
-      store_selection_keys = '<C-l>',
+      store_selection_keys = '<tab>',
       ft_func = filetype_funcs.from_cursor_pos,
       load_ft_func = filetype_funcs.extend_load_ft {
         quarto = { 'markdown', 'r', 'julia', 'python' },
