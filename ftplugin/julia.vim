@@ -48,6 +48,27 @@ let g:julia_cell_delimit_cells_by = "tags"
 let g:julia_cell_tag = "# %%"
 setlocal omnifunc=syntaxcomplete#Complete
 
+" Wrap whole-cell sends so the REPL sees `begin ... end;` and suppresses output.
+function! _EscapeText_julia(text) abort
+  if get(b:, 'julia_slime_silent_cell', 0)
+    let l:text = a:text
+    if l:text !~ "\n$"
+      let l:text .= "\n"
+    endif
+    return "begin\n" . l:text . "end;\n"
+  endif
+  return a:text
+endfunction
+
+function! s:SlimeSendCellSilent() abort
+  let b:julia_slime_silent_cell = 1
+  try
+    call slime#send_cell()
+  finally
+    unlet! b:julia_slime_silent_cell
+  endtry
+endfunction
+
 " 不要在 ] 的后面按'自动拓展为 ''
 let b:delimitMate_smart_quotes = '\%(\w\|[^[:punct:][:space:]]\|\]\|\%(\\\\\)*\\\)\%#\|\%#\%(\w\|[^[:space:][:punct:]]\)'
 
@@ -63,8 +84,8 @@ xmap <silent><buffer> <CR> <Plug>SlimeRegionSend
 xmap <silent><buffer> <localleader>r :<c-u>call slime#send("@paste" . "\r")<CR>
 nmap <silent><buffer> <space><space> <Plug>SlimeParagraphSend
 nmap <silent><buffer> <localleader>C <Plug>SlimeConfig
-nmap <buffer> <M-CR> <Plug>SlimeSendCell
-nmap <silent><buffer> <CR> :exec "normal \<Plug>SlimeLineSend"<cr>j
+nmap <silent><buffer> <M-CR> :call <SID>SlimeSendCellSilent()<CR>
+nmap <silent><buffer> <CR> :exec "normal \<Plug>SlimeLineSend"<cr>
 
 " map <Leader>jr to run entire file
 nnoremap <buffer> <Leader>r :JuliaCellRun<CR>
@@ -73,6 +94,7 @@ nnoremap <buffer> <Leader>r :JuliaCellRun<CR>
 
 " nmap <silent><buffer> <localleader>r :JuliaCellExecuteCell<CR>
 nnoremap <silent><buffer> <localleader>r :exec "normal \<Plug>SlimeSendCell"<cr>
+nnoremap <silent><buffer> <localleader>R :call <SID>SlimeSendCellSilent()<CR>
 
 " map <Leader>jC to execute the current cell and jump to the next cell
 nnoremap <buffer> <localLeader>R :JuliaCellExecuteCellJump<CR>
@@ -81,8 +103,8 @@ nnoremap <buffer> <localLeader>R :JuliaCellExecuteCellJump<CR>
 nnoremap <buffer> <localLeader><c-l> :JuliaCellClear<CR>
 
 " map <Leader>jp and <Leader>jn to jump to the previous and next cell header
-nnoremap <buffer> [d :JuliaCellPrevCell<CR>
-nnoremap <buffer> ]d :JuliaCellNextCell<CR>
+nnoremap <buffer><silent> ]5 /# %%<CR>
+nnoremap <buffer><silent> [5 ?# %%<CR>
 
 
 " jupyter_ascending
