@@ -4,6 +4,7 @@ local ls = require 'luasnip'
 local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
 local is_math = ts_utils.in_mathzone
 
+local ps = ls.parser.parse_snippet
 local i = ls.insert_node
 local d = ls.dynamic_node
 local sn = ls.snippet_node
@@ -62,11 +63,11 @@ local function paren_fraction(_, snip)
   })
 end
 
-local math_snip_table = {
+return {
   ms(
     { trig = '([^%s]+)t', regTrig = true, priority = 1 },
-    fmta('(<>)^(<>) <> hello', { f(function(_, s)
-      return s.captures[1]
+    fmta('(<>)^(<>) <> hello', { f(function(_, snip)
+      return snip.captures[1]
     end), i(1), i(2) })
   ),
   s({ trig = 'mat', priority = 100, name = 'bmatrix' }, {
@@ -77,9 +78,6 @@ local math_snip_table = {
     condition = is_math,
     show_condition = is_math,
   }),
-}
-
-local snip_table = {
   -- Transform (...)/ into \frac{...}{•} in math zones
   s({
     trig = '(^.*\\))/',
@@ -114,5 +112,3 @@ local snip_table = {
     i(0),
   }, { condition = is_math }),
 }
-
-return vim.tbl_extend('force', snip_table, math_snip_table)

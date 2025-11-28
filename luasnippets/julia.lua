@@ -6,8 +6,17 @@ local d = ls.dynamic_node
 local sn = ls.snippet_node
 local f = ls.function_node
 local s = ls.snippet
+local ps = ls.parser.parse_snippet
 
 return {
+  ps(
+    'fn',
+    [[
+      function $1($2)
+        $0
+      end
+    ]]
+  ),
   s('bg', {
     f(function(args, snip)
       local env = snip.env
