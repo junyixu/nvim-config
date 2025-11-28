@@ -2,7 +2,8 @@
 " via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
 "imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>'
 "imap <silent><expr> <Tab> luasnip#expandable() ? '<Plug>luasnip-expand' : '<Tab>'
-inoremap <silent> <tab> <cmd>lua require'luasnip'.expand()<Cr>
+imap <silent> <Plug>(luasnip-expand-only) <Cmd>lua require'luasnip'.expand()<CR>
+imap <silent><expr> <Tab> luasnip#expandable() ? '<Plug>(luasnip-expand-only)' : "\<Tab>"
 
 " -1 for jumping backwards.
 inoremap <silent> <C-b> <cmd>lua require'luasnip'.jump(-1)<Cr>
