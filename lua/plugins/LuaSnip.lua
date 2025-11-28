@@ -44,8 +44,13 @@ return {
     -- regular markdown snippets are still considered there.
     ls.filetype_extend('markdown_inline', { 'markdown' })
 
-    -- vim.keymap.set({ 'i' }, '<C-k>', function()
-    --   ls.expand()
+    -- vim.keymap.set({ 'i' }, '<Tab>', function()
+    --   if ls.expand_or_jumpable() then
+    --     ls.expand()
+    --     return ''
+    --   else
+    --     return '<TAB>'
+    --   end
     -- end, { silent = true, desc = 'expand autocomplete' })
     --
     -- vim.keymap.set({ 'i', 's' }, '<C-f>', function()
