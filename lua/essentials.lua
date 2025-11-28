@@ -198,6 +198,7 @@ vim.keymap.set('n', '<M-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<M-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<M-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('n', 'ss', '<C-w><C-s>', { desc = 'Split the window horizontally' })
+vim.keymap.set('n', 'sp', '<C-w>p', { desc = 'back to the last window' })
 vim.keymap.set('n', 's=', '<C-w>=', { desc = 'Window equal size' })
 vim.keymap.set('n', 'sT', '<C-w>T', { desc = 'Move window to new tab' })
 vim.keymap.set('n', 'sv', '<C-w><C-v>', { desc = 'Split the window vertically' })
