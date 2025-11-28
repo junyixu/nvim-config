@@ -3,8 +3,22 @@
 return {
   'L3MON4D3/LuaSnip',
   version = '2.*',
-  lazy = false,
-  priority = 2000, -- Make sure to load this before all the other start plugins.
+  event = 'InsertEnter',
+  keys = {
+    {
+      '<leader>es',
+      function()
+        local filetype = vim.bo.filetype
+        if filetype == 'quarto' or filetype == 'markdown' then
+          filetype = 'tex'
+        end
+        local snippet_path = vim.fn.stdpath 'config' .. '/luasnippets/' .. filetype .. '.lua'
+        vim.cmd('vsplit ' .. snippet_path)
+      end,
+      mode = 'n',
+      desc = 'auto pick filetype and edit the snippet',
+    },
+  },
   build = (function()
     if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
       return
@@ -26,14 +40,9 @@ return {
       },
     }
 
-    vim.keymap.set({ 'n' }, '<leader>es', function()
-      local filetype = vim.bo.filetype
-      if filetype == 'quarto' or 'markdown' then
-        filetype = 'tex'
-      end
-      local snippet_path = vim.fn.stdpath 'config' .. '/luasnippets/' .. filetype .. '.lua'
-      vim.cmd('vsplit ' .. snippet_path)
-    end, { silent = true, desc = 'auto pick filetype and edit the snippet' })
+    -- Treesitter returns `markdown_inline` for normal text regions, so make sure the
+    -- regular markdown snippets are still considered there.
+    ls.filetype_extend('markdown_inline', { 'markdown' })
 
     -- vim.keymap.set({ 'i' }, '<C-k>', function()
     --   ls.expand()
