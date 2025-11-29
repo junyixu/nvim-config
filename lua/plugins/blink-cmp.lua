@@ -15,6 +15,9 @@ return {
       preset = 'default', -- keep defaults but let LuaSnip handle <Tab>/<S-Tab>
       ['<Tab>'] = false,
       ['<S-Tab>'] = false,
+      ['<C-f>'] = false,
+      ['<C-b>'] = false,
+      ['<C-e>'] = false,
     },
     completion = {
       documentation = { auto_show = false, auto_show_delay_ms = 500 },
