@@ -56,12 +56,22 @@ return {
     -- regular markdown snippets are still considered there.
     ls.filetype_extend('markdown_inline', { 'markdown' })
 
-    vim.keymap.set({ 'i', 's' }, '<C-c>', function()
-      if ls.in_snippet() then
-        ls.unlink_current()
-      end
-      return '<C-c>'
-    end, { expr = true, silent = true, desc = 'leave Insert/Select and unlink current LuaSnip snippet' })
+    vim.api.nvim_create_autocmd('ModeChanged', {
+      pattern = { 's:n', 'i:n' }, -- leaving select or insert
+      callback = function()
+        if ls.in_snippet() then -- only clear when a snippet is active
+          ls.unlink_current()
+        end
+      end,
+      desc = 'LuaSnip: forget snippet when exiting to Normal mode',
+    })
+
+    -- vim.keymap.set({ 'i', 's' }, '<C-c>', function()
+    --   if ls.in_snippet() then
+    --     ls.unlink_current()
+    --   end
+    --   return '<C-c>'
+    -- end, { expr = true, silent = true, desc = 'leave Insert/Select and unlink current LuaSnip snippet' })
 
     -- vim.keymap.set({ 'i' }, '<Tab>', function()
     --   if ls.expand_or_jumpable() then
