@@ -6,10 +6,10 @@ local d = ls.dynamic_node
 local sn = ls.snippet_node
 local f = ls.function_node
 local s = ls.snippet
-local ps = ls.parser.parse_snippet
+local parse = ls.parser.parse_snippet
 
 return {
-  ps(
+  parse(
     'fn',
     [[
       function $1($2)

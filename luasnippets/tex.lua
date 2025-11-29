@@ -4,7 +4,7 @@ local ls = require 'luasnip'
 local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
 local is_math = ts_utils.in_mathzone
 
-local ps = ls.parser.parse_snippet
+local parse = ls.parser.parse_snippet
 local i = ls.insert_node
 local d = ls.dynamic_node
 local sn = ls.snippet_node
@@ -22,7 +22,7 @@ local decorator = {
 }
 
 local parse_snippet = ls.extend_decorator.apply(ls.parser.parse_snippet, decorator) --[[@as function]]
-local ms = ls.extend_decorator.apply(ls.snippet, decorator) --[[@as function]]
+local maths = ls.extend_decorator.apply(ls.snippet, decorator) --[[@as function]]
 
 local function paren_fraction(_, snip)
   local stripped = snip.captures[1] or ''
@@ -63,8 +63,28 @@ local function paren_fraction(_, snip)
   })
 end
 
-return {
-  ms(
+local math_snipets = {
+  -- parse({ trig = 'beg', name = 'begin...end' }, '\\begin{${1:env}}\n$0\n\\end{$1}'),
+  s(
+    { trig = 'beg', name = 'begin...end' },
+    fmta(
+      [[
+\begin{<>}
+<>
+\end{<>}
+]],
+      { i(1, 'env'), i(0), rep(1) }
+    )
+  ),
+}
+
+for _, snip in ipairs(math_snipets) do
+  snip.condition = is_math
+  snip.show_condition = is_math
+end
+
+origin_snippets = {
+  maths(
     { trig = '([^%s]+)t', regTrig = true, priority = 1 },
     fmta('(<>)^(<>) <> hello', { f(function(_, snip)
       return snip.captures[1]
@@ -112,3 +132,5 @@ return {
     i(0),
   }, { condition = is_math }),
 }
+
+return vim.list_extend(math_snipets, origin_snippets)
