@@ -29,6 +29,7 @@ return {
     require('luasnip.loaders.from_lua').load { paths = vim.fn.stdpath 'config' .. '/luasnippets' }
     local ls = require 'luasnip'
     local filetype_funcs = require 'luasnip.extras.filetype_functions'
+    local types = require 'luasnip.util.types'
 
     ls.setup {
       update_events = { 'TextChanged', 'TextChangedI' },
@@ -37,6 +38,17 @@ return {
       ft_func = filetype_funcs.from_cursor_pos,
       load_ft_func = filetype_funcs.extend_load_ft {
         quarto = { 'markdown', 'r', 'julia', 'python' },
+      },
+      ext_opts = {
+        [types.choiceNode] = {
+          active = {
+            virt_text = { { '<- Current Choice', 'DiagnosticHint' } },
+            virt_text_pos = 'eol', -- optional, defaults to eol
+          },
+          passive = {
+            virt_text = { { '<- Choice Node', 'Comment' } },
+          },
+        },
       },
     }
 
