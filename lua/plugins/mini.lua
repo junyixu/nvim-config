@@ -30,7 +30,7 @@ return {
           '^().*()$',
         },
       },
-      n_lines = 500,
+      n_lines = 50,
     }
     require('mini.surround').setup {
       custom_surroundings = {
