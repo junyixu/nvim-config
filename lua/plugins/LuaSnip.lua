@@ -56,6 +56,13 @@ return {
     -- regular markdown snippets are still considered there.
     ls.filetype_extend('markdown_inline', { 'markdown' })
 
+    vim.keymap.set({ 'i', 's' }, '<C-c>', function()
+      if ls.in_snippet() then
+        ls.unlink_current()
+      end
+      return '<C-c>'
+    end, { expr = true, silent = true, desc = 'leave Insert/Select and unlink current LuaSnip snippet' })
+
     -- vim.keymap.set({ 'i' }, '<Tab>', function()
     --   if ls.expand_or_jumpable() then
     --     ls.expand()
