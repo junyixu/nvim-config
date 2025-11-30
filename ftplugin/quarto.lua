@@ -13,6 +13,8 @@ vim.keymap.set('n', '<CR>', runner.run_line, { buffer = true, desc = 'run line',
 
 -- Run operations with localleader
 vim.keymap.set('n', '<localleader>rc', runner.run_cell, { buffer = true, desc = 'run cell', silent = true })
+vim.keymap.set('n', '<M-CR>', runner.run_cell, { buffer = true, desc = 'run cell', silent = true })
+vim.keymap.set('n', '<S-CR>', runner.run_cell, { buffer = true, desc = 'run cell', silent = true })
 vim.keymap.set('n', '<localleader>ra', runner.run_above, { buffer = true, desc = 'run cell and above', silent = true })
 vim.keymap.set('n', '<localleader>rA', runner.run_all, { buffer = true, desc = 'run all cells', silent = true })
 vim.keymap.set('v', '<localleader>r', runner.run_range, { buffer = true, desc = 'run visual range', silent = true })
