@@ -12,7 +12,10 @@ return {
   --- @type blink.cmp.Config
   opts = {
     keymap = {
-      preset = 'default', -- keep defaults but let LuaSnip handle <Tab>/<S-Tab>
+      -- NOTE: Keep Blink's default preset but let the plain Neovim mappings in
+      -- plugin/luasnip.vim own <Tab>/<S-Tab>, so snippet expansion/jumps still
+      -- work even when the completion menu is visible.
+      preset = 'default',
       ['<Tab>'] = false,
       ['<S-Tab>'] = false,
       ['<C-f>'] = false,
