@@ -1,18 +1,17 @@
 ---@diagnostic disable: undefined-global
 
 local ls = require 'luasnip'
-local ts_utils = require 'luasnip-latex-snippets.util.ts_utils'
-local is_math = ts_utils.in_mathzone
-
 local parse = ls.parser.parse_snippet
 local i = ls.insert_node
 local d = ls.dynamic_node
 local sn = ls.snippet_node
 local f = ls.function_node
 local s = ls.snippet
--- local math_iA = require 'luasnip-latex-snippets.math_iA'
---
+
 local utils = require 'luasnip-latex-snippets.util.utils'
+-- true 表示走 treesitter；如果想让 vimtex 判定就改成 false
+local is_math = utils.with_opts(utils.is_math, true)
+local not_math = utils.with_opts(utils.not_math, true)
 local pipe, no_backslash = utils.pipe, utils.no_backslash
 
 local decorator = {
