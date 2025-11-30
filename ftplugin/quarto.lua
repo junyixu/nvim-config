@@ -1,5 +1,8 @@
 -- Quarto filetype specific keymaps
 
+local slime_term = require 'custom.slime_term'
+slime_term.ensure()
+
 local runner = require 'quarto.runner'
 
 -- Run cell with Ctrl+Enter
