@@ -1,10 +1,7 @@
--- Quarto filetype specific keymaps
-
-local slime_term = require 'custom.slime_term'
-slime_term.ensure()
-
 local julia_term = require 'custom.julia_term'
 local runner = require 'quarto.runner'
+
+-- Quarto filetype specific keymaps
 
 -- Run cell with Ctrl+Enter
 vim.keymap.set('n', '<C-CR>', runner.run_cell, { buffer = true, desc = 'run cell', silent = true })
