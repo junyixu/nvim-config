@@ -219,7 +219,7 @@ vim.keymap.set('n', '<M-L>', '<C-w>L', { desc = 'Move window to the right' })
 vim.keymap.set('n', '<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
 vim.keymap.set('n', '<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
 
-vim.keymap.set('n', '-', '<CMD>Explore %:h<CR>', { desc = 'Netrw pwd; minic vinegar and oil' })
+-- vim.keymap.set('n', '-', '<CMD>Explore %:h<CR>', { desc = 'Netrw pwd; minic vinegar and oil' })
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
