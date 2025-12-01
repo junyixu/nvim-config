@@ -85,7 +85,8 @@ xmap <silent><buffer> <localleader>r :<c-u>call slime#send("@paste" . "\r")<CR>
 nmap <silent><buffer> <space><space> <Plug>SlimeParagraphSend
 nmap <silent><buffer> <localleader>C <Plug>SlimeConfig
 nmap <silent><buffer> <M-CR> :call <SID>SlimeSendCellSilent()<CR>
-nmap <silent><buffer> <S-CR> :call <SID>SlimeSendCell()<CR>
+nmap <silent><buffer> <C-CR> :call <SID>SlimeSendCell()<CR>
+nmap <silent><buffer> <S-CR> :call <SID>SlimeSendCell()<CR>/# %%<CR>
 nmap <silent><buffer> <CR> :exec "normal \<Plug>SlimeLineSend"<cr>
 
 " map <Leader>jr to run entire file
