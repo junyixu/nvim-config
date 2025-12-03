@@ -11,8 +11,12 @@ local f = ls.function_node
 local s = ls.snippet
 
 return {
+  -- YAML Front Matter
+  -- YAML 前置元数据）或简称 Front Matter。
+  -- 它的作用是定义文档的元数据和配置选项，
+  -- 告诉渲染引擎如何处理这个文档。
   s(
-    '---',
+    { trig = '---', name = 'YAML Front Matter', dscr = 'Insert YAML Front Matter for Quarto document' },
     fmt(
       [[
 ---
