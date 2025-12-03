@@ -197,6 +197,8 @@ vim.keymap.set('n', '<M-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<M-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<M-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<M-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<M-w>', '<C-w>', { remap = true, desc = 'Enter window command mode' })
+vim.keymap.set('n', '<M-w><M-w>', '<C-w>p', { desc = 'back to the last window' })
 vim.keymap.set('n', 'ss', '<C-w><C-s>', { desc = 'Split the window horizontally' })
 vim.keymap.set('n', 'sp', '<C-w>p', { desc = 'back to the last window' })
 vim.keymap.set('n', 's=', '<C-w>=', { desc = 'Window equal size' })
@@ -205,6 +207,7 @@ vim.keymap.set('n', 'sv', '<C-w><C-v>', { desc = 'Split the window vertically' }
 vim.keymap.set('n', 'so', '<C-w>o', { desc = 'Window [o]nly' })
 vim.keymap.set('n', 'sO', '<CMD>tab split<CR>', { desc = 'Split the window in a new tab' })
 vim.keymap.set('n', '<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
+vim.keymap.set('n', '<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 vim.keymap.set('n', 'sq', '<CMD>q<CR>', { desc = 'Quit the current window' })
 vim.keymap.set('n', '<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 
