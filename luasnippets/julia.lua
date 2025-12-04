@@ -13,7 +13,7 @@ return {
     'fn',
     [[
       function $1($2)
-        $0
+          $0
       end
     ]]
   ),
