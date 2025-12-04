@@ -51,6 +51,9 @@ return {
       search_method = 'cover_or_next',
     }
 
+    -- 'ys' is also mapped in Visual mode by mini.surround, so remove it to keep regular Visual 'y' instant
+    pcall(vim.keymap.del, 'x', 'ys')
+
     vim.api.nvim_set_keymap('x', 's', [[:<C-u>lua MiniSurround.add('visual')<CR>]], { noremap = true })
     vim.api.nvim_set_keymap('n', 'yss', 'ys_', { noremap = false })
 
