@@ -149,8 +149,8 @@ vim.o.cursorline = true
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
--- Stop `/` from wrapping back to the start of the file
-vim.o.wrapscan = false
+-- `/` 搜索完整个文档，就从头搜索; wrapping back to the start of the file
+vim.o.wrapscan = true
 
 -- [[ Basic Keymaps ]]
 -- See `:help vim.keymap.set()`
