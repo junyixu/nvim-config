@@ -18,6 +18,8 @@ return {
               ['af'] = '@function.outer',
               ['if'] = '@function.inner',
               ['ac'] = '@class.outer',
+              ['ix'] = '@codechunk.inner',
+              ['ax'] = '@codechunk.outer',
               -- === 新增 Lua if/end 块选择 ===
               ['ad'] = { query = '@conditional.outer', desc = 'Select around conditional (if/end)' },
               ['id'] = { query = '@conditional.inner', desc = 'Select inner conditional body' },
