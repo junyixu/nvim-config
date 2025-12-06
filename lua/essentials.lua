@@ -223,6 +223,15 @@ vim.keymap.set('n', '<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
 vim.keymap.set('n', '<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
 vim.keymap.set('t', '<M-n>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+
+vim.keymap.set('v', '<M-f>', function()
+  vim.lsp.buf.format()
+  vim.cmd.normal() -- 回到 normal 模式
+end, {
+  silent = true,
+  desc = 'Format selection',
+})
+
 -- vim.keymap.set('n', '-', '<CMD>Explore %:h<CR>', { desc = 'Netrw pwd; minic vinegar and oil' })
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
