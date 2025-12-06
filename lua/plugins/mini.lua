@@ -29,6 +29,7 @@ return {
           },
           '^().*()$',
         },
+        a = require('mini.ai').gen_spec.argument { separator = '[,;]' },
       },
       n_lines = 50,
     }
