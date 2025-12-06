@@ -221,6 +221,7 @@ vim.keymap.set('n', 'M-H>', '<C-w>H', { desc = 'Move window to the left' })
 vim.keymap.set('n', '<M-L>', '<C-w>L', { desc = 'Move window to the right' })
 vim.keymap.set('n', '<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
 vim.keymap.set('n', '<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
+vim.keymap.set('t', '<M-n>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- vim.keymap.set('n', '-', '<CMD>Explore %:h<CR>', { desc = 'Netrw pwd; minic vinegar and oil' })
 -- [[ Basic Autocommands ]]
