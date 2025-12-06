@@ -223,6 +223,25 @@ vim.keymap.set('n', '<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
 vim.keymap.set('n', '<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
 vim.keymap.set('t', '<M-n>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+-- command! -nargs=1 -complete=file E execute 'edit' split(<q-args>, ':')[0] | execute split(<q-args>, ':')[1]
+vim.api.nvim_create_user_command('E', function(opts)
+  local parts = vim.split(opts.args, ':', { plain = true })
+  local file = parts[1] or ''
+  local cmd = parts[2]
+
+  if file:sub(1, 1) == '@' then
+    file = file:sub(2)
+  end
+  if file == '' then
+    vim.notify('E command expects {file}:{cmd}', vim.log.levels.ERROR)
+    return
+  end
+
+  vim.cmd.tabedit(file)
+  if cmd and cmd ~= '' then
+    vim.cmd(cmd)
+  end
+end, { nargs = 1, complete = 'file' })
 
 vim.keymap.set('v', '<M-f>', function()
   vim.lsp.buf.format()
