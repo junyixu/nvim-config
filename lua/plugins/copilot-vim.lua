@@ -8,6 +8,7 @@ return {
         \ 'markdown': v:false,
         \ 'julia': v:true,
         \ }
+        imap <C-Right> <Plug>(copilot-accept-word)
       ]]
     end,
   },
