@@ -177,6 +177,12 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>qf', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- `clipboard=autoselect` is not implemented yet
+-- https://github.com/neovim/neovim/issues/2325.
+-- You may find this workaround to be useful:
+vim.keymap.set('v', '<LeftRelease>', '"*ygv', { desc = 'Yank selection to primary clipboard' })
+vim.keymap.set('v', '<2-LeftRelease>', '"*ygv', { desc = 'Yank selection to primary  clipboard' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
