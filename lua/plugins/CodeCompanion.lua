@@ -63,6 +63,13 @@ return {
           -- adapter = 'glm',
           -- adapter = 'codex',
           adapter = 'deepseek',
+          keymaps = {
+            yolo_mode = {
+              modes = { n = "<leader>ty" },
+              callback = "keymaps.yolo_mode",
+              description = "YOLO mode toggle",
+            },
+          },
         },
       },
       display = {
