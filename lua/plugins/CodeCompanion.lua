@@ -61,8 +61,8 @@ return {
       interactions = {
         chat = {
           -- adapter = 'glm',
-          adapter = 'codex',
-          -- adapter = 'deepseek',
+          -- adapter = 'codex',
+          adapter = 'deepseek',
         },
       },
       display = {
@@ -77,8 +77,13 @@ return {
     config = function(_, opts)
       -- 加载插件并应用配置
       require('codecompanion').setup(opts)
+      vim.keymap.set('n', '<leader>tc', '<cmd>CodeCompanionChat Toggle<cr>', { desc = '[T]oggle CodeCompanion [C]hat' })
+      vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { noremap = true, silent = true, desc = 'CodeCompanion Chat [A]dd selection' })
+      vim.keymap.set('v', '<leader>ca', '<cmd>CodeCompanionActions<cr>', { noremap = true, silent = true, desc = '[C]odeCompanion [A]ctions' })
       -- 添加命令缩写
-      vim.cmd 'cabbrev cc CodeCompanion'
+      vim.cmd [[
+        cabbrev cc CodeCompanion
+      ]]
     end,
   },
 }
