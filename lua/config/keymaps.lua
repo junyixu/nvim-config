@@ -1,16 +1,43 @@
 -- Keymaps configuration
+-- See `:help vim.keymap.set()`
+
+-- Helper function for normal mode keymaps (nnoremap equivalent)
+local function nnoremap(lhs, rhs, opts)
+  local defaults = { noremap = true, silent = true }
+  local options = vim.tbl_extend('force', defaults, opts or {})
+  vim.keymap.set('n', lhs, rhs, options)
+end
+
+local function nmap(lhs, rhs, opts)
+  local defaults = { noremap = false, silent = true }
+  local options = vim.tbl_extend('force', defaults, opts or {})
+  vim.keymap.set('n', lhs, rhs, options)
+end
+
+-- Helper function for visual mode keymaps (vnoremap equivalent)
+local function vnoremap(lhs, rhs, opts)
+  local defaults = { noremap = true, silent = true }
+  local options = vim.tbl_extend('force', defaults, opts or {})
+  vim.keymap.set('v', lhs, rhs, options)
+end
+
+local function vmap(lhs, rhs, opts)
+  local defaults = { noremap = false, silent = true }
+  local options = vim.tbl_extend('force', defaults, opts or {})
+  vim.keymap.set('v', lhs, rhs, options)
+end
 
 --  See `:help hlsearch`
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+nnoremap('<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '<leader>qf', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+nnoremap('<leader>qf', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- `clipboard=autoselect` is not implemented yet
 -- https://github.com/neovim/neovim/issues/2325.
 -- You may find this workaround to be useful:
-vim.keymap.set('v', '<LeftRelease>', '"*ygv', { desc = 'Yank selection to primary clipboard' })
-vim.keymap.set('v', '<2-LeftRelease>', '"*ygv', { desc = 'Yank selection to primary  clipboard' })
+vnoremap('<LeftRelease>', '"*ygv', { desc = 'Yank selection to primary clipboard' })
+vnoremap('<2-LeftRelease>', '"*ygv', { desc = 'Yank selection to primary  clipboard' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -24,40 +51,58 @@ vim.keymap.set('v', '<2-LeftRelease>', '"*ygv', { desc = 'Yank selection to prim
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+nnoremap('<M-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+nnoremap('<M-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+nnoremap('<M-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+nnoremap('<M-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+nnoremap('<M-H>', '<C-w>H', { desc = 'Move window to the left' })
+nnoremap('<M-L>', '<C-w>L', { desc = 'Move window to the right' })
+nnoremap('<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
+nnoremap('<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
+nnoremap('<M-w>', '<C-w>', { desc = 'Enter window command mode' })
+nnoremap('<M-w><M-w>', '<C-w>p', { desc = 'back to the last window' })
+nnoremap('<M-w><M-t>', '<C-w>T', { desc = 'Move window to new tab' })
+nnoremap('<M-w>p', '<C-w>P', { desc = 'Move to previous window' })
+-- nnoremap('<C-]>', '<C-w>}', { desc = 'Show definition in preview window' })
+nnoremap('ss', '<C-w><C-s>', { desc = 'Split the window horizontally' })
+nnoremap('sp', '<C-w>p', { desc = 'back to the last window' })
+nnoremap('s=', '<C-w>=', { desc = 'Window equal size' })
+nnoremap('sT', '<C-w>T', { desc = 'Move window to new tab' })
+nnoremap('sv', '<C-w><C-v>', { desc = 'Split the window vertically' })
+nnoremap('so', '<C-w>o', { desc = 'Window [o]nly' })
+nnoremap('sO', '<CMD>tab split<CR>', { desc = 'Split the window in a new tab' })
+nnoremap('<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
+nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
+nnoremap('sq', '<CMD>q<CR>', { desc = 'Quit the current window' })
+nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 
-vim.keymap.set('n', '<M-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<M-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<M-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<M-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-vim.keymap.set('n', '<M-w>', '<C-w>', { remap = true, desc = 'Enter window command mode' })
-vim.keymap.set('n', '<M-w><M-w>', '<C-w>p', { desc = 'back to the last window' })
-vim.keymap.set('n', '<M-w><M-t>', '<C-w>T', { desc = 'Move window to new tab' })
-vim.keymap.set('n', '<M-w>p', '<C-w>P', { desc = 'Move to previous window' })
--- vim.keymap.set('n', '<C-]>', '<C-w>}', { desc = 'Show definition in preview window' })
-vim.keymap.set('n', 'ss', '<C-w><C-s>', { desc = 'Split the window horizontally' })
-vim.keymap.set('n', 'sp', '<C-w>p', { desc = 'back to the last window' })
-vim.keymap.set('n', 's=', '<C-w>=', { desc = 'Window equal size' })
-vim.keymap.set('n', 'sT', '<C-w>T', { desc = 'Move window to new tab' })
-vim.keymap.set('n', 'sv', '<C-w><C-v>', { desc = 'Split the window vertically' })
-vim.keymap.set('n', 'so', '<C-w>o', { desc = 'Window [o]nly' })
-vim.keymap.set('n', 'sO', '<CMD>tab split<CR>', { desc = 'Split the window in a new tab' })
-vim.keymap.set('n', '<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
-vim.keymap.set('n', '<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
-vim.keymap.set('n', 'sq', '<CMD>q<CR>', { desc = 'Quit the current window' })
-vim.keymap.set('n', '<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
+nnoremap('<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
+nnoremap('<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
 
-vim.keymap.set('n', '<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
-vim.keymap.set('n', '<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
-
-vim.keymap.set('n', 'cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
+nnoremap('cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
-vim.keymap.set('n', 'M-H>', '<C-w>H', { desc = 'Move window to the left' })
-vim.keymap.set('n', '<M-L>', '<C-w>L', { desc = 'Move window to the right' })
-vim.keymap.set('n', '<M-J>', '<C-w>J', { desc = 'Move window to the lower' })
-vim.keymap.set('n', '<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
 vim.keymap.set('t', '<M-n>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+-- if vim.env.TERM == 'xterm-kitty' then
+--   local term = vim.api.nvim_replace_termcodes
+--   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), 'j', { noremap = true })
+--   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9002;1u', true, true, true), '<M-S-CR>', { noremap = true })
+--   --   -- vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), '<Tab>', { noremap = true })
+--   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[105;5u', true, true, true), '<C-i>', { noremap = true })
+--   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[13;2u', true, true, true), '<CR>', { noremap = true })
+--   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[109;5u', true, true, true), '<C-m>', { noremap = true })
+--   -- vim.cmd [[
+--   -- nnoremap <silent> <M-CR> :tabnew<CR>
+--   -- nnoremap <silent> <M-S-CR> :tabclose<CR>
+--   -- ]]
+-- end
+-- vim.cmd [[
+-- let &t_TI = "\<Esc>[>4;2m"
+-- let &t_TE = "\<Esc>[>4;m"
+-- "nnoremap <Tab>f :tabnext<CR>
+-- "nnoremap <C-I>f :tabprev<CR>
+-- ]]
+--
+-- Clear highlights on search when pressing <Esc> in normal mode
+-- Keymaps moved to config/keymaps.lua

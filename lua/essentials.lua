@@ -153,32 +153,6 @@ vim.o.confirm = true
 -- `/` 搜索完整个文档，就从头搜索; wrapping back to the start of the file
 vim.o.wrapscan = true
 
--- [[ Basic Keymaps ]]
--- See `:help vim.keymap.set()`
-
--- if vim.env.TERM == 'xterm-kitty' then
---   local term = vim.api.nvim_replace_termcodes
---   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), 'j', { noremap = true })
---   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9002;1u', true, true, true), '<M-S-CR>', { noremap = true })
---   --   -- vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), '<Tab>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[105;5u', true, true, true), '<C-i>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[13;2u', true, true, true), '<CR>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[109;5u', true, true, true), '<C-m>', { noremap = true })
---   -- vim.cmd [[
---   -- nnoremap <silent> <M-CR> :tabnew<CR>
---   -- nnoremap <silent> <M-S-CR> :tabclose<CR>
---   -- ]]
--- end
--- vim.cmd [[
--- let &t_TI = "\<Esc>[>4;2m"
--- let &t_TE = "\<Esc>[>4;m"
--- "nnoremap <Tab>f :tabnext<CR>
--- "nnoremap <C-I>f :tabprev<CR>
--- ]]
---
--- Clear highlights on search when pressing <Esc> in normal mode
--- Keymaps moved to config/keymaps.lua
-
 -- command! -nargs=1 -complete=file E execute 'edit' split(<q-args>, ':')[0] | execute split(<q-args>, ':')[1]
 vim.api.nvim_create_user_command('E', function(opts)
   local parts = vim.split(opts.args, ':', { plain = true })
