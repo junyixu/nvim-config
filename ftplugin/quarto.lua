@@ -29,4 +29,4 @@ vim.keymap.set('n', '<localleader>RA', function()
 end, { buffer = true, desc = 'run all cells of all languages', silent = true })
 
 vim.keymap.set('n', '<space>st', julia_term.open, { buffer = true, desc = 'open julia termimal' })
-vim.keymap.set('n', '<M-=>', julia_term.toggle, { buffer = true, desc = 'toggle julia termimal' })
+vim.keymap.set('n', '<leader>tt', julia_term.toggle, { buffer = true, desc = 'toggle julia termimal' })
