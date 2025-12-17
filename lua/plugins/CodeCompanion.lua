@@ -61,13 +61,31 @@ return {
       interactions = {
         chat = {
           -- adapter = 'glm',
-          -- adapter = 'codex',
-          adapter = 'deepseek',
+          adapter = 'codex',
+          -- adapter = 'deepseek',
           keymaps = {
+            options = {
+              modes = { n = 'g?' },
+              callback = 'keymaps.options',
+              description = 'Options',
+              hide = true,
+            },
+            fold_code = {
+              modes = { n = 'gzc' },
+              index = 15,
+              callback = 'keymaps.fold_code',
+              description = 'Fold code',
+            },
+            goto_file_under_cursor = {
+              modes = { n = 'gf' },
+              index = 20,
+              callback = 'keymaps.goto_file_under_cursor',
+              description = 'Open file under cursor',
+            },
             yolo_mode = {
-              modes = { n = "<leader>ty" },
-              callback = "keymaps.yolo_mode",
-              description = "YOLO mode toggle",
+              modes = { n = '<leader>ty' },
+              callback = 'keymaps.yolo_mode',
+              description = 'YOLO mode toggle',
             },
           },
         },
@@ -75,6 +93,30 @@ return {
       display = {
         chat = {
           auto_scroll = false,
+        },
+      },
+      rules = {
+        -- 移除默认规则中的 CLAUDE.md
+        myrule = {
+          files = {
+            '.clinerules',
+            '.cursorrules',
+            '.goosehints',
+            '.rules',
+            '.windsurfrules',
+            '.github/copilot-instructions.md',
+            'AGENT.md',
+            'AGENTS.md',
+            -- 注释掉 CLAUDE.md 相关文件
+            -- { path = "CLAUDE.md", parser = "claude" },
+            -- { path = "CLAUDE.local.md", parser = "claude" },
+            -- { path = "~/.claude/CLAUDE.md", parser = "claude" },
+          },
+        },
+        opts = {
+          chat = {
+            autoload = 'default',
+          },
         },
       },
     },
