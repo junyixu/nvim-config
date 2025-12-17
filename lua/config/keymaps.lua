@@ -84,6 +84,14 @@ nnoremap('cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 vim.keymap.set('t', '<M-n>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+vim.keymap.set('v', '<M-f>', function()
+  vim.lsp.buf.format()
+  vim.cmd.normal() -- 回到 normal 模式
+end, {
+  silent = true,
+  desc = 'Format selection',
+})
+
 -- if vim.env.TERM == 'xterm-kitty' then
 --   local term = vim.api.nvim_replace_termcodes
 --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), 'j', { noremap = true })

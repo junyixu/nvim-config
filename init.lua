@@ -1,3 +1,2 @@
-require 'essentials'
-require 'config.keymaps'
+require 'config'
 require 'lazy_nvim'
