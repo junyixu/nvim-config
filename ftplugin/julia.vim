@@ -37,8 +37,16 @@ noremap <buffer> <localleader>li :call slime#send(expand("<cword>") . "\r")<cr>
 " noremap <leader>sje :call slime#send("@edit " . expand("<cword>") . "\r")<cr>
 
 
-let g:latex_to_unicode_auto=1	
+let g:latex_to_unicode_auto=1
 " let g:latex_to_unicode_cmd_mapping=['<S-Tab>']
+
+" Initialize LaTeX-to-Unicode for Julia files
+call LaTeXtoUnicode#Refresh()
+" Set up delayed initialization for auto-substitution (like julia-vim does)
+augroup JuliaL2UInit
+  autocmd!
+  autocmd InsertEnter <buffer> let g:did_insert_enter = 1 | call LaTeXtoUnicode#Init(0)
+augroup END
 noremap <expr> <F7> LaTeXtoUnicode#Toggle()
 
 let g:julia_cell_use_primary_selection=1
