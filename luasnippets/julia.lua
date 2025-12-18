@@ -177,19 +177,19 @@ for _, item in ipairs(unicode_snippets) do
     }, { t(item.unicode .. ' ') })
   ) -- Output unicode with trailing space
 
-  -- Autosnippets for punctuation triggers: \pi, \pi: \pi. \pi; \pi! \pi? \pi( \pi) \pi[ \pi] \pi{ \pi}
-  local punctuations = { ',', ':', '.', ';', '!', '?', '(', ')', '[', ']', '{', '}' }
-  for _, punct in ipairs(punctuations) do
-    table.insert(
-      result,
-      s({
-        trig = '\\' .. clean_name .. punct, -- \pi followed by punctuation
-        name = clean_name,
-        snippetType = 'autosnippet',
-        hidden = true, -- Hide from completion engine
-      }, { t(item.unicode .. punct) })
-    ) -- Output unicode with punctuation
-  end
+  -- Autosnippet for any non-alphanumeric character: \pi followed by [^a-zA-Z0-9]
+  table.insert(
+    result,
+    s({
+      trig = '\\' .. clean_name .. '([^a-zA-Z0-9])', -- \pi followed by non-alphanumeric
+      regTrig = true, -- Enable regex
+      name = clean_name,
+      snippetType = 'autosnippet',
+      hidden = true, -- Hide from completion engine
+    }, { f(function(args, snip)
+      return item.unicode .. (snip.captures[1] or '')
+    end, {}) })
+  ) -- Output unicode + captured punctuation
 
   -- Regular snippet for manual expansion: \pi (for Enter key)
   table.insert(
