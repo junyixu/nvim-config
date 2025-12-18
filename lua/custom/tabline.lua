@@ -104,7 +104,7 @@ local function tab_title(tabpage)
   if bufname:sub(1, 1) ~= '/' then
     local scheme = bufname:match('^(%a[%w+.-]*):')
     if scheme == 'fugitive' then
-      return 'fugitive'
+      return 'FUGITIVE'
     end
 
     local base = vim.fn.fnamemodify(bufname, ':t')
