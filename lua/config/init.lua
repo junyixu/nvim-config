@@ -1,6 +1,9 @@
-pcall(vim.fn.mkdir, vim.fn.stdpath 'cache', 'p')
-pcall(vim.fn.mkdir, vim.fn.stdpath 'state', 'p')
-pcall(vim.fn.mkdir, vim.fn.stdpath 'log', 'p')
+local mkdir = vim.fn.mkdir
+local stdpath = vim.fn.stdpath
+
+pcall(mkdir, stdpath 'cache', 'p')
+pcall(mkdir, stdpath 'state', 'p')
+pcall(mkdir, stdpath 'log', 'p')
 
 require 'config.globals'
 require 'config.options'

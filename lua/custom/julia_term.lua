@@ -52,8 +52,8 @@ local function show_term_window()
     return
   end
 
-  vim.cmd 'botright vsplit'
-  vim.cmd.wincmd 'L'
+  vim.cmd 'topleft vsplit'
+  vim.cmd.wincmd 'H'
   vim.api.nvim_win_set_buf(0, term_bufnr)
   vim.api.nvim_win_set_width(0, term_width)
   slime_term.scroll_buf(term_bufnr)
@@ -80,8 +80,8 @@ end
 
 function M.open()
   local source_buf = vim.api.nvim_get_current_buf()
-  vim.cmd 'botright vsplit'
-  vim.cmd.wincmd 'L'
+  vim.cmd 'topleft vsplit'
+  vim.cmd.wincmd 'H'
   vim.cmd.term()
   term_bufnr = vim.api.nvim_get_current_buf()
   vim.api.nvim_win_set_width(0, term_width)
