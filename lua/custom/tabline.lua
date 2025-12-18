@@ -102,7 +102,16 @@ local function tab_title(tabpage)
   -- Only abbreviate real filesystem paths. For special buffers (like terminals),
   -- keep the basename to avoid odd-looking protocol names.
   if bufname:sub(1, 1) ~= '/' then
-    return vim.fn.fnamemodify(bufname, ':t')
+    local scheme = bufname:match('^(%a[%w+.-]*):')
+    if scheme == 'fugitive' then
+      return 'fugitive'
+    end
+
+    local base = vim.fn.fnamemodify(bufname, ':t')
+    if base ~= '' then
+      return base
+    end
+    return scheme or '[No Name]'
   end
 
   local tabnr = vim.api.nvim_tabpage_get_number(tabpage)
