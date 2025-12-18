@@ -60,6 +60,13 @@ local snip_table = {
     ),
   }),
   ps('test', 'hellor world'),
+  s({
+    trig = '-',
+    name = 'todo list',
+    condition = conds.line_begin,
+  }, {
+    t '- [ ] ',
+  }),
 }
 
 return snip_table
