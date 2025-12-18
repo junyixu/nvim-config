@@ -73,6 +73,8 @@ nnoremap('<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
 nnoremap('<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
 
 nnoremap('cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
+-- cmap  expand("")<left><left>
+vim.keymap.set('c', '<C-->', 'expand("")<left><left>', { desc = 'Insert word under cursor' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 vim.keymap.set('t', '<M-n>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
