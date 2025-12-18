@@ -46,10 +46,10 @@ return {
         desc = 'Toggle Flash Search',
       },
     },
-    config = function(_, opts)
-      require('flash').jump {
-        search = { forward = true, wrap = false, multi_window = false },
-      }
-    end,
+    -- config = function(_, opts)
+    --   require('flash').jump {
+    --     search = { forward = true, wrap = false, multi_window = false },
+    --   }
+    -- end,
   },
 }
