@@ -1,23 +1,55 @@
 return {
-  'justinmk/vim-sneak',
-  lazy = false,
-  dependencies = {
-    'tpope/vim-repeat',
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    ---@type Flash.Config
+    opts = {},
+    keys = {
+      {
+        's',
+        mode = { 'n', 'o' },
+        function()
+          require('flash').jump()
+        end,
+        desc = 'Flash',
+      },
+      {
+        'S',
+        mode = { 'n', 'x', 'o' },
+        function()
+          require('flash').treesitter()
+        end,
+        desc = 'Flash Treesitter',
+      },
+      {
+        'r',
+        mode = 'o',
+        function()
+          require('flash').remote()
+        end,
+        desc = 'Remote Flash',
+      },
+      {
+        'R',
+        mode = { 'o', 'x' },
+        function()
+          require('flash').treesitter_search()
+        end,
+        desc = 'Treesitter Search',
+      },
+      {
+        '<c-s>',
+        mode = { 'c' },
+        function()
+          require('flash').toggle()
+        end,
+        desc = 'Toggle Flash Search',
+      },
+    },
+    -- config = function(_, opts)
+    --   require('flash').jump {
+    --     search = { forward = true, wrap = false, multi_window = false },
+    --   }
+    -- end,
   },
-  config = function()
-    -- Sneak forward to character
-    vim.keymap.set('n', 'f', '<Plug>Sneak_f', { desc = 'Sneak forward to character' })
-
-    -- Sneak backward to character
-    vim.keymap.set('n', 'F', '<Plug>Sneak_F', { desc = 'Sneak backward to character' })
-
-    -- Clear q recording
-    vim.keymap.set('n', '<C-q>', 'q', { desc = 'Remap q recording' })
-
-    -- Sneak from cursor position
-    vim.keymap.set('n', 'q', '<Plug>Sneak_s', { desc = 'Sneak from cursor position' })
-
-    -- Sneak backward from cursor position
-    vim.keymap.set('n', 'Q', '<Plug>Sneak_S', { desc = 'Sneak backward from cursor position' })
-  end,
 }
