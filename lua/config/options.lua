@@ -79,3 +79,5 @@ vim.o.confirm = true
 -- `/` 搜索完整个文档，就从头搜索; wrapping back to the start of the file
 vim.o.wrapscan = true
 
+-- Tabline: prefix each tab with its index (1., 2., ...) and keep window count suffix.
+require('custom.tabline').setup()

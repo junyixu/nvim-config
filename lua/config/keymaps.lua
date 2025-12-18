@@ -69,6 +69,11 @@ nnoremap('<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
 nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 
+-- Switch tabs quickly with Alt+number (matches the tabline prefix "1.", "2.", ...).
+for i = 1, 9 do
+  nnoremap(string.format('<M-%d>', i), string.format('%dgt', i), { desc = string.format('Go to tab %d', i) })
+end
+
 nnoremap('<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
 nnoremap('<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
 
