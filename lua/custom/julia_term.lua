@@ -5,7 +5,7 @@ local M = {}
 
 local job_id = 0
 local term_bufnr = nil
-local term_width = 80
+local term_width = 50
 
 local function configure_slime_job(bufnr)
   if job_id <= 0 then
