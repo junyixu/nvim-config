@@ -114,14 +114,73 @@ local function tab_title(tabpage)
   return abbreviate_path(bufname)
 end
 
-local function tab_win_status_suffix(tabpage)
+local function list_layout_wins(tabpage)
   local tabnr = vim.api.nvim_tabpage_get_number(tabpage)
-  local current_win = vim.fn.tabpagewinnr(tabnr)
-  local total_wins = vim.fn.tabpagewinnr(tabnr, '$')
-  if total_wins <= 1 then
+  local layout = vim.fn.winlayout(tabnr)
+  if type(layout) ~= 'table' or layout[1] == nil then
+    return {}
+  end
+
+  local wins = {}
+  local function walk(node)
+    if type(node) ~= 'table' then
+      return
+    end
+
+    if node[1] == 'leaf' and type(node[2]) == 'number' then
+      table.insert(wins, node[2])
+      return
+    end
+
+    local children = node[2]
+    if type(children) ~= 'table' then
+      return
+    end
+    for _, child in ipairs(children) do
+      walk(child)
+    end
+  end
+
+  walk(layout)
+  return wins
+end
+
+local function tab_win_status_suffix(tabpage)
+  -- Count only "real" split windows from `winlayout()`.
+  -- This avoids counting temporary floating/plugin windows (e.g. flash.nvim hints).
+  local tabnr = vim.api.nvim_tabpage_get_number(tabpage)
+  local wins = list_layout_wins(tabpage)
+  if #wins <= 1 then
     return ''
   end
-  return string.format(' [%d/%d]', current_win, total_wins)
+
+  local items = {}
+  for _, win in ipairs(wins) do
+    local ok, tabwin = pcall(vim.fn.win_id2tabwin, win)
+    if ok and type(tabwin) == 'table' and tabwin[1] == tabnr and type(tabwin[2]) == 'number' then
+      table.insert(items, { win = win, winnr = tabwin[2] })
+    end
+  end
+
+  table.sort(items, function(a, b)
+    return a.winnr < b.winnr
+  end)
+
+  local total = #items
+  if total <= 1 then
+    return ''
+  end
+
+  local cur_win = vim.api.nvim_tabpage_get_win(tabpage)
+  local cur_index = 1
+  for i, item in ipairs(items) do
+    if item.win == cur_win then
+      cur_index = i
+      break
+    end
+  end
+
+  return string.format(' [%d/%d]', cur_index, total)
 end
 
 function M.render()
