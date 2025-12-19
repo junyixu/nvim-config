@@ -89,14 +89,21 @@ origin_snippets = {
       return snip.captures[1]
     end), i(1), i(2) })
   ),
-  s({ trig = 'mat', priority = 100, name = 'bmatrix' }, {
-    t { '\\begin{bmatrix}', '' },
-    i(1),
-    t { '', '\\end{bmatrix}' },
-  }, {
-    condition = is_math,
-    show_condition = is_math,
-  }),
+  s(
+    { trig = 'mat', priority = 100, name = 'bmatrix' },
+    fmta(
+      [[
+\begin{bmatrix}
+<>
+\end{bmatrix}
+]],
+      { i(0) }
+    ),
+    {
+      condition = is_math,
+      show_condition = is_math,
+    }
+  ),
   -- Transform (...)/ into \frac{...}{•} in math zones
   s({
     trig = '(^.*\\))/',

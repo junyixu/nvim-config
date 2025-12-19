@@ -7,7 +7,7 @@ return {
   },
   opts = {
     use_treesitter = true,
-    allow_on_markdown = true,
+    allow_on_markdown = false,
   },
   config = function(_, opts)
     require('luasnip-latex-snippets').setup(opts)
@@ -36,8 +36,7 @@ return {
     extend('math_wRA_no_backslash', is_math)
     extend('math_wrA', is_math)
     extend('math_wA_no_backslash', is_math)
-    extend('wA', not_math)
-    extend('bwA', not_math)
+    -- extend('bwA', not_math)
 
     for _, snip in ipairs(autos) do
       snip.hidden = true

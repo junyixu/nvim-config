@@ -1,3 +1,5 @@
+---@diagnostic disable: undefined-global
+
 local ls = require 'luasnip'
 
 local ps = ls.parser.parse_snippet
@@ -67,6 +69,12 @@ local snip_table = {
   }, {
     t '- [ ] ',
   }),
+  parse({ trig = 'mk', name = 'Inline Math', snippetType = 'autosnippet' }, '\\$${1:${TM_SELECTED_TEXT}}\\$$0'),
+
+  parse(
+    { trig = 'dm', name = 'Block Math', priority = 1, condition = conds.line_begin, snippetType = 'autosnippet' },
+    '\\$\\$\n${0:${TM_SELECTED_TEXT}}\n\\$\\$'
+  ),
 }
 
 return snip_table
