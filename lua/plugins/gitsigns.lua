@@ -15,23 +15,6 @@ return {
   },
   -- 重点：使用 gitsigns.nav_hunk()
   keys = {
-    -- 1. 跳转到下一个 Hunk (使用 ]g)
-    {
-      ']c',
-      function()
-        require('gitsigns').nav_hunk 'next'
-      end,
-      desc = 'Next Git Hunk',
-    },
-    -- 2. 跳转到上一个 Hunk (使用 [g)
-    {
-      '[c',
-      function()
-        require('gitsigns').nav_hunk 'prev'
-      end,
-      desc = 'Previous Git Hunk',
-    },
-    -- 推荐添加的 Hunk 操作（保持不变，因为它们没有被弃用）
     {
       '<leader>hs',
       function()
