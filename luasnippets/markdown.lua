@@ -69,6 +69,14 @@ local snip_table = {
   }, {
     t '- [ ] ',
   }),
+
+  -- Current time in %H:%M format
+  s({ trig = 't', name = 'Current Time', condition = conds.line_begin }, {
+    f(function()
+      return os.date '%H:%M' .. '\t'
+    end, {}),
+  }),
+
   parse({ trig = 'mk', name = 'Inline Math', snippetType = 'autosnippet' }, '\\$${1:${TM_SELECTED_TEXT}}\\$$0'),
 
   parse(
