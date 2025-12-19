@@ -2,7 +2,7 @@
 
 local ls = require 'luasnip'
 
-local ps = ls.parser.parse_snippet
+local parse = ls.parser.parse_snippet
 local t = ls.text_node
 local i = ls.insert_node
 local d = ls.dynamic_node
@@ -53,6 +53,7 @@ local snip_table = {
     i(0),
     t { '', '```' },
   }),
+
   s({ trig = '``' }, {
     fmta(
       [[```
@@ -61,7 +62,7 @@ local snip_table = {
       { i(1) }
     ),
   }),
-  ps('test', 'hellor world'),
+
   s({
     trig = '-',
     name = 'todo list',
