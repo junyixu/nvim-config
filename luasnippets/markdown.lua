@@ -10,7 +10,13 @@ local sn = ls.snippet_node
 local f = ls.function_node
 local s = ls.snippet
 
--- local inline_math = ls.parser.parse_snippet({ trig = 'mk', name = 'Math', priority = 10, snippetType = 'autosnippet' }, '$ ${1:${TM_SELECTED_TEXT}} $$0')
+local function list_concat(...)
+  local out = {}
+  for _, tbl in ipairs { ... } do
+    vim.list_extend(out, tbl)
+  end
+  return out
+end
 
 local snip_table = {
   s('paren_change', {
@@ -40,20 +46,6 @@ local snip_table = {
   }),
   -- test
   s('trig', { i(1), t 'test', i(2), t 'text again' }),
-  -- python code block
-  s('py', {
-    t { '```{python}', '' },
-    i(0),
-    t { '', '```' },
-  }),
-
-  -- Julia code block
-  s('jl', {
-    t { '```{julia}', '' },
-    i(0),
-    t { '', '```' },
-  }),
-
   s(
     { trig = '``', name = 'code block' },
     fmt(
@@ -80,6 +72,31 @@ local snip_table = {
     end, {}),
   }),
 
+  -- Current time in %H:%M format
+  s({ trig = 'time', name = 'Current Time' }, {
+    f(function()
+      return os.date '%H:%M'
+    end, {}),
+  }),
+}
+
+local code_block = {
+  -- python code block
+  s('py', {
+    t { '```{python}', '' },
+    i(0),
+    t { '', '```' },
+  }),
+
+  -- Julia code block
+  s('jl', {
+    t { '```{julia}', '' },
+    i(0),
+    t { '', '```' },
+  }),
+}
+
+local math_blocks = {
   parse({ trig = 'mk', name = 'Inline Math', snippetType = 'autosnippet' }, '\\$${1:${TM_SELECTED_TEXT}}\\$$0'),
 
   parse(
@@ -88,4 +105,31 @@ local snip_table = {
   ),
 }
 
-return snip_table
+local obsidian_callouts = {
+  s({ trig = 'note', name = 'Obsidian Callouts: note', condition = conds.line_begin }, {
+    t { '> [!note]', '> ' },
+    i(0),
+  }),
+  s({ trig = 'info', name = 'Obsidian Callouts: info', condition = conds.line_begin }, {
+    t { '> [!info]', '> ' },
+    i(0),
+  }),
+  s({ trig = 'tip', name = 'Obsidian Callouts: tip', condition = conds.line_begin }, {
+    t { '> [!tip]', '> ' },
+    i(0),
+  }),
+  s({ trig = 'faq', name = 'Obsidian Callouts: faq', condition = conds.line_begin }, {
+    t { '> [!faq]', '> ' },
+    i(0),
+  }),
+  s({ trig = 'question', name = 'Obsidian Callouts: question', condition = conds.line_begin }, {
+    t { '> [!question]', '> ' },
+    i(0),
+  }),
+  s({ trig = 'example', name = 'Obsidian Callouts: example', condition = conds.line_begin }, {
+    t { '> [!example]', '> ' },
+    i(0),
+  }),
+}
+
+return list_concat(snip_table, obsidian_callouts, math_blocks, code_block)
