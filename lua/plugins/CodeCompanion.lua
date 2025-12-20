@@ -56,6 +56,14 @@ return {
               },
             })
           end,
+          claude_code = function()
+            return require('codecompanion.adapters').extend('claude_code', {
+              env = {
+                ANTHROPIC_API_KEY = os.getenv 'DEEPSEEK_API_KEY',
+                ANTHROPIC_AUTH_TOKEN = os.getenv 'DEEPSEEK_API_KEY',
+              },
+            })
+          end,
         },
       },
       interactions = {
@@ -63,6 +71,7 @@ return {
           -- adapter = 'glm',
           -- adapter = 'codex',
           adapter = 'deepseek',
+          -- adapter = 'claude_code',
           keymaps = {
             options = {
               modes = { n = 'g?' },
