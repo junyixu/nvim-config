@@ -5,7 +5,7 @@ return {
     opts = {
       adapters = {
         http = {
-          claudehub = function()
+          qin = function()
             return require('codecompanion.adapters').extend('openai_compatible', {
               env = {
                 url = 'https://api.qinzhiai.com',
