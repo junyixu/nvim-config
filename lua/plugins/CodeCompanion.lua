@@ -67,12 +67,41 @@ return {
         },
       },
       interactions = {
+        inline = {
+          adapter = 'copilot',
+          keymaps = {
+            stop = {
+              modes = { n = '<C-c>' },
+              index = 4,
+              callback = 'keymaps.stop',
+              description = 'Stop request',
+            },
+          },
+        },
         chat = {
           -- adapter = 'glm',
           -- adapter = 'codex',
           adapter = 'deepseek',
           -- adapter = 'claude_code',
           keymaps = {
+            stop = {
+              modes = { n = '<C-c>' },
+              index = 5,
+              callback = 'keymaps.stop',
+              description = 'Stop request',
+            },
+            next_chat = {
+              modes = { n = 'g]' },
+              index = 11,
+              callback = 'keymaps.next_chat',
+              description = 'Next chat',
+            },
+            previous_chat = {
+              modes = { n = 'g[' },
+              index = 12,
+              callback = 'keymaps.previous_chat',
+              description = 'Previous chat',
+            },
             options = {
               modes = { n = 'g?' },
               callback = 'keymaps.options',
@@ -96,6 +125,9 @@ return {
               callback = 'keymaps.yolo_mode',
               description = 'YOLO mode toggle',
             },
+          },
+          opts = {
+            register = '*', -- The register to use for yanking code
           },
         },
       },
