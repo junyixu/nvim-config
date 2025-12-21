@@ -3,10 +3,26 @@ if vim.g.loaded_gtags_ref_lua == 1 then
 end
 vim.g.loaded_gtags_ref_lua = 1
 
+-- Minimal GNU Global (gtags) integration for Neovim.
+--
+-- Commands:
+--   :Gtags  [options] {pattern}
+--   :Gtagsa [options] {pattern}  (append to current quickfix)
+--
+-- Supported options:
+--   -r  find references
+--   -s  find other symbols
+--
+-- Output:
+--   We call `global` with `--result=ctags-mod` and parse the output into quickfix
+--   items. `ctags-mod` is typically: {file}\t{line}\t{text}.
+--
 local function echo(msg, hl)
   vim.api.nvim_echo({ { msg, hl or 'None' } }, true, {})
 end
 
+-- Parse `global --result=ctags-mod` output into quickfix items.
+-- Also supports the space-aligned output some setups display.
 local function parse_global_ctags_mod(out)
   local items = {}
   for _, line in ipairs(vim.split(out, '\n', { trimempty = true })) do
@@ -31,6 +47,7 @@ local function run_global(option, pattern, action, title_prefix)
     return
   end
 
+  -- Always pass `-e` so patterns starting with '-' are treated as a pattern.
   local cmd = 'global --path-style=absolute --result=ctags-mod -q ' .. option .. ' -e ' .. vim.fn.shellescape(query)
   local out = vim.fn.system(cmd)
 
@@ -51,16 +68,23 @@ local function run_global(option, pattern, action, title_prefix)
 
   local items = parse_global_ctags_mod(out)
   if action == 'a' then
+    -- Append to the current quickfix list and keep cursor position.
     vim.fn.setqflist(items, 'a')
     vim.cmd 'botright copen'
     return
   end
 
+  -- Replace the current quickfix list and jump to the first match.
   vim.fn.setqflist({}, 'r', { title = (title_prefix or 'Gtags') .. ': ' .. query, items = items })
   vim.cmd 'botright copen'
   pcall(vim.cmd.cfirst)
 end
 
+-- Parse a small subset of `:Gtags` options, keeping it intentionally simple.
+-- Accepted forms:
+--   -r {pat}   / -r
+--   -s {pat}   / -s
+-- Otherwise treat the whole argline as the pattern.
 local function parse_args(qargs)
   local argline = qargs or ''
   local opt, pat = '', argline
@@ -68,6 +92,9 @@ local function parse_args(qargs)
   local trimmed = vim.trim(argline)
   if vim.startswith(trimmed, '-r ') or trimmed == '-r' then
     opt = '-r'
+    pat = vim.trim(trimmed:sub(3))
+  elseif vim.startswith(trimmed, '-s ') or trimmed == '-s' then
+    opt = '-s'
     pat = vim.trim(trimmed:sub(3))
   end
 
