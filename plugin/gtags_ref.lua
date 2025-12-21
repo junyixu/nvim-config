@@ -21,13 +21,13 @@ local function parse_global_ctags_mod(out)
   return items
 end
 
-local function run_global(option, pattern)
+local function run_global(option, pattern, action, title_prefix)
   local query = pattern
   if query == '' then
     query = vim.fn.input('Gtags for pattern: ', vim.fn.expand '<cword>')
   end
   if query == '' then
-    echo('Gtags: pattern not specified.', 'ErrorMsg')
+    echo((title_prefix or 'Gtags') .. ': pattern not specified.', 'ErrorMsg')
     return
   end
 
@@ -35,25 +35,33 @@ local function run_global(option, pattern)
   local out = vim.fn.system(cmd)
 
   if vim.v.shell_error ~= 0 then
-    echo(('Gtags: global failed (%d)'):format(vim.v.shell_error), 'ErrorMsg')
+    echo(((title_prefix or 'Gtags') .. ': global failed (%d)'):format(vim.v.shell_error), 'ErrorMsg')
     echo(cmd)
     return
   end
 
   if out == '' then
-    echo('Gtags: not found: ' .. query, 'WarningMsg')
-    vim.fn.setqflist({}, 'r', { title = 'Gtags: ' .. query, items = {} })
-    vim.cmd.cclose()
+    echo((title_prefix or 'Gtags') .. ': not found: ' .. query, 'WarningMsg')
+    if action == 'r' then
+      vim.fn.setqflist({}, 'r', { title = (title_prefix or 'Gtags') .. ': ' .. query, items = {} })
+      vim.cmd.cclose()
+    end
     return
   end
 
   local items = parse_global_ctags_mod(out)
-  vim.fn.setqflist({}, 'r', { title = 'Gtags: ' .. query, items = items })
+  if action == 'a' then
+    vim.fn.setqflist(items, 'a')
+    vim.cmd 'botright copen'
+    return
+  end
+
+  vim.fn.setqflist({}, 'r', { title = (title_prefix or 'Gtags') .. ': ' .. query, items = items })
   vim.cmd 'botright copen'
   pcall(vim.cmd.cfirst)
 end
 
-local function gtags(qargs)
+local function parse_args(qargs)
   local argline = qargs or ''
   local opt, pat = '', argline
 
@@ -63,9 +71,23 @@ local function gtags(qargs)
     pat = vim.trim(trimmed:sub(3))
   end
 
-  run_global(opt, pat)
+  return opt, pat
+end
+
+local function gtags(qargs)
+  local opt, pat = parse_args(qargs)
+  run_global(opt, pat, 'r', 'Gtags')
+end
+
+local function gtagsa(qargs)
+  local opt, pat = parse_args(qargs)
+  run_global(opt, pat, 'a', 'Gtagsa')
 end
 
 vim.api.nvim_create_user_command('Gtags', function(opts)
   gtags(opts.args)
+end, { nargs = '*' })
+
+vim.api.nvim_create_user_command('Gtagsa', function(opts)
+  gtagsa(opts.args)
 end, { nargs = '*' })
