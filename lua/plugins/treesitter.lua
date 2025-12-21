@@ -3,6 +3,7 @@
 return {
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'master', -- 关键：手动指定旧分支
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -22,6 +23,7 @@ return {
   },
   { -- Show current context
     'nvim-treesitter/nvim-treesitter-context',
+    branch = 'master', -- 关键：手动指定旧分支
     opts = {
       enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
       multiwindow = false, -- Enable multiwindow support.
