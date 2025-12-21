@@ -1,6 +1,7 @@
 return {
   {
     'nvim-treesitter/nvim-treesitter-textobjects',
+    branch = 'master', -- 关键：手动指定旧分支
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
     },
