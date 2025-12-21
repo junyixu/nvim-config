@@ -17,3 +17,16 @@ vim.api.nvim_create_user_command('E', function(opts)
   end
 end, { nargs = 1, complete = 'file' })
 
+do
+  local gtags_ref = require 'custom.gtags_ref'
+
+  pcall(vim.api.nvim_del_user_command, 'Gtags')
+  vim.api.nvim_create_user_command('Gtags', function(opts)
+    gtags_ref.gtags(opts.args)
+  end, { nargs = '*' })
+
+  pcall(vim.api.nvim_del_user_command, 'Gtagsa')
+  vim.api.nvim_create_user_command('Gtagsa', function(opts)
+    gtags_ref.gtagsa(opts.args)
+  end, { nargs = '*' })
+end
