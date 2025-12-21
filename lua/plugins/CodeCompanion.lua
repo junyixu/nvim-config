@@ -83,6 +83,9 @@ return {
           -- adapter = 'codex',
           adapter = 'deepseek',
           -- adapter = 'claude_code',
+          roles = {
+            user = 'Me',
+          },
           keymaps = {
             stop = {
               modes = { n = '<C-c>' },
@@ -134,6 +137,10 @@ return {
       display = {
         chat = {
           auto_scroll = false,
+          intro_message = 'Welcome to CodeCompanion ✨! Press g? for options',
+          window = {
+            width = 0.35, ---@type number|"auto" using "auto" will allow full_height buffers to act like normal buffers
+          },
         },
       },
       rules = {
