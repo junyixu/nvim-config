@@ -5,3 +5,6 @@ vim.keymap.set('n', '<leader>tt', julia_term.toggle, { buffer = true, desc = 'to
 
 local julia_ctags = require 'custom.julia_ctags'
 julia_ctags.attach(0)
+
+local julia_gtags = require 'custom.julia_gtags'
+julia_gtags.attach(0)
