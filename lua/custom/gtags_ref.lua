@@ -1,28 +1,9 @@
-if vim.g.loaded_gtags_ref_lua == 1 then
-  return
-end
-vim.g.loaded_gtags_ref_lua = 1
+local M = {}
 
--- Minimal GNU Global (gtags) integration for Neovim.
---
--- Commands:
---   :Gtags  [options] {pattern}
---   :Gtagsa [options] {pattern}  (append to current quickfix)
---
--- Supported options:
---   -r  find references
---   -s  find other symbols
---
--- Output:
---   We call `global` with `--result=ctags-mod` and parse the output into quickfix
---   items. `ctags-mod` is typically: {file}\t{line}\t{text}.
---
 local function echo(msg, hl)
   vim.api.nvim_echo({ { msg, hl or 'None' } }, true, {})
 end
 
--- Parse `global --result=ctags-mod` output into quickfix items.
--- Also supports the space-aligned output some setups display.
 local function parse_global_ctags_mod(out)
   local items = {}
   for _, line in ipairs(vim.split(out, '\n', { trimempty = true })) do
@@ -80,11 +61,6 @@ local function run_global(option, pattern, action, title_prefix)
   pcall(vim.cmd.cfirst)
 end
 
--- Parse a small subset of `:Gtags` options, keeping it intentionally simple.
--- Accepted forms:
---   -r {pat}   / -r
---   -s {pat}   / -s
--- Otherwise treat the whole argline as the pattern.
 local function parse_args(qargs)
   local argline = qargs or ''
   local opt, pat = '', argline
@@ -111,10 +87,7 @@ local function gtagsa(qargs)
   run_global(opt, pat, 'a', 'Gtagsa')
 end
 
-vim.api.nvim_create_user_command('Gtags', function(opts)
-  gtags(opts.args)
-end, { nargs = '*' })
+M.gtags = gtags
+M.gtagsa = gtagsa
 
-vim.api.nvim_create_user_command('Gtagsa', function(opts)
-  gtagsa(opts.args)
-end, { nargs = '*' })
+return M
