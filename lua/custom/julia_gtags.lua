@@ -3,7 +3,7 @@ local M = {}
 local uv = vim.uv or vim.loop
 
 M.config = {
-  debounce_ms = 300,
+  debounce_ms = 2300,
   gtags_file = 'GTAGS',
 }
 
@@ -76,10 +76,14 @@ function M.schedule()
   end
 
   timer = uv.new_timer()
-  timer:start(M.config.debounce_ms, 0, vim.schedule_wrap(function()
-    timer = nil
-    M.update(pending_cwd)
-  end))
+  timer:start(
+    M.config.debounce_ms,
+    0,
+    vim.schedule_wrap(function()
+      timer = nil
+      M.update(pending_cwd)
+    end)
+  )
 end
 
 function M.attach(bufnr)

@@ -3,7 +3,7 @@ local M = {}
 local uv = vim.uv or vim.loop
 
 M.config = {
-  debounce_ms = 300,
+  debounce_ms = 2300,
   tagfile = 'tags',
   excludes = {
     '.git',
@@ -47,7 +47,7 @@ end
 function M.run(cwd)
   cwd = cwd or vim.fn.getcwd()
 
-  if vim.fn.executable('ctags') ~= 1 then
+  if vim.fn.executable 'ctags' ~= 1 then
     notify('`ctags` not found in PATH', vim.log.levels.WARN)
     return
   end
@@ -69,10 +69,14 @@ function M.schedule()
   end
 
   timer = uv.new_timer()
-  timer:start(M.config.debounce_ms, 0, vim.schedule_wrap(function()
-    timer = nil
-    M.run(pending_cwd)
-  end))
+  timer:start(
+    M.config.debounce_ms,
+    0,
+    vim.schedule_wrap(function()
+      timer = nil
+      M.run(pending_cwd)
+    end)
+  )
 end
 
 function M.attach(bufnr)
