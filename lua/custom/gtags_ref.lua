@@ -85,6 +85,9 @@ local function parse_args(qargs)
   elseif vim.startswith(trimmed, '-s ') or trimmed == '-s' then
     opt = '-s'
     pat = vim.trim(trimmed:sub(3))
+  elseif vim.startswith(trimmed, '-d ') or trimmed == '-d' then
+    opt = '-d'
+    pat = vim.trim(trimmed:sub(3))
   end
 
   return opt, pat
