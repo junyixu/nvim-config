@@ -1,5 +1,7 @@
 local M = {}
 
+local QUICKFIX_MAX_HEIGHT = 15
+
 local function echo(msg, hl)
   vim.api.nvim_echo({ { msg, hl or 'None' } }, true, {})
 end
@@ -16,6 +18,15 @@ local function parse_global_ctags_mod(out)
     end
   end
   return items
+end
+
+local function adjust_quickfix_height(item_count)
+  local height = math.min(item_count, QUICKFIX_MAX_HEIGHT)
+
+  local qf_win = vim.fn.getqflist({ winid = 0 }).winid
+  if qf_win ~= 0 then
+    vim.api.nvim_win_set_height(qf_win, height)
+  end
 end
 
 local function run_global(option, pattern, action, title_prefix)
@@ -52,12 +63,14 @@ local function run_global(option, pattern, action, title_prefix)
     -- Append to the current quickfix list and keep cursor position.
     vim.fn.setqflist(items, 'a')
     vim.cmd 'botright copen'
+    adjust_quickfix_height(#items)
     return
   end
 
   -- Replace the current quickfix list and jump to the first match.
   vim.fn.setqflist({}, 'r', { title = (title_prefix or 'Gtags') .. ': ' .. query, items = items })
   vim.cmd 'botright copen'
+  adjust_quickfix_height(#items)
   pcall(vim.cmd.cfirst)
 end
 
@@ -89,5 +102,12 @@ end
 
 M.gtags = gtags
 M.gtagsa = gtagsa
+
+function M.setup(opts)
+  opts = opts or {}
+  if opts.quickfix_max_height ~= nil then
+    QUICKFIX_MAX_HEIGHT = opts.quickfix_max_height
+  end
+end
 
 return M

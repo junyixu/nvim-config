@@ -19,6 +19,9 @@ end, { nargs = 1, complete = 'file' })
 
 do
   local gtags_ref = require 'custom.gtags_ref'
+  gtags_ref.setup {
+    quickfix_max_height = 10,
+  }
 
   pcall(vim.api.nvim_del_user_command, 'Gtags')
   vim.api.nvim_create_user_command('Gtags', function(opts)
