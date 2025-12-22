@@ -32,4 +32,10 @@ do
   vim.api.nvim_create_user_command('Gtagsa', function(opts)
     gtags_ref.gtagsa(opts.args)
   end, { nargs = '*' })
+
+  vim.cmd [[
+    cabbrev gr Gtags -r
+    cabbrev gs Gtags -s
+    cabbrev gd Gtags -d
+  ]]
 end
