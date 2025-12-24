@@ -39,3 +39,14 @@ do
     cabbrev gd Gtags -d
   ]]
 end
+
+
+
+do
+  local GPTCommit = require 'custom.GPTCommit'
+
+  pcall(vim.api.nvim_del_user_command, 'GptCommit')
+  vim.api.nvim_create_user_command('GptCommit', function(opts)
+    GPTCommit.cmd(opts.args)
+  end, { nargs = '?', complete = 'file' })
+end
