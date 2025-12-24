@@ -16,108 +16,23 @@
 
 local M = {}
 
-local function trim(s)
-  return (s:gsub('^%s+', ''):gsub('%s+$', ''))
-end
-
-local function split_lines(s)
-  if s == '' then
-    return {}
-  end
-  return vim.split(s, '\n', { plain = true })
-end
-
-local function limit_lines(text, max_lines)
-  local lines = split_lines(text)
-  if #lines <= max_lines then
-    return text
-  end
-  return table.concat(lines, '\n', 1, max_lines)
-end
-
-local function stat_type(path)
-  local st = vim.uv.fs_stat(path)
-  return st and st.type or nil
-end
-
-local function is_dir(path)
-  return stat_type(path) == 'directory'
-end
-
-local function is_file(path)
-  return stat_type(path) == 'file'
-end
-
--- 执行外部命令（新版）：返回 (exit_code, stdout, stderr)
-local function sys(cmd, input)
-  local res = vim.system(cmd, { text = true, stdin = input }):wait()
-  return res.code, res.stdout or '', res.stderr or ''
-end
-
-local function normalize_path(arg)
-  local path = trim(arg or '')
-  if path:sub(1, 1) == '@' then
-    path = path:sub(2)
-  end
-
-  if path == '' then
-    local bufname = vim.api.nvim_buf_get_name(0)
-    -- 常见场景：在 `.git/COMMIT_EDITMSG` 里执行，需要把 repo root 当作工作目录
-    -- 例如：`/repo/.git/COMMIT_EDITMSG` -> `/repo`
-    path = bufname:match '^(.*)/%.git/' or vim.fs.dirname(bufname)
-  end
-
-  if path:sub(1, 1) ~= '/' then
-    path = vim.fs.joinpath(vim.uv.cwd(), path)
-  end
-
-  path = vim.fs.normalize(path)
-  if is_file(path) then
-    return vim.fs.dirname(path)
-  end
-  return path
-end
-
-local function git_root(path)
-  local code, out = sys { 'git', '-C', path, 'rev-parse', '--show-toplevel' }
-  if code ~= 0 then
-    return nil
-  end
-  local root = trim(out)
-  return root ~= '' and vim.fs.normalize(root) or nil
-end
-
-local function git_diff(root, staged)
-  local args = { 'git', '-C', root, 'diff' }
-  if staged then
-    table.insert(args, '--staged')
-  end
-  local code, out = sys(args)
-  if code ~= 0 then
-    return nil
-  end
-  return out
-end
-
 local function build_prompt()
-  return table.concat({
-    'Generate a git commit message following conventional commit format, for my changes. eg:',
-    '',
-    '<type>(scope): <brief summary>',
-    '',
-    '- Explain technical improvement or benefit',
-    '- Note any interface or behavior changes',
-    '',
-    'Requirements:',
-    '- Header: conventional commit format, under 80 chars',
-    '- Body: 2-3 bullet points starting with action verbs',
-    '- Focus on WHAT changed and WHY, not HOW',
-    '- Be specific',
-    '- <type> is one of feat, fix, docs, style, refactor, perf, test, chore',
-    '- Use meaningful scope if applicable, e.g.: feat(fugitive.vim)',
-    '- Use present tense, imperative mood',
-    '- Output only the commit message, no labels or formatting markers',
-  }, '\n')
+  return [[Generate a git commit message following conventional commit format, for my changes. eg:
+
+<type>(scope): <brief summary>
+
+- Explain technical improvement or benefit
+- Note any interface or behavior changes
+
+Requirements:
+- Header: conventional commit format, under 80 chars
+- Body: 2-3 bullet points starting with action verbs
+- Focus on WHAT changed and WHY, not HOW
+- Be specific
+- <type> is one of feat, fix, docs, style, refactor, perf, test, chore
+- Use meaningful scope if applicable, e.g.: feat(fugitive.vim)
+- Use present tense, imperative mood
+- Output only the commit message, no labels or formatting markers]]
 end
 
 -- 约定：curl 输出 body，并在末尾追加一行 http_code（用 -w '\n%{http_code}'）
@@ -141,18 +56,17 @@ local function openai_request(key, model, messages)
     '\n%{http_code}',
   }
 
-  local code, out, err = sys(curl, body)
-  if code ~= 0 then
-    local detail = trim(err) ~= '' and trim(err) or trim(out)
-    return nil, ('curl failed (%d): %s'):format(code, detail)
+  local res = vim.system(curl, { text = true, stdin = body }):wait()
+  if res.code ~= 0 then
+    local detail = vim.trim((res.stderr or '') ~= '' and res.stderr or (res.stdout or ''))
+    return nil, ('curl failed (%d): %s'):format(res.code, detail)
   end
 
-  local lines = split_lines(out)
-  local http_code = tonumber(lines[#lines])
-  local resp_body = table.concat(lines, '\n', 1, math.max(#lines - 1, 0))
-
+  local out = res.stdout or ''
+  local resp_body, http_code = out:match '^([%s%S]*)\n(%d+)%s*$'
+  http_code = tonumber(http_code)
   if http_code ~= 200 then
-    return nil, ('OpenAI HTTP %s: %s'):format(tostring(http_code), trim(resp_body))
+    return nil, ('OpenAI HTTP %s: %s'):format(tostring(http_code), vim.trim(resp_body or out))
   end
 
   local ok, obj = pcall(vim.json.decode, resp_body)
@@ -162,11 +76,12 @@ local function openai_request(key, model, messages)
 
   local choice = obj.choices and obj.choices[1]
   local content = choice and choice.message and choice.message.content
-  if type(content) ~= 'string' or trim(content) == '' then
-    return nil, 'OpenAI response missing choices[1].message.content'
+  content = type(content) == 'string' and vim.trim(content) or ''
+  if content == '' then
+    return nil, 'OpenAI response missing `choices[1].message.content`'
   end
 
-  return trim(content), nil
+  return content
 end
 
 function M.generate(repo_path)
@@ -179,24 +94,33 @@ function M.generate(repo_path)
   local max_lines = tonumber(vim.g.gpt_commit_max_lines) or 160
   local staged = (vim.g.gpt_commit_staged == nil) or (vim.g.gpt_commit_staged == 1)
 
-  local root = git_root(repo_path)
-  if not root then
-    return nil, 'Not a git repository: ' .. repo_path
+  local root_res = vim.system({ 'git', '-C', repo_path, 'rev-parse', '--show-toplevel' }, { text = true }):wait()
+  local root = root_res.code == 0 and vim.trim(root_res.stdout or '') or ''
+  if root == '' then
+    return nil, ('Not a git repository: %s'):format(repo_path)
   end
 
-  local diff = git_diff(root, staged)
-  if not diff then
-    return nil, 'Failed to run git diff'
+  local diff_cmd = { 'git', '-C', root, 'diff' }
+  if staged then
+    table.insert(diff_cmd, '--staged')
   end
+  local diff_res = vim.system(diff_cmd, { text = true }):wait()
+  if diff_res.code ~= 0 then
+    return nil, 'Failed to run `git diff`'
+  end
+  local diff = diff_res.stdout or ''
 
-  if trim(diff) == '' and staged then
-    diff = git_diff(root, false) or ''
+  if diff == '' and staged then
+    diff = (vim.system({ 'git', '-C', root, 'diff' }, { text = true }):wait().stdout or '')
   end
-  if trim(diff) == '' then
+  if diff == '' then
     return nil, 'No changes'
   end
 
-  diff = limit_lines(diff, max_lines)
+  local lines = vim.split(diff, '\n', { plain = true })
+  if #lines > max_lines then
+    diff = table.concat(lines, '\n', 1, max_lines)
+  end
 
   local messages = {
     { role = 'system', content = build_prompt() },
@@ -206,28 +130,22 @@ function M.generate(repo_path)
   return openai_request(key, model, messages)
 end
 
-function M.cmd(args)
-  local path = normalize_path(args)
-  if not is_dir(path) then
-    vim.notify('Directory does not exist: ' .. path, vim.log.levels.ERROR)
-    return
-  end
-
-  if vim.bo.buftype ~= '' or not vim.bo.modifiable or vim.bo.readonly then
-    vim.notify('Buffer is not writable', vim.log.levels.ERROR)
-    return
-  end
+function M.cmd(_)
+  local bufname = vim.api.nvim_buf_get_name(0)
+  -- 常见场景：在 `.git/COMMIT_EDITMSG` 里执行，需要把 repo root 当作工作目录
+  -- 例如：`/repo/.git/COMMIT_EDITMSG` -> `/repo`
+  local path = bufname ~= '' and (bufname:match '^(.*)/%.git/' or vim.fs.dirname(bufname)) or (vim.uv.cwd() or vim.fn.getcwd())
 
   vim.notify('Generating commit message...', vim.log.levels.INFO, { title = 'GPTCommit' })
 
   local msg, err = M.generate(path)
   if not msg then
-    vim.notify(err or 'Unknown error', vim.log.levels.ERROR)
+    vim.notify(err or 'Failed to generate commit message.', vim.log.levels.ERROR, { title = 'GPTCommit' })
     return
   end
 
   local row = vim.api.nvim_win_get_cursor(0)[1]
-  vim.api.nvim_buf_set_lines(0, row - 1, row - 1, false, split_lines(msg))
+  vim.api.nvim_buf_set_lines(0, row - 1, row - 1, false, vim.split(msg, '\n', { plain = true, trimempty = true }))
   vim.cmd 'redraw'
   vim.notify('Commit message generated.', vim.log.levels.INFO, { title = 'GPTCommit' })
 end
