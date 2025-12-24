@@ -218,7 +218,7 @@ function M.cmd(args)
     return
   end
 
-  vim.api.nvim_echo({ { 'Generating commit message ...', 'Title' } }, false, {})
+  vim.notify('Generating commit message...', vim.log.levels.INFO, { title = 'GPTCommit' })
 
   local msg, err = M.generate(path)
   if not msg then
@@ -228,7 +228,8 @@ function M.cmd(args)
 
   local row = vim.api.nvim_win_get_cursor(0)[1]
   vim.api.nvim_buf_set_lines(0, row - 1, row - 1, false, split_lines(msg))
-  vim.api.nvim_echo({ { 'Generated', 'Title' } }, false, {})
+  vim.cmd 'redraw'
+  vim.notify('Commit message generated.', vim.log.levels.INFO, { title = 'GPTCommit' })
 end
 
 return M
