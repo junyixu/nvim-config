@@ -123,4 +123,18 @@ function M.toggle()
   end
 end
 
+-- Toggle slime target between kitty and neovim
+function M.toggle_slime_target()
+  -- Determine current target: buffer variable takes precedence over global
+  local current_target = vim.b.slime_target or vim.g.slime_target or 'neovim'
+
+  -- Toggle between kitty and neovim
+  local new_target = (current_target == 'neovim') and 'kitty' or 'neovim'
+
+  -- Set buffer variable (takes precedence over global)
+  vim.b.slime_target = new_target
+
+  -- Notify user
+  vim.notify(string.format('Slime target switched to: %s', new_target), vim.log.levels.INFO)
+end
 return M
