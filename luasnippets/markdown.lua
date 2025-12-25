@@ -122,6 +122,10 @@ local obsidian_callouts = {
     t { '> [!faq]', '> ' },
     i(0),
   }),
+  s({ trig = 'warning', name = 'Obsidian Callouts: warning', condition = conds.line_begin }, {
+    t { '> [!warning]', '> ' },
+    i(0),
+  }),
   s({ trig = 'question', name = 'Obsidian Callouts: question', condition = conds.line_begin }, {
     t { '> [!question]', '> ' },
     i(0),
