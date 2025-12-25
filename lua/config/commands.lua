@@ -40,8 +40,6 @@ do
   ]]
 end
 
-
-
 do
   local GPTCommit = require 'custom.GPTCommit'
 
@@ -50,3 +48,7 @@ do
     GPTCommit.cmd(opts.args)
   end, { nargs = '?', complete = 'file' })
 end
+
+vim.cmd [[
+command! BufOnly execute '%bdelete|edit #|normal `"'
+]]
