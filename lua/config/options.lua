@@ -21,7 +21,12 @@ vim.o.showmode = false
 --  See `:help 'clipboard'`
 --  我希望同步 * 剪贴板，而不是 + 剪贴板
 vim.schedule(function()
-  vim.o.clipboard = 'unnamed'
+  if vim.g.has_wl_copy then
+    if vim.g.is_wsl then
+      vim.o.clipboard = 'unnamedplus'
+    end
+    vim.o.clipboard = 'unnamed'
+  end
 end)
 
 -- Enable break indent
