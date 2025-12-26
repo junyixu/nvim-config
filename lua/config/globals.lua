@@ -6,6 +6,11 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+-- Cached environment checks (avoid repeated feature/env probing elsewhere).
+vim.g.is_wsl = vim.fn.has 'wsl' == 1 or vim.env.WSL_DISTRO_NAME ~= nil or vim.env.WSL_INTEROP ~= nil
+
+vim.g.has_wl_copy = vim.fn.executable 'wl-copy' == 1
+
 -- Whether to enable special Unicode characters in the commit graph.
 -- Currently supported by the Kitty terminal.
 vim.g.flog_enable_extended_chars = true
