@@ -60,6 +60,10 @@ return {
 
     require('mini.pairs').setup {
       modes = { insert = true, command = false, terminal = false },
+      mappings = {
+        ['('] = { action = 'open', pair = '()', neigh_pattern = '.[%s\n]' },
+        ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^`\\].' },
+      },
     }
 
     local statusline = require 'mini.statusline'
