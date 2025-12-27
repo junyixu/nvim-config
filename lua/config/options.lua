@@ -24,6 +24,7 @@ vim.schedule(function()
   if vim.g.has_wl_copy then
     if vim.g.is_wsl then
       vim.o.clipboard = 'unnamedplus'
+      return
     end
     vim.o.clipboard = 'unnamed'
   end
