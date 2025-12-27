@@ -69,14 +69,6 @@ return {
       interactions = {
         inline = {
           adapter = 'copilot',
-          keymaps = {
-            stop = {
-              modes = { n = '<C-c>' },
-              index = 4,
-              callback = 'keymaps.stop',
-              description = 'Stop request',
-            },
-          },
         },
         chat = {
           -- adapter = 'glm',
@@ -87,6 +79,21 @@ return {
             user = 'Me',
           },
           keymaps = {
+            stop = {
+              modes = { n = '<C-c>' },
+              index = 4,
+              callback = 'keymaps.stop',
+              description = 'Stop request',
+            },
+            send = {
+              modes = {
+                n = { '<C-CR>', '<C-s>' },
+                i = '<C-s>',
+              },
+              index = 2,
+              callback = 'keymaps.send',
+              description = 'Send message',
+            },
             stop = {
               modes = { n = '<C-c>' },
               index = 5,
