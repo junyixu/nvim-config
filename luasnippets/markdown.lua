@@ -57,6 +57,16 @@ local snip_table = {
     )
   ),
 
+  s(
+    { trig = '```', name = 'code block', snippetType = 'autosnippet' },
+    fmt(
+      [[
+        ```{}
+        ```
+      ]],
+      { i(0) }
+    )
+  ),
   s({
     trig = '-',
     name = 'todo list',
