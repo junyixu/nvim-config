@@ -13,7 +13,7 @@ local utils = require 'luasnip-latex-snippets.util.utils'
 local is_math = utils.with_opts(utils.is_math, true)
 local not_math = utils.with_opts(utils.not_math, true)
 local pipe, no_backslash = utils.pipe, utils.no_backslash
-
+in_mathzone = is_math
 local decorator = {
   wordTrig = false,
   hidden = true,
@@ -82,6 +82,12 @@ for _, snip in ipairs(math_snipets) do
   snip.show_condition = is_math
 end
 
+local function cap(idx)
+  return f(function(_, snip)
+    return snip.captures[idx] or ''
+  end)
+end
+
 origin_snippets = {
   maths(
     { trig = '([^%s]+)t', regTrig = true, priority = 1 },
@@ -89,6 +95,43 @@ origin_snippets = {
       return snip.captures[1]
     end), i(1), i(2) })
   ),
+
+  s({
+    trig = '<(.-)|',
+    regTrig = true,
+    trigEngine = 'pattern',
+    wordTrig = false,
+    snippetType = 'autosnippet',
+    condition = in_mathzone,
+  }, { t '\\bra{', cap(1), t '}' }),
+
+  s({
+    trig = '|(.-)>',
+    regTrig = true,
+    trigEngine = 'pattern',
+    wordTrig = false,
+    snippetType = 'autosnippet',
+    condition = in_mathzone,
+  }, { t '\\ket{', cap(1), t '}' }),
+
+  s({
+    trig = '<(.-)>',
+    regTrig = true,
+    trigEngine = 'pattern',
+    wordTrig = false,
+    snippetType = 'autosnippet',
+    condition = in_mathzone,
+  }, { t '\\braket{', cap(1), t '}' }),
+
+  s({
+    trig = '(.*)\\bra{(.-)}([^|]-)>',
+    regTrig = true,
+    trigEngine = 'pattern',
+    wordTrig = false,
+    snippetType = 'autosnippet',
+    condition = in_mathzone,
+  }, { cap(1), t '\\braket{', cap(2), t '|', cap(3), t '}' }),
+
   s(
     { trig = 'mat', priority = 100, name = 'bmatrix' },
     fmta(
