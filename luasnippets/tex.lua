@@ -75,6 +75,19 @@ local math_snipets = {
       { i(1, 'env'), i(0), rep(1) }
     )
   ),
+  -- priority 1000
+  -- context "isMath()"
+  -- snippet pdv "diff" i
+  -- \frac{\partial $1}{\partial $2}
+  -- endsnippet
+  --
+  s({ trig = 'pdv', name = 'partial derivative' }, fmta('\\frac{\\partial <>}{\\partial <>}', { i(1), i(2) })),
+  -- priority 100
+  -- context "isMath()"
+  -- snippet dv "diff" i
+  -- \frac{\mathrm{d} $1}{\mathrm{d} $2}
+  -- endsnippet
+  s({ trig = 'dv', name = 'derivative' }, fmta('\\frac{\\mathrm{d} <>}{\\mathrm{d} <>}', { i(1), i(2) })),
 }
 
 for _, snip in ipairs(math_snipets) do
@@ -118,39 +131,62 @@ origin_snippets = {
     trig = '<(.-)|',
     regTrig = true,
     trigEngine = 'pattern',
+    priority = 100,
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = is_math,
   }, fmta('\\Bra{<>}', { cap(1) })),
 
+  -- s({
+  --   trig = '|(%a-)>',
+  --   regTrig = true,
+  --   priority = 100,
+  --   trigEngine = 'pattern',
+  --   wordTrig = false,
+  --   snippetType = 'autosnippet',
+  --   condition = in_mathzone,
+  -- }, fmta('\\Ket{<>}', { cap(1) })),
+  --
+  -- s({
+  --   trig = '|(\\%a-)>',
+  --   regTrig = true,
+  --   priority = 200,
+  --   trigEngine = 'pattern',
+  --   wordTrig = false,
+  --   snippetType = 'autosnippet',
+  --   condition = in_mathzone,
+  -- }, fmta('\\Ket{<>}', { cap(1) })),
+
   s({
-    trig = '|(.-)>',
+    trig = '|(\\?%a-)>',
     regTrig = true,
-    priority = 100,
+    priority = 2000,
     trigEngine = 'pattern',
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, { t '\\Ket{', cap(1), t '}' }),
+  }, fmta('\\Ket{<>}', { cap(1) })),
 
   s({
     trig = '<(.-)>',
     regTrig = true,
     trigEngine = 'pattern',
+    priority = 0,
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, { t '\\Braket{', cap(1), t '}' }),
+  }, fmta('\\Braket{<>}', { cap(1) })),
 
   s({
     trig = '(.*)\\Bra{(.-)}([^|]-)>',
     regTrig = true,
-    priority = 10,
+    priority = 2000,
     trigEngine = 'pattern',
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, { cap(1), t '\\Braket{', cap(2), t '|', cap(3), t '}' }),
+  }, fmta('\\Braket{<>|<>}', { cap(2), cap(3) })),
+
   s(
     { trig = 'mat', priority = 100, name = 'bmatrix' },
     fmta(
