@@ -96,23 +96,42 @@ origin_snippets = {
     end), i(1), i(2) })
   ),
 
+  -- s({
+  --   trig = '<([a-zA-Z]-)|',
+  --   regTrig = true,
+  --   trigEngine = 'pattern',
+  --   wordTrig = false,
+  --   snippetType = 'autosnippet',
+  --   condition = is_math,
+  -- }, fmta('\\bra{<>}', { cap(1) })),
+  --
+  -- s({
+  --   trig = '<(\\[a-zA-Z]-)|',
+  --   regTrig = true,
+  --   trigEngine = 'pattern',
+  --   wordTrig = false,
+  --   snippetType = 'autosnippet',
+  --   condition = is_math,
+  -- }, fmta('\\bra{<>}', { cap(1) })),
+
   s({
     trig = '<(.-)|',
     regTrig = true,
     trigEngine = 'pattern',
     wordTrig = false,
     snippetType = 'autosnippet',
-    condition = in_mathzone,
-  }, { t '\\bra{', cap(1), t '}' }),
+    condition = is_math,
+  }, fmta('\\Bra{<>}', { cap(1) })),
 
   s({
     trig = '|(.-)>',
     regTrig = true,
+    priority = 100,
     trigEngine = 'pattern',
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, { t '\\ket{', cap(1), t '}' }),
+  }, { t '\\Ket{', cap(1), t '}' }),
 
   s({
     trig = '<(.-)>',
@@ -121,17 +140,17 @@ origin_snippets = {
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, { t '\\braket{', cap(1), t '}' }),
+  }, { t '\\Braket{', cap(1), t '}' }),
 
   s({
-    trig = '(.*)\\bra{(.-)}([^|]-)>',
+    trig = '(.*)\\Bra{(.-)}([^|]-)>',
     regTrig = true,
+    priority = 10,
     trigEngine = 'pattern',
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, { cap(1), t '\\braket{', cap(2), t '|', cap(3), t '}' }),
-
+  }, { cap(1), t '\\Braket{', cap(2), t '|', cap(3), t '}' }),
   s(
     { trig = 'mat', priority = 100, name = 'bmatrix' },
     fmta(
