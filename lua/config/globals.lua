@@ -14,3 +14,5 @@ vim.g.has_wl_copy = vim.fn.executable 'wl-copy' == 1
 -- Whether to enable special Unicode characters in the commit graph.
 -- Currently supported by the Kitty terminal.
 vim.g.flog_enable_extended_chars = true
+
+vim.g.snacks_image_enabled = true
