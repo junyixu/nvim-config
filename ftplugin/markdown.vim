@@ -44,6 +44,7 @@ setlocal list								"如果行尾有多余的空格（包括 tab 键）, 该配
 " 有了 tpope/vim-apathy 插件不需要了
 " setlocal  suffixesadd+=.md
 
+nnoremap <buffer> <leader>tm :RenderMarkdown buf_toggle<CR>
 
 function! TmpMarkdown()
 	if expand("%:p") == "/tmp/test.md"
