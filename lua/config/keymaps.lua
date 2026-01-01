@@ -67,6 +67,7 @@ nnoremap('<M-w>O', '<CMD>tab split<CR>', { desc = 'Split the window in a new tab
 nnoremap('<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
 nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
+nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
 
 -- Switch tabs quickly with Alt+number (matches the tabline prefix "1.", "2.", ...).
 for i = 1, 9 do
@@ -75,6 +76,15 @@ end
 
 nnoremap('<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
 nnoremap('<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
+
+nnoremap('j', 'gj')
+nnoremap('k', 'gk')
+nnoremap('gj', 'j')
+nnoremap('gk', 'k')
+vnoremap('j', 'gj')
+vnoremap('k', 'gk')
+vnoremap('gj', 'j')
+vnoremap('gk', 'k')
 
 nnoremap('cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
 -- cmap  expand("")<left><left>
