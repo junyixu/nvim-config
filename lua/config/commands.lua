@@ -49,6 +49,29 @@ do
   end, { nargs = '?', complete = 'file' })
 end
 
+-- 自定义远程对比命令
+-- eg: :DiffRemote
+-- :DiffRemote 192.168.1.100
+-- :vertical diffsplit oil-ssh://junyi@100.85.19.60//home/junyi/.claude/CLAUDE.md
+vim.api.nvim_create_user_command('DiffRemote', function(opts)
+  -- 1. 获取当前文件的绝对路径
+  local local_path = vim.fn.expand '%:p'
+
+  -- 2. 设置默认的远程信息 (你可以根据需求修改这些默认值)
+  local user = 'junyi'
+  local host = opts.args ~= '' and opts.args or '100.85.19.60'
+
+  -- 3. 构造 oil-ssh 路径
+  -- 注意：这里假设远程路径与本地路径完全一致
+  local remote_url = string.format('oil-ssh://%s@%s/%s', user, host, local_path)
+
+  -- 4. 执行垂直分屏对比
+  vim.cmd('vertical diffsplit ' .. remote_url)
+end, {
+  nargs = '?', -- 接受 0 或 1 个参数（远程 IP/Host）
+  desc = 'Compare current file with its remote counterpart using oil-ssh',
+})
+
 vim.cmd [[
 command! BufOnly execute '%bdelete|edit #|normal `"'
 cabbrev cc CodeCompanion
