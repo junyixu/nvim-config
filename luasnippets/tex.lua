@@ -62,7 +62,66 @@ local function paren_fraction(_, snip)
   })
 end
 
+local function cap(idx)
+  return f(function(_, snip)
+    return snip.captures[idx] or ''
+  end)
+end
+
+local greeks_snipets = {
+  parse({ trig = ',a', name = 'alpha', snippetType = 'autosnippet' }, '\\alpha'),
+  -- parse({ trig = ',a', name = 'alpha' }, '\\alpha'),
+  parse({ trig = ',b', name = 'beta', snippetType = 'autosnippet' }, '\\beta'),
+  parse({ trig = ',g', name = 'gamma', snippetType = 'autosnippet' }, '\\gamma'),
+  parse({ trig = ',G', name = 'Gamma', snippetType = 'autosnippet' }, '\\Gamma'),
+  parse({ trig = ',d', name = 'delta', snippetType = 'autosnippet' }, '\\delta'),
+  parse({ trig = ',D', name = 'Delta', snippetType = 'autosnippet' }, '\\Delta'),
+  parse({ trig = ',r', name = 'rho', snippetType = 'autosnippet' }, '\\rho'),
+  parse({ trig = ',c', name = 'chi', snippetType = 'autosnippet' }, '\\chi'),
+  parse({ trig = ',x', name = 'xi', snippetType = 'autosnippet' }, '\\xi'),
+  parse({ trig = ',z', name = 'zeta', snippetType = 'autosnippet' }, '\\zeta'),
+  parse({ trig = ',s', name = 'sigma', snippetType = 'autosnippet' }, '\\sigma'),
+  parse({ trig = ',S', name = 'Sigma', snippetType = 'autosnippet' }, '\\Sigma'),
+  parse({ trig = ',t', name = 'tau', snippetType = 'autosnippet' }, '\\tau'),
+  parse({ trig = ',o', name = 'omega', snippetType = 'autosnippet' }, '\\omega'),
+  parse({ trig = ',O', name = 'Omega', snippetType = 'autosnippet' }, '\\Omega'),
+  parse({ trig = ',m', name = 'mu', snippetType = 'autosnippet' }, '\\mu'),
+  parse({ trig = ',n', name = 'nu', snippetType = 'autosnippet' }, '\\nu'),
+  parse({ trig = ',q', name = 'theta', snippetType = 'autosnippet' }, '\\theta'),
+  parse({ trig = ',f', name = 'varphi', snippetType = 'autosnippet' }, '\\varphi'),
+  parse({ trig = ',F', name = 'Phi', snippetType = 'autosnippet' }, '\\Phi'),
+  parse({ trig = ',e', name = 'epsilon', snippetType = 'autosnippet' }, '\\epsilon'),
+  parse({ trig = ',,f', name = 'phi', snippetType = 'autosnippet', priority = 1001 }, '\\phi'),
+  parse({ trig = ',e', name = 'varepsilon', snippetType = 'autosnippet' }, '\\varepsilon'),
+  parse({ trig = ',,e', name = 'epsilon', snippetType = 'autosnippet', priority = 1001 }, '\\epsilon'),
+  parse({ trig = ',l', name = 'lambda', snippetType = 'autosnippet' }, '\\lambda'),
+  parse({ trig = ',L', name = 'Lambda', snippetType = 'autosnippet' }, '\\Lambda'),
+  parse({ trig = ',p', name = 'pi', snippetType = 'autosnippet' }, '\\pi'),
+  parse({ trig = ',k', name = 'kappa', snippetType = 'autosnippet' }, '\\kappa'),
+  parse({ trig = ',y', name = 'psi', snippetType = 'autosnippet' }, '\\psi'),
+}
+
 local math_snipets = {
+  s(
+    {
+      -- trig 是正则表达式
+      -- (.+) 捕获前面所有的字符
+      -- <C-/> 在这里假设你直接输入该字符，或通过 mapping 触发
+      -- 注意：如果你的终端将 <C-/> 发送为特定字符，请替换下方触发词
+      trig = '(%S+)//',
+      priority = 1,
+      regTrig = true,
+      wordTrig = false,
+      snippetType = 'autosnippet', -- 推荐使用自动触发
+    },
+    fmta([[ \frac{<>}{<>}<> ]], {
+      cap(1), -- 填入第一个捕获组的内容，即 \sqrt{3}
+      i(1), -- 分母位置
+      i(0), -- 退出位置
+    })
+  ),
+  -- a1 -> a_1
+  s({ trig = '([%a])(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
   -- parse({ trig = 'beg', name = 'begin...end' }, '\\begin{${1:env}}\n$0\n\\end{$1}'),
   s(
     { trig = 'beg', name = 'begin...end' },
@@ -78,27 +137,16 @@ local math_snipets = {
   -- priority 1000
   -- context "isMath()"
   -- snippet pdv "diff" i
-  -- \frac{\partial $1}{\partial $2}
+  -- \frac{\partial ${1:y}}{\partial ${2:x}}
   -- endsnippet
   --
-  s({ trig = 'pdv', name = 'partial derivative' }, fmta('\\frac{\\partial <>}{\\partial <>}', { i(1), i(2) })),
-  -- priority 100
-  -- context "isMath()"
-  -- snippet dv "diff" i
-  -- \frac{\mathrm{d} $1}{\mathrm{d} $2}
-  -- endsnippet
-  s({ trig = 'dv', name = 'derivative' }, fmta('\\frac{\\mathrm{d} <>}{\\mathrm{d} <>}', { i(1), i(2) })),
+  s({ trig = 'pdv', name = 'partial derivative' }, fmta('\\frac{\\partial <>}{\\partial <>}', { i(1, 'y'), i(2, 'x') })),
+  s({ trig = 'dv', name = 'derivative', priority = 100 }, fmta('\\frac{\\mathrm{d} <>}{\\mathrm{d} <>}', { i(1, 'y'), i(2, 'x') })),
 }
 
 for _, snip in ipairs(math_snipets) do
   snip.condition = is_math
   snip.show_condition = is_math
-end
-
-local function cap(idx)
-  return f(function(_, snip)
-    return snip.captures[idx] or ''
-  end)
 end
 
 origin_snippets = {
@@ -178,14 +226,14 @@ origin_snippets = {
   }, fmta('\\Braket{<>}', { cap(1) })),
 
   s({
-    trig = '(.*)\\Bra{(.-)}([^|]-)>',
+    trig = '\\Bra{(.-)}([^|]-)>',
     regTrig = true,
     priority = 2000,
     trigEngine = 'pattern',
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, fmta('\\Braket{<>|<>}', { cap(2), cap(3) })),
+  }, fmta('\\Braket{<>|<>}', { cap(1), cap(2) })),
 
   s(
     { trig = 'mat', priority = 100, name = 'bmatrix' },
@@ -237,4 +285,5 @@ origin_snippets = {
   }, { condition = is_math }),
 }
 
+math_snipets = vim.list_extend(greeks_snipets, math_snipets)
 return vim.list_extend(math_snipets, origin_snippets)

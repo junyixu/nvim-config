@@ -19,6 +19,17 @@ local function list_concat(...)
 end
 
 local snip_table = {
+  s(
+    { trig = 'ali', name = 'begin{aligned}...end{aligned}', condition = conds.line_begin },
+    fmta(
+      [[$$
+\begin{aligned}
+<>
+\end{aligned}
+$$]],
+      { i(0) }
+    )
+  ),
   s('paren_change', {
     c(1, {
       sn(nil, { t '(', r(1, 'user_text'), t ')' }),
@@ -57,16 +68,16 @@ local snip_table = {
     )
   ),
 
-  s(
-    { trig = '```', name = 'code block', snippetType = 'autosnippet' },
-    fmt(
-      [[
-        ```{}
-        ```
-      ]],
-      { i(0) }
-    )
-  ),
+  -- s(
+  --   { trig = '```', name = 'code block', snippetType = 'autosnippet' },
+  --   fmt(
+  --     [[
+  --       ```{}
+  --       ```
+  --     ]],
+  --     { i(0) }
+  --   )
+  -- ),
   s({
     trig = '-',
     name = 'todo list',
