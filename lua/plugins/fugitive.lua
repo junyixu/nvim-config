@@ -3,13 +3,15 @@
 return {
   {
     'tpope/vim-fugitive',
+    lazy = true,
+    cmd = { 'G', 'Git' },
     config = function()
       vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 ]]
     end,
   },
-  { 'tpope/vim-rhubarb', dependencies = {
+  { 'tpope/vim-rhubarb', lazy = true, cmd = { 'GBrowse' }, dependencies = {
     'tpope/vim-fugitive',
   } },
   {

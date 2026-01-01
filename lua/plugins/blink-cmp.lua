@@ -2,12 +2,9 @@
 
 return {
   'saghen/blink.cmp',
+  lazy = true,
   event = 'VimEnter',
   version = '1.*',
-  dependencies = {
-    'L3MON4D3/LuaSnip',
-    'folke/lazydev.nvim',
-  },
   --- @module 'blink.cmp'
   --- @type blink.cmp.Config
   opts = {
