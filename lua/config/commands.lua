@@ -51,4 +51,5 @@ end
 
 vim.cmd [[
 command! BufOnly execute '%bdelete|edit #|normal `"'
+cabbrev cc CodeCompanion
 ]]
