@@ -2,6 +2,8 @@ return {
   {
     'olimorris/codecompanion.nvim',
     version = '^18.0.0',
+    lazy = true,
+    cmd = { 'CodeCompanionChat', 'CodeCompanionCmd', 'CodeCompanionActions', 'CodeCompanion' },
     opts = {
       adapters = {
         http = {
@@ -184,10 +186,6 @@ return {
       vim.keymap.set('n', '<leader>tc', '<cmd>CodeCompanionChat Toggle<cr>', { desc = '[T]oggle CodeCompanion [C]hat' })
       vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { noremap = true, silent = true, desc = 'CodeCompanion Chat [A]dd selection' })
       vim.keymap.set('v', '<leader>ca', '<cmd>CodeCompanionActions<cr>', { noremap = true, silent = true, desc = '[C]odeCompanion [A]ctions' })
-      -- 添加命令缩写
-      vim.cmd [[
-        cabbrev cc CodeCompanion
-      ]]
 
       local progress = require 'fidget.progress'
       local handles = {}

@@ -1,6 +1,6 @@
 return {
   {
-    'folke/snacks.nvim',
+    'junyixu/snacks.nvim',
     priority = 1000,
     lazy = false,
     ---@type snacks.Config
