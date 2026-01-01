@@ -4,7 +4,23 @@ return {
   {
     'tpope/vim-fugitive',
     lazy = true,
-    cmd = { 'G', 'Git' },
+    cmd = {
+      'G',
+      'Git',
+      'Gw',
+      'Gwrite',
+      'Gread',
+      'Ge',
+      'Gedit',
+      'Gdiffsplit',
+      'Gvdiffsplit',
+      'Ghdiffsplit',
+      'Gclog',
+      'GRemove',
+      'GDelete',
+      'GMove',
+      'GRename',
+    },
     config = function()
       vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
