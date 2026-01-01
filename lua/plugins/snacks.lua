@@ -58,7 +58,8 @@ return {
           -- render the image inline in the buffer
           -- if your env doesn't support unicode placeholders, this will be disabled
           -- takes precedence over `opts.float` on supported terminals
-          inline = true,
+          float = true,
+          inline = false,
           max_width = 100,
           max_height = 60,
         },
