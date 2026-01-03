@@ -16,4 +16,3 @@ nnoremap <buffer> <localleader>cc :Git commit -m "update"<cr>
 nnoremap <buffer> com :Git checkout main<cr>
 nnoremap <buffer> cob :Git checkout -b 
 nnoremap <buffer> cbd :Git branch -d 
-nnoremap <buffer> cb<CR> :Git branch -vv<CR> 
