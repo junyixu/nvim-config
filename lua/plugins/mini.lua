@@ -1,5 +1,3 @@
--- echasnovski/mini.nvim – assorted UI helpers
-
 return {
   'nvim-mini/mini.nvim',
   config = function()
@@ -19,6 +17,7 @@ return {
       --   },
       -- },
       custom_textobjects = {
+        i = require('mini.extra').gen_ai_spec.indent(),
         -- camelCase / snake_case subword (doc example from mini-ai.txt)
         v = {
           {
@@ -31,7 +30,7 @@ return {
         },
         a = require('mini.ai').gen_spec.argument { separator = '%s*[,;]%s*' },
       },
-      n_lines = 50,
+      n_lines = 100,
     }
     require('mini.surround').setup {
       custom_surroundings = {
@@ -61,7 +60,7 @@ return {
     require('mini.pairs').setup {
       modes = { insert = true, command = false, terminal = false },
       mappings = {
-        ['('] = { action = 'open', pair = '()', neigh_pattern = '[%a\\].' },
+        ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\][^%w%.]' },
         ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^`\\].' },
         ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^"\\].' },
       },
