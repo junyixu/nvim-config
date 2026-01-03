@@ -17,7 +17,7 @@ return {
           enable = true, -- 注意：最新 README 没写 enable，但 main 分支逻辑建议保留或根据报错调整
           lookahead = true,
           selection_modes = {
-            ['@function.outer'] = 'V',
+            ['@function.outer'] = 'v',
             ['@class.outer'] = 'V',
             ['@block.outer'] = 'V',
           },
@@ -70,6 +70,8 @@ return {
         [']I'] = { query = '@conditional.outer', func = move.goto_next_end },
         ['[i'] = { query = '@conditional.outer', func = move.goto_previous_start },
         ['[I'] = { query = '@conditional.outer', func = move.goto_previous_end },
+        ['[f'] = { query = '@call.outer', func = move.goto_previous_start },
+        [']f'] = { query = '@call.outer', func = move.goto_next_start },
       }
 
       for key, conf in pairs(move_maps) do
