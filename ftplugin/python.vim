@@ -78,5 +78,3 @@ let g:jupyter_ascending_default_mappings=0
 nmap <buffer> <localLeader>x <Plug>JupyterExecute
 nmap <buffer> <localLeader>X <Plug>JupyterExecuteAll
 nnoremap <leader>r :AsyncRun! -mode=hide  manim -pql % DifferentRotations<cr>
-
-source $HOME/.vim/my_maps/GreekLetter4Programming.vim 
