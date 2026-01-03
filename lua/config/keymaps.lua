@@ -101,6 +101,9 @@ end, {
   desc = 'Format selection',
 })
 
+vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
+nnoremap <leader>gds :Ghdiffsplit<cr>
+]]
 -- if vim.env.TERM == 'xterm-kitty' then
 --   local term = vim.api.nvim_replace_termcodes
 --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), 'j', { noremap = true })
