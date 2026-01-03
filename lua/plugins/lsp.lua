@@ -71,6 +71,7 @@ return {
     }
 
     vim.lsp.enable 'julials'
+    vim.lsp.enable 'clangd'
 
     vim.api.nvim_create_autocmd('LspAttach', {
       group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
