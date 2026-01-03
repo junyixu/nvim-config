@@ -1,43 +1,44 @@
--- Treesitter configuration
-
+-- Treesitter configuration (Adapter for main branch)
 return {
-  { -- Highlight, edit, and navigate code
+  {
     'nvim-treesitter/nvim-treesitter',
-    branch = 'master', -- 关键：手动指定旧分支
+    branch = 'main',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'julia' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
+    config = function()
+      local ts = require 'nvim-treesitter'
+
+      -- 1. 基础配置 (可选)
+      ts.setup {
+        -- 如果你需要自定义安装路径等，在这里设置
+        -- install_dir = vim.fn.stdpath('data') .. '/site',
+      }
+
+      -- 2. 代替 ensure_installed: 手动安装你需要的语言
+      -- 建议只在初次安装或更新时运行，也可以直接写在 config 里
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'julia' }
+      ts.install(parsers)
+
+      -- 3. 【关键】手动开启高亮、缩进和折叠
+      -- main 分支不再自动开启这些，需要利用 Neovim 原生 API
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(args)
+          local bufnr = args.buf
+          local ft = vim.bo[bufnr].filetype
+
+          -- 开启高亮
+          -- 只有当你安装了对应语言的 parser 时才会生效
+          pcall(vim.treesitter.start, bufnr)
+        end,
+      })
+    end,
   },
-  { -- Show current context
+
+  { -- Treesitter Context 也需要同步到最新
     'nvim-treesitter/nvim-treesitter-context',
-    branch = 'master', -- 关键：手动指定旧分支
     opts = {
-      enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-      multiwindow = false, -- Enable multiwindow support.
-      max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-      min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-      line_numbers = true,
-      multiline_threshold = 20, -- Maximum number of lines to show for a single context
-      trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-      mode = 'cursor', -- Line used to calculate context. Choices: 'cursor', 'topline'
-      -- Separator between context and content. Should be a single character string, like '-'.
-      -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-      separator = nil,
-      zindex = 20, -- The Z-index of the context window
-      on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+      enable = true,
+      mode = 'cursor',
+      max_lines = 3, -- 建议限制行数，避免遮挡过多
     },
   },
 }
