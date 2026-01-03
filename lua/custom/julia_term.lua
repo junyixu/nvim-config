@@ -83,6 +83,7 @@ function M.open()
   vim.cmd 'topleft vsplit'
   vim.cmd.wincmd 'H'
   vim.cmd.term()
+  vim.opt_local.wrap = false
   term_bufnr = vim.api.nvim_get_current_buf()
   vim.api.nvim_win_set_width(0, term_width)
   slime_term.scroll_buf(term_bufnr)
