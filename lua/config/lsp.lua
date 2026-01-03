@@ -25,8 +25,7 @@ vim.diagnostic.config {
   },
 }
 
--- local capabilities = require('blink.cmp').get_lsp_capabilities()
-
+vim.lsp.set_log_level 'ERROR'
 vim.lsp.enable 'pyright'
 vim.lsp.enable 'lua_ls'
 vim.lsp.enable 'stylua'
