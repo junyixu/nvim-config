@@ -1,6 +1,5 @@
 -- ~/.config/nvim/after/lsp/julials.lua
-local home = vim.fn.expand '~'
-local env_path = home .. '/.julia/environments/nvim-lspconfig/'
+local env_path = vim.fn.expand '~/.julia/environments/nvim-lspconfig/'
 local sysimage_path = env_path .. 'julials.so'
 
 return {
