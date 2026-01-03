@@ -21,11 +21,6 @@ return {
       'GMove',
       'GRename',
     },
-    config = function()
-      vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
-nnoremap <leader>gds :Ghdiffsplit<cr>
-]]
-    end,
   },
   { 'tpope/vim-rhubarb', lazy = true, cmd = { 'GBrowse' }, dependencies = {
     'tpope/vim-fugitive',
