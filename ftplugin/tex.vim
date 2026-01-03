@@ -68,31 +68,6 @@ call vimtex#imaps#add_map({
 
 " TODO
 " 部分公式预览
-function g:PreviewEq4LaTeX()
-if g:asyncrun_status!='running'
-	" 复制 env 中的内容到 x 剪贴板
-	" if !isdirectory("/tmp/latex_img")
-	" 	call mkdir("/tmp/latex_img", "p", 0700)
-	" endif
-	silent normal mz"xyie
-	" TODO latex_img 目录由 ueberzug_latex.py 创建，导致第一次 writefile
-	" 无法写入 formula.txt，紧接着 ueberzug_latex.py 无法 cat formula.txt
-	call writefile(getreg('x',1,1), '/tmp/latex_img/formula.txt')
-	normal `z
-	normal mz
-	" call system('~/scripts/ueberzug_latex.py')
-	AsyncRun -silent ~/.vim/scripts/ueberzug_latex.py
-	" let l:jobID=job_start('~/.vim/scripts/ueberzug_latex.py')
-	" let job = job_start('~/scripts/ueberzug_latex.py')
-	" let job = job_start(["/bin/python", "~/scripts/ueberzug_latex.py"])
-	" echo job_status(job)
-	" if job_status(job) != 'fail'
-	" 	echom job_status(job)
-	" endif
-else
-	AsyncStop
-endif
-endfunction
 function ScreenLine()
 	" 当前行
 	let a=line(".")
@@ -102,10 +77,6 @@ function ScreenLine()
 endfunction
 function ScreenColumn()
  return col(".") + 20
-endfunction
-function g:VisualPreviewEq4LaTeX()
-	call writefile(getreg('*',1,1), '/tmp/latex_img/formula.txt')
-	AsyncRun -silent ~/.vim/scripts/ueberzug_latex.py
 endfunction
 nnoremap <silent><buffer> <localleader><localleader> :call g:PreviewEq4LaTeX()<cr>
 vnoremap <silent><buffer> <CR> :call g:VisualPreviewEq4LaTeX()<cr>
@@ -136,9 +107,6 @@ setlocal tabstop=2
 "set complete+=k
 
 setlocal spell spelllang=en_us,cjk		"忽略中文对英文进行拼写检查
-setlocal spellfile=~/.vim/spell/en.utf-8.add
-setlocal spellfile+=~/.vim/spell/latex.utf-8.add
-
 
 " https://github.com/gillescastel/inkscape-figures
 " 如果是 <C-i> 就会和 Ultisnips 的 tab 冲突
@@ -175,7 +143,5 @@ endif
 inoremap <buffer> <silent> <M-j> <Esc>/<++><CR>c4l
 
 nnoremap <buffer><silent> <localleader>f :call tex#sec2file()<CR>
-
-source $HOME/.vim/my_maps/GreekLetter4Writting.vim 
 " source $HOME/.vim/ycmMaps.vim
 vmap <localleader>c c$\ce{"}$<ESC>

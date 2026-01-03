@@ -102,5 +102,3 @@ endfunction
 nnoremap <buffer> <localLeader>wrhl <Plug>VimwikiRemoveHeaderLevel
 setlocal nolbr
 setlocal fo+=B
-
-source $HOME/.vim/ftplugin/markdownandvimwiki.vim
