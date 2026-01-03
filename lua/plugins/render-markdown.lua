@@ -9,7 +9,7 @@ return {
       -- 为 markdown 和 quarto 文件设置 keymap
       vim.api.nvim_create_autocmd('FileType', {
         group = markdown_group,
-        pattern = { 'markdown', 'quarto' },
+        pattern = { 'markdown', 'codecompanion', 'quarto' },
         callback = function()
           -- 这里添加你的 keymap
           vim.keymap.set('n', '<leader>tm', ':RenderMarkdown buf_toggle<CR>', { buffer = true, desc = 'Toggle markdown preview' })
