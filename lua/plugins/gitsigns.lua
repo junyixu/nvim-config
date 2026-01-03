@@ -13,8 +13,21 @@ return {
       changedelete = { text = '~' },
     },
   },
-  -- 重点：使用 gitsigns.nav_hunk()
   keys = {
+    {
+      ']c',
+      function()
+        require('gitsigns').nav_hunk 'next'
+      end,
+      desc = 'Next Git Hunk',
+    },
+    {
+      '[c',
+      function()
+        require('gitsigns').nav_hunk 'prev'
+      end,
+      desc = 'Previous Git Hunk',
+    },
     {
       '<leader>hs',
       function()
