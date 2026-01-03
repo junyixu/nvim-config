@@ -53,12 +53,23 @@ return {
       -- 3. 手动绑定 Move 映射 (Normal, Visual, Operator-pending)
       local move_maps = {
         [']m'] = { query = '@function.outer', func = move.goto_next_start },
+        [']M'] = { query = '@function.outer', func = move.goto_next_end },
         ['[m'] = { query = '@function.outer', func = move.goto_previous_start },
+        ['[M'] = { query = '@function.outer', func = move.goto_previous_end },
         [']]'] = { query = '@class.outer', func = move.goto_next_start },
         ['[['] = { query = '@class.outer', func = move.goto_previous_start },
         [']l'] = { query = '@loop.outer', func = move.goto_next_start },
+        [']L'] = { query = '@loop.outer', func = move.goto_next_end },
         ['[l'] = { query = '@loop.outer', func = move.goto_previous_start },
-        -- 你可以继续添加其它的映射...
+        ['[L'] = { query = '@loop.outer', func = move.goto_previous_end },
+        [']k'] = { query = '@block.outer', func = move.goto_next_start },
+        [']K'] = { query = '@block.outer', func = move.goto_next_end },
+        ['[k'] = { query = '@block.outer', func = move.goto_previous_start },
+        ['[K'] = { query = '@block.outer', func = move.goto_previous_end },
+        [']i'] = { query = '@conditional.outer', func = move.goto_next_start },
+        [']I'] = { query = '@conditional.outer', func = move.goto_next_end },
+        ['[i'] = { query = '@conditional.outer', func = move.goto_previous_start },
+        ['[I'] = { query = '@conditional.outer', func = move.goto_previous_end },
       }
 
       for key, conf in pairs(move_maps) do
