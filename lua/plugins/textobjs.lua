@@ -32,15 +32,17 @@ return {
       local select_maps = {
         ['am'] = '@function.outer',
         ['im'] = '@function.inner',
-        ['ac'] = '@class.outer',
-        ['ic'] = '@class.inner',
+        ['al'] = '@class.outer',
+        ['il'] = '@class.inner',
         ['ak'] = '@block.outer',
         ['ik'] = '@block.inner',
-        ['al'] = '@loop.outer',
-        ['il'] = '@loop.inner',
+        ['ir'] = '@frame.inner',
+        ['ar'] = '@frame.outer',
+        ['ao'] = '@loop.outer',
+        ['io'] = '@loop.inner',
         ['ad'] = '@conditional.outer',
         ['id'] = '@conditional.inner',
-        ['ix'] = '@codechunk.inner', -- 你的 Julia/Quarto 需求
+        ['ix'] = '@codechunk.inner', -- Quarto run cell
         ['ax'] = '@codechunk.outer',
       }
 
@@ -58,10 +60,10 @@ return {
         ['[M'] = { query = '@function.outer', func = move.goto_previous_end },
         [']]'] = { query = '@class.outer', func = move.goto_next_start },
         ['[['] = { query = '@class.outer', func = move.goto_previous_start },
-        [']l'] = { query = '@loop.outer', func = move.goto_next_start },
-        [']L'] = { query = '@loop.outer', func = move.goto_next_end },
-        ['[l'] = { query = '@loop.outer', func = move.goto_previous_start },
-        ['[L'] = { query = '@loop.outer', func = move.goto_previous_end },
+        [']o'] = { query = '@loop.outer', func = move.goto_next_start },
+        [']O'] = { query = '@loop.outer', func = move.goto_next_end },
+        ['[o'] = { query = '@loop.outer', func = move.goto_previous_start },
+        ['[O'] = { query = '@loop.outer', func = move.goto_previous_end },
         [']k'] = { query = '@block.outer', func = move.goto_next_start },
         [']K'] = { query = '@block.outer', func = move.goto_next_end },
         ['[k'] = { query = '@block.outer', func = move.goto_previous_start },
