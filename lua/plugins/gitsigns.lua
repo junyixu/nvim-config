@@ -28,24 +28,43 @@ return {
       end,
       desc = 'Previous Git Hunk',
     },
+    -- 模仿 mini.diff: ghgh (Stage Hunk)
     {
-      '<leader>hs',
+      'ghgh',
       function()
         require('gitsigns').stage_hunk()
       end,
-      mode = { 'n', 'v' },
       desc = 'Stage Hunk',
     },
+
+    -- 模仿 mini.diff: ghrh (Reset Hunk)
     {
-      '<leader>hr',
+      'ghrh',
       function()
         require('gitsigns').reset_hunk()
       end,
-      mode = { 'n', 'v' },
       desc = 'Reset Hunk',
     },
+
+    -- Visual Mode 下直接用 gh Stage 选中的范围
     {
-      '<leader>hp',
+      'gh',
+      function()
+        require('gitsigns').stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
+      end,
+      mode = { 'x' },
+      desc = 'Stage Selected Range',
+    },
+
+    -- 定义 gh 作为 Operator-pending textobject (支持 dgh, ygh 等)
+    {
+      'gh',
+      ':<C-U>Gitsigns select_hunk<CR>',
+      mode = { 'o' },
+      desc = 'Git Hunk Text Object',
+    },
+    {
+      'ghp',
       function()
         require('gitsigns').preview_hunk()
       end,
