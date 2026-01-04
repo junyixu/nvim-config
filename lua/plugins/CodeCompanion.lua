@@ -96,12 +96,6 @@ return {
               callback = 'keymaps.send',
               description = 'Send message',
             },
-            stop = {
-              modes = { n = '<C-c>' },
-              index = 5,
-              callback = 'keymaps.stop',
-              description = 'Stop request',
-            },
             next_chat = {
               modes = { n = 'g]' },
               index = 11,
