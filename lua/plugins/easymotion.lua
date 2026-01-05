@@ -46,10 +46,18 @@ return {
         desc = 'Toggle Flash Search',
       },
     },
-    -- config = function(_, opts)
-    --   require('flash').jump {
-    --     search = { forward = true, wrap = false, multi_window = false },
-    --   }
-    -- end,
+    config = function(_, opts)
+      -- 在 fugitive 的 gitrebase 界面或 git 相关缓冲区中，cS 通常用于 autosquash 或切换 commit 状态，
+      -- 而 flash.nvim 将 S 绑定到 operator-pending mode (o) 后，
+      -- 当你按下 c 准备接 S 时，Neovim 会优先触发 flash 的远程逻辑。
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'fugitive', 'gitrebase', 'floggraph' },
+        callback = function()
+          -- 针对当前 buffer 删除 S 的映射
+          -- 这样 cS 就能正常触发 fugitive 的功能了
+          pcall(vim.keymap.del, { 'n', 'x', 'o' }, 'S', { buffer = true })
+        end,
+      })
+    end,
   },
 }
