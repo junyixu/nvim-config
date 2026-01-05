@@ -158,6 +158,36 @@ local result = {
       }
     )
   ),
+  parse(
+    { trig = 'mouse', desc = 'Makie mouse position tracker', condition = conds.line_begin },
+    [[
+# 1. 创建一个用于显示坐标的 Label
+# 设置 tellwidth=false 以便将其放置在 layout 上方而不影响 axis
+pos_text = Label(
+    fig[1, 1],
+    "Position: (0, 0)";
+    halign=:left,
+    valign=:top,
+    padding=(10, 10, 10, 10),
+    tellwidth=false,
+    tellheight=false,
+)
+
+# 2. get the current scene event handler
+# 在赋值语句末尾加上 分号 ;，阻止 REPL 尝试 display 这个 Scene 对象。
+scene = ax.scene;
+
+# 3. Listen to the mouseposition event
+on(events(scene).mouseposition) do mp
+    # Convert pixel coordinates to Data Space coordinates
+    data_pos = mouseposition(scene)
+
+    # Format the string and update the Label's text attribute
+    x, y = round.(data_pos, digits=2)
+    pos_text.text = "Position: ($x, $y)"
+end
+  ]]
+  ),
   -- Original snippets
   parse(
     'fn',
