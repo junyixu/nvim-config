@@ -1,11 +1,12 @@
 return {
   'mfussenegger/nvim-lint',
-  ft = { 'matlab' },
+  ft = { 'matlab', 'sh' },
   config = function()
     local lint = require 'lint'
 
     lint.linters_by_ft = {
       matlab = { 'mlint' },
+      sh = { 'shellcheck' },
     }
 
     -- 设置 autocmd 触发 lint
