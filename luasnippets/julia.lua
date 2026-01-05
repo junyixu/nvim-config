@@ -134,6 +134,11 @@ local unicode_snippets = {
 
 -- Convert unicode_snippets table to actual snippets with autosnippet type
 local result = {
+  parse({ trig = '.', desc = 'dot product' }, '⋅'),
+  parse({ trig = 'ox', desc = 'tensor product' }, '⊗'),
+  parse({ trig = 'o', desc = 'composition operator' }, '·'),
+  parse({ trig = 'x', desc = 'cross product' }, '×'),
+  parse({ tirg = 'mkdir', condition = conds.line_begin }, [[!isdir("./figures") && mkpath("./figures")]]),
   s(
     {
       trig = 'module',
