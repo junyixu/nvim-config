@@ -7,6 +7,8 @@ local sn = ls.snippet_node
 local f = ls.function_node
 local s = ls.snippet
 local parse = ls.parser.parse_snippet
+local conds = require 'luasnip.extras.conditions'
+local fmt = require('luasnip.extras.fmt').fmt
 
 -- Unicode autosnippets for LaTeX commands
 local unicode_snippets = {
@@ -132,6 +134,25 @@ local unicode_snippets = {
 
 -- Convert unicode_snippets table to actual snippets with autosnippet type
 local result = {
+  s(
+    {
+      trig = 'module',
+      condition = conds.line_begin,
+    },
+    fmt(
+      [[
+        module {}
+        {}
+        end
+      ]],
+      {
+        f(function()
+          return vim.fn.expand '%:t:r'
+        end),
+        i(0),
+      }
+    )
+  ),
   -- Original snippets
   parse(
     'fn',
