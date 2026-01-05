@@ -173,14 +173,10 @@ pos_text = Label(
     tellheight=false,
 )
 
-# 2. get the current scene event handler
-# 在赋值语句末尾加上 分号 ;，阻止 REPL 尝试 display 这个 Scene 对象。
-scene = ax.scene;
-
-# 3. Listen to the mouseposition event
-on(events(scene).mouseposition) do mp
+# 2. Listen to the mouseposition event
+on(events(ax.scene).mouseposition) do mp
     # Convert pixel coordinates to Data Space coordinates
-    data_pos = mouseposition(scene)
+    data_pos = mouseposition(ax.scene)
 
     # Format the string and update the Label's text attribute
     x, y = round.(data_pos, digits=2)
