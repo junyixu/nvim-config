@@ -38,7 +38,25 @@ return {
     },
 
     {
-      'ghu',
+      'ghh',
+      function()
+        require('gitsigns').stage_hunk { vim.fn.line '.', vim.fn.line '.' }
+      end,
+      mode = { 'n' },
+      desc = 'Stage Hunk',
+    },
+
+    {
+      'gHH',
+      function()
+        require('gitsigns').reset_hunk { vim.fn.line '.', vim.fn.line '.' }
+      end,
+      mode = { 'n' },
+      desc = 'Reset Hunk',
+    },
+
+    {
+      'gHgh',
       function()
         require('gitsigns').reset_hunk()
       end,
@@ -53,6 +71,15 @@ return {
       end,
       mode = { 'x' },
       desc = 'Stage Selected Range',
+    },
+
+    {
+      'gH',
+      function()
+        require('gitsigns').reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
+      end,
+      mode = { 'x' },
+      desc = 'Reset Selected Range',
     },
 
     -- 定义 gh 作为 Operator-pending textobject (支持 dgh, ygh 等)
