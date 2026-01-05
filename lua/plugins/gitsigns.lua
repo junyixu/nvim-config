@@ -37,9 +37,8 @@ return {
       desc = 'Stage Hunk',
     },
 
-    -- 模仿 mini.diff: ghrh (Reset Hunk)
     {
-      'ghrh',
+      'ghu',
       function()
         require('gitsigns').reset_hunk()
       end,
