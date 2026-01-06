@@ -144,32 +144,62 @@ local math_snipets = {
   s({ trig = '(\\?%a+),%.', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
   s({ trig = '(\\?%a+)%.,', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
 
+  parse({ trig = 'op', name = 'operator' }, '\\operatorname{$1}'),
+
   parse({ trig = 'OO', snippetType = 'autosnippet', name = 'emptyset' }, '\\O'),
   parse({ trig = 'RR', snippetType = 'autosnippet', name = 'R' }, '\\mathbb{R}'),
   parse({ trig = 'QQ', snippetType = 'autosnippet', name = 'Q' }, '\\mathbb{Q}'),
   parse({ trig = 'ZZ', snippetType = 'autosnippet', name = 'Z' }, '\\mathbb{Z}'),
-  parse({ trig = 'UU', snippetType = 'autosnippet', name = 'cup' }, '\\cup '),
   parse({ trig = 'NN', snippetType = 'autosnippet', name = 'N' }, '\\mathbb{N}'),
+
+  parse({ trig = 'UU', snippetType = 'autosnippet', name = 'cup' }, '\\cup '),
+
   parse({ trig = '==', snippetType = 'autosnippet', name = 'equals' }, [[&= $1 \\\\]]),
   parse({ trig = '!=', snippetType = 'autosnippet', name = 'not equals' }, '\\neq '),
-  parse({ trig = 'op', name = 'operator' }, '\\operatorname{$1}'),
   parse({ trig = '~=', name = 'approximate', snippetType = 'autosnippet' }, '\\approx '),
+  parse({ trig = '~~', snippetType = 'autosnippet', name = '~' }, '\\sim '),
+
   parse({ trig = '__', snippetType = 'autosnippet', name = 'subscript' }, '_{$1}$0'),
+
   parse({ trig = '=>', snippetType = 'autosnippet', name = 'implies' }, '\\implies'),
   parse({ trig = '=<', snippetType = 'autosnippet', name = 'implied by' }, '\\impliedby'),
+
   parse({ trig = '<<', snippetType = 'autosnippet', name = '<<' }, '\\ll'),
   parse({ trig = '>>', snippetType = 'autosnippet', name = '<<' }, '\\gg'),
-  -- <=
+
   parse({ trig = '<=', snippetType = 'autosnippet', name = 'less equal' }, '\\leq '),
-  -- >=
   parse({ trig = '>=', snippetType = 'autosnippet', name = 'greater equal' }, '\\geq '),
-  parse({ trig = '~~', snippetType = 'autosnippet', name = '~' }, '\\sim '),
-  parse({ trig = '...', desc = '\\dots: \\ldots or \\cdots', name = 'dots', snippetType = 'autosnippet', wordTrig = false }, '\\dots '),
-  parse({ trig = '.', name = 'dot product' }, '\\cdot '),
+
   s({ trig = '(\\?%a+)-', regTrig = true }, fmta('\\bar{<>}', { cap(1) })),
   -- trig = "(%a+)hat",
   s({ trig = '(%a)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
   s({ trig = '(\\%a+)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
+  parse({ trig = 'EE', name = 'exists', snippetType = 'autosnippet' }, '\\exists '),
+  parse({ trig = 'AA', name = 'forall', snippetType = 'autosnippet' }, '\\forall '),
+
+  parse({ trig = 'cc', name = 'subset', snippetType = 'autosnippet' }, '\\subset '),
+  parse({ trig = 'ooo', name = '\\infty', snippetType = 'autosnippet' }, '\\infty'),
+
+  parse({ trig = '<!', name = 'normal', snippetType = 'autosnippet' }, '\\triangleleft '),
+
+  parse({ trig = '->', name = 'to', priority = 100, snippetType = 'autosnippet' }, '\\to '),
+  parse({ trig = '-->', name = 'long to', priority = 200, snippetType = 'autosnippet' }, '\\longrightarrow '),
+
+  parse({ trig = 'cb', wordTrig = false, snippetType = 'autosnippet', name = 'Cube ^3' }, '^3'),
+  parse({ trig = 'sr', wordTrig = false, snippetType = 'autosnippet', name = 'Square ^2' }, '^2'),
+  parse({ trig = 'td', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{}' }, '^{$1}$0 '),
+  parse({ trig = 'rd', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{()}' }, '^{($1)}$0 '),
+
+  parse({ trig = 'iff', snippetType = 'autosnippet', name = 'iff' }, '\\iff '),
+  parse({ trig = 'stt', snippetType = 'autosnippet', name = 'text subscript' }, '_\\text{$1} $0'),
+  parse({ trig = 'tt', snippetType = 'autosnippet', name = 'text' }, '\\text{$1}$0'),
+
+  parse({ trig = '...', desc = '\\dots: \\ldots or \\cdots', name = 'dots', snippetType = 'autosnippet', wordTrig = false }, '\\dots '),
+
+  parse({ trig = '.', name = 'dot product' }, '\\cdot '),
+  parse({ trig = '**', snippetType = 'autosnippet', name = 'dot product', priority = 100 }, '\\cdot '),
+  parse_snippet({ trig = 'xx', snippetType = 'autosnippet', name = 'cross product' }, '\\times '),
+  parse_snippet({ trig = ':=', snippetType = 'autosnippet', name = 'colon equals (lhs defined as rhs)' }, '\\coloneqq '),
 
   -- 用 \pu (physics unit) 代替 siunitx
   -- https://forum.obsidian.md/t/question-about-superscripts-and-subscripts/25941/8
