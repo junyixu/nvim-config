@@ -122,6 +122,8 @@ local math_snipets = {
   ),
   -- a1 -> a_1
   s({ trig = '([%a])(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
+  -- \alpha1 -> \alpha_1
+  s({ trig = '(\\%a-)(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
 
   parse(
     { trig = 'beg', name = 'begin...end' },
