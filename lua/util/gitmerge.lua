@@ -1,4 +1,5 @@
-local function smart_diffget(side)
+local M = {}
+function M.smart_diffget(side)
   -- 1. 备份当前的 diffopt 字符串
   local old_diffopt = vim.api.nvim_get_option_value('diffopt', {})
 
@@ -19,10 +20,4 @@ local function smart_diffget(side)
   -- 6. 刷新 diff 状态
   vim.cmd 'diffupdate'
 end
-
-vim.keymap.set('n', 'gh', function()
-  smart_diffget(2)
-end, { buffer = true, desc = 'Get LOCAL and clean markers' })
-vim.keymap.set('n', 'gl', function()
-  smart_diffget(3)
-end, { buffer = true, desc = 'Get REMOTE and clean markers' })
+return M

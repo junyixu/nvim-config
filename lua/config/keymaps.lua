@@ -101,6 +101,14 @@ end, {
   desc = 'Format selection',
 })
 
+local git_merge = require 'util.gitmerge'
+vim.keymap.set('n', '<leader>gh', function()
+  git_merge.smart_diffget(2)
+end, { desc = 'Get LOCAL and clean markers' })
+vim.keymap.set('n', '<leader>gl', function()
+  git_merge.smart_diffget(3)
+end, { desc = 'Get REMOTE and clean markers' })
+
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 ]]
