@@ -122,18 +122,27 @@ local math_snipets = {
   ),
   -- a1 -> a_1
   s({ trig = '([%a])(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
-  -- parse({ trig = 'beg', name = 'begin...end' }, '\\begin{${1:env}}\n$0\n\\end{$1}'),
-  s(
+
+  parse(
     { trig = 'beg', name = 'begin...end' },
-    fmta(
-      [[
-\begin{<>}
-<>
-\end{<>}
-]],
-      { i(1, 'env'), i(0), rep(1) }
-    )
+    [[
+  \begin{${1:env}}
+  $0
+  \end{$1}
+  ]]
   ),
+  --   s(
+  --     { trig = 'beg', name = 'begin...end' },
+  --     fmta(
+  --       [[
+  -- \begin{<>}
+  -- <>
+  -- \end{<>}
+  -- ]],
+  --       { i(1, 'env'), i(0), rep(1) }
+  --     )
+  --   ),
+
   s({ trig = 'pdv', name = 'partial derivative' }, fmta('\\frac{\\partial <>}{\\partial <>}', { i(1, 'y'), i(2, 'x') })),
   s({ trig = 'dv', name = 'derivative', priority = 100 }, fmta('\\frac{\\mathrm{d} <>}{\\mathrm{d} <>}', { i(1, 'y'), i(2, 'x') })),
   parse({ trig = 'lap', name = 'laplace', snippetType = 'autosnippet' }, '\\nabla^2 '),
