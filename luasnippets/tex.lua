@@ -134,14 +134,50 @@ local math_snipets = {
       { i(1, 'env'), i(0), rep(1) }
     )
   ),
-  -- priority 1000
-  -- context "isMath()"
-  -- snippet pdv "diff" i
-  -- \frac{\partial ${1:y}}{\partial ${2:x}}
-  -- endsnippet
-  --
   s({ trig = 'pdv', name = 'partial derivative' }, fmta('\\frac{\\partial <>}{\\partial <>}', { i(1, 'y'), i(2, 'x') })),
   s({ trig = 'dv', name = 'derivative', priority = 100 }, fmta('\\frac{\\mathrm{d} <>}{\\mathrm{d} <>}', { i(1, 'y'), i(2, 'x') })),
+  parse({ trig = 'lap', name = 'laplace', snippetType = 'autosnippet' }, '\\nabla^2 '),
+  parse({ trig = 'grad', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla}'),
+  parse({ trig = 'curl', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla} \\times '),
+  parse({ trig = 'div', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla} \\cdot '),
+  -- \alpha,. -> \boldsymbol{\alpha}
+  s({ trig = '(\\?%a+),%.', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
+  s({ trig = '(\\?%a+)%.,', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
+
+  parse({ trig = 'OO', snippetType = 'autosnippet', name = 'emptyset' }, '\\O'),
+  parse({ trig = 'RR', snippetType = 'autosnippet', name = 'R' }, '\\mathbb{R}'),
+  parse({ trig = 'QQ', snippetType = 'autosnippet', name = 'Q' }, '\\mathbb{Q}'),
+  parse({ trig = 'ZZ', snippetType = 'autosnippet', name = 'Z' }, '\\mathbb{Z}'),
+  parse({ trig = 'UU', snippetType = 'autosnippet', name = 'cup' }, '\\cup '),
+  parse({ trig = 'NN', snippetType = 'autosnippet', name = 'N' }, '\\mathbb{N}'),
+  parse({ trig = '==', snippetType = 'autosnippet', name = 'equals' }, [[&= $1 \\\\]]),
+  parse({ trig = '!=', snippetType = 'autosnippet', name = 'not equals' }, '\\neq '),
+  parse({ trig = 'op', name = 'operator' }, '\\operatorname{$1}'),
+  parse({ trig = '~=', name = 'approximate', snippetType = 'autosnippet' }, '\\approx '),
+  parse({ trig = '__', snippetType = 'autosnippet', name = 'subscript' }, '_{$1}$0'),
+  parse({ trig = '=>', snippetType = 'autosnippet', name = 'implies' }, '\\implies'),
+  parse({ trig = '=<', snippetType = 'autosnippet', name = 'implied by' }, '\\impliedby'),
+  parse({ trig = '<<', snippetType = 'autosnippet', name = '<<' }, '\\ll'),
+  parse({ trig = '>>', snippetType = 'autosnippet', name = '<<' }, '\\gg'),
+  -- <=
+  parse({ trig = '<=', snippetType = 'autosnippet', name = 'less equal' }, '\\leq '),
+  -- >=
+  parse({ trig = '>=', snippetType = 'autosnippet', name = 'greater equal' }, '\\geq '),
+  parse({ trig = '~~', snippetType = 'autosnippet', name = '~' }, '\\sim '),
+  parse({ trig = '...', desc = '\\dots: \\ldots or \\cdots', name = 'dots', snippetType = 'autosnippet', wordTrig = false }, '\\dots '),
+  parse({ trig = '.', name = 'dot product' }, '\\cdot '),
+  s({ trig = '(\\?%a+)-', regTrig = true }, fmta('\\bar{<>}', { cap(1) })),
+  -- trig = "(%a+)hat",
+  s({ trig = '(%a)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
+  s({ trig = '(\\%a+)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
+
+  -- 用 \pu (physics unit) 代替 siunitx
+  -- https://forum.obsidian.md/t/question-about-superscripts-and-subscripts/25941/8
+  -- context "isMath()"
+  -- snippet '([\de\.]+)si' "unit" r
+  -- \pu{`!p snip.rv=match.group(1)` $1}
+  -- endsnippet
+  -- s({ trig = '([%de%.]+)si', name = 'physics unit', regTrig = true, snippetType = 'autosnippet' }, fmta('\\pu{<>}', { cap(1) })),
 }
 
 for _, snip in ipairs(math_snipets) do
