@@ -130,6 +130,37 @@ vim.keymap.set('n', '<M-S-=>', '<C-w>+<C-w>+<C-w>+<C-w>+<C-w>-')
 -- Alt + Shift + -
 vim.keymap.set('n', '<M-S-->', '<C-w>-<C-w>-<C-w>-<C-w>-<C-w>+')
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'qf',
+  group = vim.api.nvim_create_augroup('QuickFixCustomMappings', { clear = true }),
+  callback = function()
+    local opts = { buffer = true, silent = true }
+
+    -- 垂直分割打开 (Vertical Split)
+    vim.keymap.set('n', '<C-v>', function()
+      local qf_idx = vim.fn.line '.' -- 获取当前 quickfix 列表的索引
+      vim.cmd 'wincmd p' -- 返回跳转前的上一个窗口 (previous window)
+      vim.cmd 'vsplit' -- 在主编辑区开启垂直分割
+      vim.cmd(qf_idx .. 'cc') -- 跳转到该索引对应的 quickfix 条目
+    end, opts)
+
+    -- 水平分割打开 (Horizontal Split)
+    vim.keymap.set('n', '<C-s>', function()
+      local qf_idx = vim.fn.line '.'
+      vim.cmd 'wincmd p'
+      vim.cmd 'split'
+      vim.cmd(qf_idx .. 'cc')
+    end, opts)
+
+    -- 新标签页打开 (New Tab)
+    vim.keymap.set('n', '<C-t>', function()
+      local qf_idx = vim.fn.line '.'
+      vim.cmd 'tabnew' -- 先开新标签页
+      vim.cmd(qf_idx .. 'cc') -- 在新标签页里跳转
+    end, opts)
+  end,
+})
+
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 ]]
