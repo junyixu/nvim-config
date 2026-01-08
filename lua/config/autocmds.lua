@@ -16,8 +16,11 @@ vim.api.nvim_create_autocmd('QuickFixCmdPost', {
   group = vim.api.nvim_create_augroup('QuickfixHeightAdjustment', { clear = true }),
   pattern = { 'vimgrep', 'grep' }, -- 匹配 vimgrep 和 grep 命令
   callback = function()
-    vim.cmd 'cwindow'
     local qf_items = vim.fn.getqflist()
-    require('util.quickfix').adjust_quickfix_height(#qf_items)
+    if #qf_items == 0 then
+      return
+    end
+    local height = tostring(math.min(#qf_items, 15))
+    vim.cmd('cwindow ' .. height)
   end,
 })
