@@ -120,6 +120,16 @@ vim.keymap.set('n', '<leader>*', function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
 end, { desc = 'Vimgrep word under cursor with current extension' })
 
+-- resize windwos
+-- Alt + < (即 Alt + Shift + ,)
+vim.keymap.set('n', '<M-S-,>', '10<C-w><', { desc = 'Decrease window width' })
+-- Alt + > (即 Alt + Shift + .)
+vim.keymap.set('n', '<M-S-.>', '10<C-w>>', { desc = 'Increase window width' })
+-- Alt + Shift + =
+vim.keymap.set('n', '<M-S-=>', '<C-w>+<C-w>+<C-w>+<C-w>+<C-w>-')
+-- Alt + Shift + -
+vim.keymap.set('n', '<M-S-->', '<C-w>-<C-w>-<C-w>-<C-w>-<C-w>+')
+
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 ]]
