@@ -78,3 +78,7 @@ let g:jupyter_ascending_default_mappings=0
 nmap <buffer> <localLeader>x <Plug>JupyterExecute
 nmap <buffer> <localLeader>X <Plug>JupyterExecuteAll
 nnoremap <leader>r :AsyncRun! -mode=hide  manim -pql % DifferentRotations<cr>
+nmap <silent><buffer> <CR> <Plug>SlimeLineSend
+xmap <silent><buffer> <CR> <Plug>SlimeRegionSend
+nmap <silent><buffer> <space><space> <Plug>SlimeParagraphSend
+nmap <silent><buffer> <C-CR> :call <SID>SlimeSendCell()<CR>
