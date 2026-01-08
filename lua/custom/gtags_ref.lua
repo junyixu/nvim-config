@@ -1,6 +1,6 @@
 local M = {}
 
-local QUICKFIX_MAX_HEIGHT = 15
+local adjust_quickfix_height = require('util.quickfix').adjust_quickfix_height
 
 local function echo(msg, hl)
   vim.api.nvim_echo({ { msg, hl or 'None' } }, true, {})
@@ -18,15 +18,6 @@ local function parse_global_ctags_mod(out)
     end
   end
   return items
-end
-
-local function adjust_quickfix_height(item_count)
-  local height = math.min(item_count, QUICKFIX_MAX_HEIGHT)
-
-  local qf_win = vim.fn.getqflist({ winid = 0 }).winid
-  if qf_win ~= 0 then
-    vim.api.nvim_win_set_height(qf_win, height)
-  end
 end
 
 local function run_global(option, pattern, action, title_prefix)
@@ -108,9 +99,6 @@ M.gtagsa = gtagsa
 
 function M.setup(opts)
   opts = opts or {}
-  if opts.quickfix_max_height ~= nil then
-    QUICKFIX_MAX_HEIGHT = opts.quickfix_max_height
-  end
 end
 
 return M

@@ -109,6 +109,17 @@ vim.keymap.set('n', '<leader>gl', function()
   git_merge.smart_diffget(3)
 end, { desc = 'Get REMOTE and clean markers' })
 
+vim.keymap.set('n', '<leader>*', function()
+  local cword = vim.fn.expand '<cword>'
+  local ext = vim.fn.expand '%:e'
+  local target = (ext ~= '') and ('**/*.' .. ext) or '*'
+  -- 构造完整的命令字符串; 使用 <kbd> 控制符让命令出现在 command line 但不立即执行
+  local cmd = string.format(':vimgrep /%s/ %s', cword, target)
+  -- 将命令喂给命令行模式 (feedkeys)
+  -- 'n' 表示不递归映射，true 表示转义内容
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
+end, { desc = 'Vimgrep word under cursor with current extension' })
+
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 ]]
