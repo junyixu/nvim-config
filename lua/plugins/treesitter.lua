@@ -15,8 +15,8 @@ return {
 
       -- 2. 代替 ensure_installed: 手动安装你需要的语言
       -- 建议只在初次安装或更新时运行，也可以直接写在 config 里
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'julia' }
-      ts.install(parsers)
+      -- local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'julia', 'python', 'yaml' }
+      -- ts.install(parsers)
 
       -- 3. 【关键】手动开启高亮、缩进和折叠
       -- main 分支不再自动开启这些，需要利用 Neovim 原生 API
