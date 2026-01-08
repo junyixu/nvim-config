@@ -12,3 +12,12 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+vim.api.nvim_create_autocmd('QuickFixCmdPost', {
+  group = vim.api.nvim_create_augroup('QuickfixHeightAdjustment', { clear = true }),
+  pattern = { 'vimgrep', 'grep' }, -- 匹配 vimgrep 和 grep 命令
+  callback = function()
+    vim.cmd 'cwindow'
+    local qf_items = vim.fn.getqflist()
+    require('util.quickfix').adjust_quickfix_height(#qf_items)
+  end,
+})
