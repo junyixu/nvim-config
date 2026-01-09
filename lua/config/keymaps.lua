@@ -120,6 +120,29 @@ vim.keymap.set('n', '<leader>*', function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
 end, { desc = 'Vimgrep word under cursor with current extension' })
 
+vim.keymap.set('x', '<leader>*', function()
+  -- 1. 获取 Visual Mode 选中的区域
+  -- getpos("v") 获取选区起点，getpos(".") 获取光标位置（终点）
+  local region = vim.fn.getregion(vim.fn.getpos 'v', vim.fn.getpos '.', { type = vim.fn.mode() })
+  local text = table.concat(region, '\n')
+
+  -- 2. 处理转义：在 vimgrep 的 / / 中，斜杠和反斜杠需要转义
+  local pattern = vim.fn.escape(text, '/\\')
+
+  -- 3. 确定搜索范围 (与你的 Normal mode 逻辑一致)
+  local ext = vim.fn.expand '%:e'
+  local target = (ext ~= '') and ('**/*.' .. ext) or '*'
+
+  -- 4. 构造命令字符串
+  -- \V 开启 very-nomagic，使得绝大多数特殊字符都被视为普通文本
+  local cmd = string.format(':vimgrep /%s\\C\\V/ %s', pattern, target)
+
+  -- 5. 执行 feedkeys
+  -- 先发送 <Esc> 退出 visual mode，否则命令会尝试作用于选区
+  local keys = vim.api.nvim_replace_termcodes('<Esc>' .. cmd, true, false, true)
+  vim.api.nvim_feedkeys(keys, 'n', false)
+end, { desc = 'Vimgrep selection with current extension' })
+
 -- resize windwos
 -- Alt + < (即 Alt + Shift + ,)
 vim.keymap.set('n', '<M-S-,>', '10<C-w><', { desc = 'Decrease window width' })
