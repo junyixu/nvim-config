@@ -3,8 +3,26 @@ return {
     'folke/flash.nvim',
     event = 'VeryLazy',
     ---@type Flash.Config
-    opts = {},
+    opts = {
+      modes = {
+        char = {
+          enabled = true, -- 确保 char 模式开启 [cite: 50]
+          -- 核心修改：按照文档  的方式进行按键替换
+          -- 这告诉 flash：把原本分配给 "," 的功能，现在分配给 "\"
+          keys = { 'f', 'F', 't', 'T', ';', [','] = '\\' },
+          char_actions = function(motion)
+            return {
+              [';'] = 'next',
+              [','] = 'prev', -- 定义按下 \ 时的动作为 "跳转到上一个"
+              [motion:lower()] = 'next',
+              [motion:upper()] = 'prev',
+            }
+          end,
+        },
+      },
+    },
     keys = {
+      -- 你的常规 flash 快捷键保持不变
       {
         's',
         mode = { 'n', 'o' },
@@ -46,10 +64,5 @@ return {
         desc = 'Toggle Flash Search',
       },
     },
-    -- config = function(_, opts)
-    --   require('flash').jump {
-    --     search = { forward = true, wrap = false, multi_window = false },
-    --   }
-    -- end,
   },
 }
