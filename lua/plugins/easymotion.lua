@@ -4,6 +4,9 @@ return {
     event = 'VeryLazy',
     ---@type Flash.Config
     opts = {
+      jump = {
+        jumplist = true,
+      },
       modes = {
         char = {
           enabled = true, -- 确保 char 模式开启 [cite: 50]
