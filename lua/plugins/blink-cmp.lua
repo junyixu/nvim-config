@@ -75,11 +75,12 @@ return {
       },
     },
     completion = {
-      -- trigger = {
-      --   auto_show = function(_)
-      --     return vim.bo.filetype ~= 'markdown'
-      --   end,
-      -- },
+      -- 禁用补全函数的自动括号
+      accept = {
+        auto_brackets = {
+          enabled = false,
+        },
+      },
       documentation = { auto_show = true, auto_show_delay_ms = 2000 },
       -- ghost_text = {
       --   enabled = true,
