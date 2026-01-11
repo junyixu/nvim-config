@@ -184,6 +184,27 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+vim.keymap.set('v', 'gy', function()
+  -- 使用 nvim_feedkeys 模拟真实的按键操作
+  -- 'x' 模式表示同步执行，这样后续的代码能立刻拿到寄存器内容
+  local keys = vim.api.nvim_replace_termcodes('"ay', true, false, true)
+  vim.api.nvim_feedkeys(keys, 'x', false)
+
+  -- 2. 使用原生 API 获取寄存器 a 的内容
+  local content = vim.fn.getreg 'a'
+
+  -- 3. OSC 52 的 copy 函数要求输入是一个 table（每一行是一个元素）
+  -- 我们使用 vim.split 将获取到的内容按换行符切割
+  local lines = vim.split(content, '\n', { plain = true })
+
+  -- 4. 调用内置 OSC 52 handler 发送到 '*'
+  -- 注意：require('...').copy('*') 返回的是一个处理函数，所以后面要再跟一个 ()
+  require('vim.ui.clipboard.osc52').copy '*'(lines)
+
+  -- 可选：在命令行显示提示
+  print "已同步到寄存器 'a' 和本地 Primary (*)"
+end, { desc = 'Copy selection to reg a and send via OSC 52 to *' })
+
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 ]]
