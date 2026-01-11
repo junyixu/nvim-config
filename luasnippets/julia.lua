@@ -193,6 +193,18 @@ end
       end
     ]]
   ),
+  parse({
+    trig = '#!',
+    name = 'shebang',
+    desc = 'Julia shebang',
+    snippetType = 'autosnippet',
+    condition = function(line_to_cursor, matched_trigger, captures)
+      return vim.fn.line '.' == 1 and line_to_cursor == matched_trigger
+    end,
+  }, '#! /usr/bin/env -S julia --color=yes --startup-file=no'),
+
+  -- 如果输入的 `#!` 在 buf 的第 1 行, 则自动展开 (autosnippet)
+
   s('bg', {
     f(function(args, snip)
       local env = snip.env
