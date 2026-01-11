@@ -72,6 +72,8 @@ end, {
   desc = 'Compare current file with its remote counterpart using oil-ssh',
 })
 
+vim.api.nvim_create_user_command('FixMath', require('util.re').fix_markdown_latex, { desc = 'Convert LaTeX delimiters to $ and $$ with strict spacing' })
+
 vim.cmd [[
 command! BufOnly execute '%bdelete|edit #|normal `"'
 cabbrev cc CodeCompanion
