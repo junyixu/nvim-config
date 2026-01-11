@@ -193,6 +193,7 @@ end
       end
     ]]
   ),
+  parse({ trig = 'dark', desc = 'Makie dark theme', condition = conds.line_begin }, 'set_theme!(theme_dark())'),
   parse({
     trig = '#!',
     name = 'shebang',
