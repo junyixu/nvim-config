@@ -199,12 +199,12 @@ vim.keymap.set('v', 'gy', function()
   print "已同步到寄存器 'a' 和本地 Primary (*)"
 end, { desc = 'Copy selection to reg a and send via OSC 52 to *' })
 
--- 使用 expr 映射来动态展开命令行
 vim.keymap.set('n', '<leader>cf', function()
   if vim.fn.exists ':Cfilter' == 2 then
-    return ':Cfilter! '
+    return ':Cfilter! //<Left>'
   else
-    return ':packadd cfilter | Cfilter! '
+    -- 先加载 cfilter，然后执行命令，最后左移一格让光标停在 // 中间
+    return ':packadd cfilter | Cfilter! //<Left>'
   end
 end, { expr = true, desc = 'Quickfix filter (exclude)' })
 -- NOTE:
