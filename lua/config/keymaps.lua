@@ -109,12 +109,29 @@ end, { desc = 'Get REMOTE and clean markers' })
 
 vim.keymap.set('n', '<leader>*', function()
   local cword = vim.fn.expand '<cword>'
-  -- 构造完整的命令字符串; 使用 <kbd> 控制符让命令出现在 command line 但不立即执行
+  if cword == '' then
+    return
+  end -- 如果当前位置没有单词则直接退出
+
+  -- 1. 创建一个窗口私有的参数列表 (Argument List)
+  -- 2. 清空它，防止之前残留的文件干扰
+  -- 3. 将所有打开的 Buffer (% 代表当前，bufdo 则遍历所有) 加入该列表
+  vim.cmd 'silent! arglocal'
+  vim.cmd 'silent! %argdelete' -- 清空当前 local arglist
+  vim.cmd 'silent! bufdo argadd %'
+
+  -- 构造 vimgrep 命令字符串
+  -- 目标是 ##，它代表我们刚刚填满的 Argument List
   local cmd = string.format(':vimgrep /\\<%s\\>\\V\\C/ ##', cword)
-  -- 将命令喂给命令行模式 (feedkeys)
-  -- 'n' 表示不递归映射，true 表示转义内容
+
+  -- 将命令喂给命令行，等待用户按回车执行
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
-end, { desc = 'Vimgrep word under cursor with current extension' })
+end, { desc = 'Search cword in all open buffers via local arglist' })
+-- NOTE:
+-- 如何清空 qf
+--  :cexpr []
+--  or
+--  :cex []
 
 -- Visual Mode: 搜索选中的文本
 vim.keymap.set('x', '<leader>*', function()
