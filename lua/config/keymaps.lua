@@ -107,38 +107,9 @@ vim.keymap.set('n', '<leader>gl', function()
   git_merge.smart_diffget(3)
 end, { desc = 'Get REMOTE and clean markers' })
 
-vim.keymap.set('n', '<leader>*', function()
-  local cword = vim.fn.expand '<cword>'
-  if cword == '' then
-    return
-  end
-
-  -- 1. 获取所有 listed 且有文件名的 Buffer 路径
-  local bufnrs = vim.api.nvim_list_bufs()
-  local files = {}
-  for _, bufnr in ipairs(bufnrs) do
-    if vim.api.nvim_get_option_value('buflisted', { buf = bufnr }) then
-      local name = vim.api.nvim_buf_get_name(bufnr)
-      if name ~= '' then
-        table.insert(files, vim.fn.fnameescape(name))
-      end
-    end
-  end
-
-  -- 2. 一次性设置窗口本地参数列表 (Atomic operation)
-  if #files > 0 then
-    vim.cmd('arglocal ' .. table.concat(files, ' '))
-  else
-    return
-  end
-
-  -- 3. 构造 vimgrep 命令
-  -- 使用 \b 而不是 \< \> 可以增加兼容性，但保留你的习惯
-  local cmd = string.format(':vimgrep /\\<%s\\>\\V\\C/ ##', cword)
-
-  -- 4. 喂给命令行
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
-end, { desc = 'Search cword in all open buffers' })
+vim.keymap.set('n', '<leader>*', require('util.search').search_cword_in_buffers, {
+  desc = 'Search cword in all open buffers',
+})
 -- NOTE:
 -- 如何清空 qf
 --  :cexpr []
