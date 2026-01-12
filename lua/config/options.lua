@@ -85,5 +85,18 @@ vim.o.confirm = true
 -- `/` 搜索完整个文档，就从头搜索; wrapping back to the start of the file
 vim.o.wrapscan = true
 
+--   --vimgrep 是一个复合参数。根据官方文档，使用 --vimgrep 时，它会自动开启（隐含）以下选项：
+--      --column (输出列号)
+--      --line-number (输出行号)
+--      --no-heading (不按文件分组，每行都重复文件名)
+--      --with-filename (即 -H，显示文件名)
+--      --color never (禁用颜色，方便 Vim 解析)
+if vim.fn.executable 'rg' == 1 then
+  -- 去掉官方加的 -uu，让 rg 尊重 .gitignore 并且不搜索隐藏文件
+  vim.opt.grepprg = 'rg --vimgrep'
+  -- vim.opt.grepprg = 'rg --vimgrep --follow' -- follow 选项让 rg 跟随符号链接
+  vim.opt.grepformat = '%f:%l:%c:%m'
+end
+
 -- Tabline: prefix each tab with its index (1., 2., ...) and keep window count suffix.
 require('custom.tabline').setup()
