@@ -67,26 +67,39 @@ nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
 
-vim.keymap.set('n', '%', function()
-  -- 定义 fallback 函数：执行传统的 matchit 跳转
-  local function fallback()
-    local key = vim.api.nvim_replace_termcodes('<Plug>(MatchitNormalForward)', true, false, true)
+local function ts_matchit_jump()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local mode = vim.api.nvim_get_mode().mode
+
+  -- 1. 定义 Fallback 映射表
+  local fallback_map = {
+    n = '<Plug>(MatchitNormalForward)',
+    v = '<Plug>(MatchitVisualForward)',
+    V = '<Plug>(MatchitVisualForward)',
+    ['\22'] = '<Plug>(MatchitVisualForward)', -- CTRL-V
+    o = '<Plug>(MatchitOperationForward)',
+  }
+
+  -- 根据当前模式首字母决定 fallback (处理 o, no, nov 等变体)
+  local fallback_key = fallback_map[mode:sub(1, 1)] or fallback_map['n']
+
+  local function do_fallback()
+    local key = vim.api.nvim_replace_termcodes(fallback_key, true, false, true)
     vim.api.nvim_feedkeys(key, 'm', false)
   end
 
-  -- 1. 获取当前 buffer 的 parser 和光标下的 node
-  local bufnr = vim.api.nvim_get_current_buf()
+  -- 2. 检查 Tree-sitter 可用性
   local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
   if not ok or not parser then
-    return fallback()
+    return do_fallback()
   end
 
   local node = vim.treesitter.get_node { bufnr = bufnr, ignore_injections = false }
   if not node then
-    return fallback()
+    return do_fallback()
   end
 
-  -- 2. 定义 Julia 容器节点类型 (可根据需要扩展)
+  -- 3. Julia 块容器类型
   local container_types = {
     'function_definition',
     'if_statement',
@@ -101,7 +114,7 @@ vim.keymap.set('n', '%', function()
     'macro_definition',
   }
 
-  -- 3. 向上遍历 AST 寻找匹配的容器
+  -- 4. 向上寻找最近的容器节点
   local parent = node
   local is_container = false
   while parent do
@@ -118,27 +131,28 @@ vim.keymap.set('n', '%', function()
     parent = parent:parent()
   end
 
-  -- 如果没找到 TS 节点，执行 matchit fallback
   if not parent then
-    return fallback()
+    return do_fallback()
   end
 
-  -- 4. 获取位置信息
+  -- 5. 计算跳转位置
   local start_row, start_col = parent:start()
   local end_row, end_col = parent:end_()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local cur_row = cursor[1] - 1
 
-  -- 5. 执行跳转逻辑
   if cur_row == start_row then
-    -- 跳到末尾的 'end'，通常 end 在最后一行末尾
-    -- 减去 3 是为了让光标落在 'e' 'n' 'd' 上
+    -- 跳到末尾 end 关键字
     vim.api.nvim_win_set_cursor(0, { end_row + 1, math.max(0, end_col - 3) })
   else
-    -- 跳回起始位置 (如 function, if 等关键字)
+    -- 跳到起始关键字 (function, if, 等)
     vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   end
-end, { desc = 'TS with Matchit fallback' })
+end
+
+-- 6. 绑定键位映射
+-- n: 普通模式, x: 可视化模式 (不含 Select), o: 操作符等待模式
+vim.keymap.set({ 'n', 'x', 'o' }, '%', ts_matchit_jump, { desc = 'TS Jump with Matchit Fallback' })
 
 -- Switch tabs quickly with Alt+number (matches the tabline prefix "1.", "2.", ...).
 for i = 1, 9 do
