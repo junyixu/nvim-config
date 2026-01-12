@@ -68,16 +68,25 @@ nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
 
 vim.keymap.set('n', '%', function()
-  -- 1. 获取当前 buffer 的 parser 和光标下的 node
-  local bufnr = vim.api.nvim_get_current_buf()
-  local node = vim.treesitter.get_node { bufnr = bufnr, ignore_injections = false }
-
-  if not node then
-    return '%'
+  -- 定义 fallback 函数：执行传统的 matchit 跳转
+  local function fallback()
+    local key = vim.api.nvim_replace_termcodes('<Plug>(MatchitNormalForward)', true, false, true)
+    vim.api.nvim_feedkeys(key, 'm', false)
   end
 
-  -- 2. 定义 Julia 中具有 "end" 的容器节点类型
-  -- Julia 的 AST 中，function_definition, if_statement 等通常包含 'end' 符号
+  -- 1. 获取当前 buffer 的 parser 和光标下的 node
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+  if not ok or not parser then
+    return fallback()
+  end
+
+  local node = vim.treesitter.get_node { bufnr = bufnr, ignore_injections = false }
+  if not node then
+    return fallback()
+  end
+
+  -- 2. 定义 Julia 容器节点类型 (可根据需要扩展)
   local container_types = {
     'function_definition',
     'if_statement',
@@ -89,13 +98,14 @@ vim.keymap.set('n', '%', function()
     'let_statement',
     'do_clause',
     'try_statement',
+    'macro_definition',
   }
 
-  -- 3. 向上寻找最近的容器节点
+  -- 3. 向上遍历 AST 寻找匹配的容器
   local parent = node
+  local is_container = false
   while parent do
     local p_type = parent:type()
-    local is_container = false
     for _, t in ipairs(container_types) do
       if p_type == t then
         is_container = true
@@ -108,27 +118,27 @@ vim.keymap.set('n', '%', function()
     parent = parent:parent()
   end
 
+  -- 如果没找到 TS 节点，执行 matchit fallback
   if not parent then
-    return vim.api.nvim_feedkeys('%', 'n', true)
+    return fallback()
   end
 
-  -- 4. 获取该容器的起始位置和结束位置 (end 关键字)
+  -- 4. 获取位置信息
   local start_row, start_col = parent:start()
   local end_row, end_col = parent:end_()
-
-  -- 5. 获取当前光标位置 (0-indexed)
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local cur_row, cur_col = cursor[1] - 1, cursor[2]
+  local cur_row = cursor[1] - 1
 
-  -- 6. 跳转逻辑：如果在开头则跳到末尾，否则跳回开头
-  -- 注意：Julia 的 end 通常占据最后一行，我们要跳到 'end' 这个词上
+  -- 5. 执行跳转逻辑
   if cur_row == start_row then
-    -- 跳到末尾的 'end' (通常是 end_row, end_col 前面 3 个字符)
+    -- 跳到末尾的 'end'，通常 end 在最后一行末尾
+    -- 减去 3 是为了让光标落在 'e' 'n' 'd' 上
     vim.api.nvim_win_set_cursor(0, { end_row + 1, math.max(0, end_col - 3) })
   else
+    -- 跳回起始位置 (如 function, if 等关键字)
     vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   end
-end, { desc = 'TS 原生跳转 (Julia function/end)' })
+end, { desc = 'TS with Matchit fallback' })
 
 -- Switch tabs quickly with Alt+number (matches the tabline prefix "1.", "2.", ...).
 for i = 1, 9 do
