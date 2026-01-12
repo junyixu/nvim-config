@@ -111,22 +111,34 @@ vim.keymap.set('n', '<leader>*', function()
   local cword = vim.fn.expand '<cword>'
   if cword == '' then
     return
-  end -- 如果当前位置没有单词则直接退出
+  end
 
-  -- 1. 创建一个窗口私有的参数列表 (Argument List)
-  -- 2. 清空它，防止之前残留的文件干扰
-  -- 3. 将所有打开的 Buffer (% 代表当前，bufdo 则遍历所有) 加入该列表
-  vim.cmd 'silent! arglocal'
-  vim.cmd 'silent! %argdelete' -- 清空当前 local arglist
-  vim.cmd 'silent! bufdo argadd %'
+  -- 1. 获取所有 listed 且有文件名的 Buffer 路径
+  local bufnrs = vim.api.nvim_list_bufs()
+  local files = {}
+  for _, bufnr in ipairs(bufnrs) do
+    if vim.api.nvim_get_option_value('buflisted', { buf = bufnr }) then
+      local name = vim.api.nvim_buf_get_name(bufnr)
+      if name ~= '' then
+        table.insert(files, vim.fn.fnameescape(name))
+      end
+    end
+  end
 
-  -- 构造 vimgrep 命令字符串
-  -- 目标是 ##，它代表我们刚刚填满的 Argument List
+  -- 2. 一次性设置窗口本地参数列表 (Atomic operation)
+  if #files > 0 then
+    vim.cmd('arglocal ' .. table.concat(files, ' '))
+  else
+    return
+  end
+
+  -- 3. 构造 vimgrep 命令
+  -- 使用 \b 而不是 \< \> 可以增加兼容性，但保留你的习惯
   local cmd = string.format(':vimgrep /\\<%s\\>\\V\\C/ ##', cword)
 
-  -- 将命令喂给命令行，等待用户按回车执行
+  -- 4. 喂给命令行
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
-end, { desc = 'Search cword in all open buffers via local arglist' })
+end, { desc = 'Search cword in all open buffers' })
 -- NOTE:
 -- 如何清空 qf
 --  :cexpr []
