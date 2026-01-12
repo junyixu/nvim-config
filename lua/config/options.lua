@@ -85,12 +85,19 @@ vim.o.confirm = true
 -- `/` 搜索完整个文档，就从头搜索; wrapping back to the start of the file
 vim.o.wrapscan = true
 
---   --vimgrep 是一个复合参数。根据官方文档，使用 --vimgrep 时，它会自动开启（隐含）以下选项：
---      --column (输出列号)
---      --line-number (输出行号)
---      --no-heading (不按文件分组，每行都重复文件名)
---      --with-filename (即 -H，显示文件名)
---      --color never (禁用颜色，方便 Vim 解析)
+-- NOTE:
+-- --vimgrep 是一个复合参数。根据官方文档，使用 --vimgrep 时，它会自动开启（隐含）以下选项：
+--    --column (输出列号)
+--    --line-number (输出行号)
+--    --no-heading (不按文件分组，每行都重复文件名)
+--    --with-filename (即 -H，显示文件名)
+--    --color never (禁用颜色，方便 Vim 解析)
+-- NOTE:
+-- 可以手动加
+-- -S, --smart-case 选项，让 rg 支持智能大小写搜索
+-- -i, --ignore-case 选项，让 rg 忽略大小写搜索
+-- -s, --case-sensitive 选项，让 rg 区分大小写搜索
+
 if vim.fn.executable 'rg' == 1 then
   -- 去掉官方加的 -uu，让 rg 尊重 .gitignore 并且不搜索隐藏文件
   vim.opt.grepprg = 'rg --vimgrep'
