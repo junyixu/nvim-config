@@ -39,3 +39,11 @@ vim.api.nvim_create_autocmd('QuickFixCmdPost', {
     end
   end,
 })
+
+vim.api.nvim_create_autocmd('QuickFixCmdPost', {
+  group = vim.api.nvim_create_augroup('GrepRedraw', { clear = true }),
+  pattern = { 'grep' }, -- 仅针对 :grep 命令
+  callback = function()
+    vim.cmd 'redraw!'
+  end,
+})
