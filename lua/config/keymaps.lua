@@ -207,6 +207,8 @@ vim.keymap.set('n', '<leader>cf', function()
     return ':packadd cfilter | Cfilter! '
   end
 end, { expr = true, desc = 'Quickfix filter (exclude)' })
+-- NOTE:
+-- 如果过滤错了，执行一次 :colder 就能退回上一步。
 
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
