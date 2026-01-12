@@ -97,6 +97,7 @@ vim.o.wrapscan = true
 -- -S, --smart-case 选项，让 rg 支持智能大小写搜索
 -- -i, --ignore-case 选项，让 rg 忽略大小写搜索
 -- -s, --case-sensitive 选项，让 rg 区分大小写搜索
+-- -w 选项，匹配一个完整的单词
 
 if vim.fn.executable 'rg' == 1 then
   -- 去掉官方加的 -uu，让 rg 尊重 .gitignore 并且不搜索隐藏文件
