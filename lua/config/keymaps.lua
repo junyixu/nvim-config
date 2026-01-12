@@ -67,6 +67,69 @@ nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
 
+vim.keymap.set('n', '%', function()
+  -- 1. 获取当前 buffer 的 parser 和光标下的 node
+  local bufnr = vim.api.nvim_get_current_buf()
+  local node = vim.treesitter.get_node { bufnr = bufnr, ignore_injections = false }
+
+  if not node then
+    return '%'
+  end
+
+  -- 2. 定义 Julia 中具有 "end" 的容器节点类型
+  -- Julia 的 AST 中，function_definition, if_statement 等通常包含 'end' 符号
+  local container_types = {
+    'function_definition',
+    'if_statement',
+    'for_statement',
+    'while_statement',
+    'struct_definition',
+    'module_definition',
+    'quote_expression',
+    'let_statement',
+    'do_clause',
+    'try_statement',
+  }
+
+  -- 3. 向上寻找最近的容器节点
+  local parent = node
+  while parent do
+    local p_type = parent:type()
+    local is_container = false
+    for _, t in ipairs(container_types) do
+      if p_type == t then
+        is_container = true
+        break
+      end
+    end
+    if is_container then
+      break
+    end
+    parent = parent:parent()
+  end
+
+  if not parent then
+    return vim.api.nvim_feedkeys('%', 'n', true)
+  end
+
+  -- 4. 获取该容器的起始位置和结束位置 (end 关键字)
+  local start_row, start_col = parent:start()
+  local end_row, end_col = parent:end_()
+
+  -- 5. 获取当前光标位置 (0-indexed)
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cur_row, cur_col = cursor[1] - 1, cursor[2]
+
+  -- 6. 跳转逻辑：如果在开头则跳到末尾，否则跳回开头
+  -- 注意：Julia 的 end 通常占据最后一行，我们要跳到 'end' 这个词上
+  if cur_row == start_row then
+    -- 跳到末尾的 'end' (通常是 end_row, end_col 前面 3 个字符)
+    vim.api.nvim_win_set_cursor(0, { end_row + 1, math.max(0, end_col - 3) })
+  else
+    vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+  end
+end, { desc = 'TS 原生跳转 (Julia function/end)' })
+
 -- Switch tabs quickly with Alt+number (matches the tabline prefix "1.", "2.", ...).
 for i = 1, 9 do
   nnoremap(string.format('<M-%d>', i), string.format('%dgt', i), { desc = string.format('Go to tab %d', i) })
