@@ -22,3 +22,5 @@ vim.g.copilot_filetypes = {
   markdown = false,
   julia = true,
 }
+
+vim.g.slime_python_ipython = 1
