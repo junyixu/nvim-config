@@ -117,7 +117,7 @@ vim.keymap.set('n', '<leader>*', function()
   local pattern = vim.fn.shellescape(cword)
 
   -- 构造命令。注意：grep 不需要 vimgrep 的 // 分隔符
-  local cmd = string.format(':silent grep %s %s', pattern, target)
+  local cmd = string.format(':silent grep -w %s %s', pattern, target)
 
   -- 发送到命令行，但不立即执行 (不带 <CR>)
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
