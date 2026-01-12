@@ -107,39 +107,42 @@ vim.keymap.set('n', '<leader>gl', function()
   git_merge.smart_diffget(3)
 end, { desc = 'Get REMOTE and clean markers' })
 
+-- Normal Mode: 搜索光标下的 Word
 vim.keymap.set('n', '<leader>*', function()
   local cword = vim.fn.expand '<cword>'
   local ext = vim.fn.expand '%:e'
   local target = (ext ~= '') and ('**/*.' .. ext) or '*'
-  -- 构造完整的命令字符串; 使用 <kbd> 控制符让命令出现在 command line 但不立即执行
-  local cmd = string.format(':vimgrep /\\C%s/ %s', cword, target)
-  -- 将命令喂给命令行模式 (feedkeys)
-  -- 'n' 表示不递归映射，true 表示转义内容
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
-end, { desc = 'Vimgrep word under cursor with current extension' })
 
+  -- 使用 shellescape 包装 cword，防止特殊字符导致 shell 解析错误
+  local pattern = vim.fn.shellescape(cword)
+
+  -- 构造命令。注意：grep 不需要 vimgrep 的 // 分隔符
+  local cmd = string.format(':silent grep %s %s', pattern, target)
+
+  -- 发送到命令行，但不立即执行 (不带 <CR>)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', false)
+end, { desc = 'Grep word under cursor with current extension' })
+
+-- Visual Mode: 搜索选中的文本
 vim.keymap.set('x', '<leader>*', function()
-  -- 1. 获取 Visual Mode 选中的区域
-  -- getpos("v") 获取选区起点，getpos(".") 获取光标位置（终点）
+  -- 1. 获取选中的文本
   local region = vim.fn.getregion(vim.fn.getpos 'v', vim.fn.getpos '.', { type = vim.fn.mode() })
   local text = table.concat(region, '\n')
 
-  -- 2. 处理转义：在 vimgrep 的 / / 中，斜杠和反斜杠需要转义
-  local pattern = vim.fn.escape(text, '/\\')
+  -- 2. 处理转义：使用 shellescape 替代手动 escape
+  local pattern = vim.fn.shellescape(text)
 
-  -- 3. 确定搜索范围 (与你的 Normal mode 逻辑一致)
+  -- 3. 确定范围
   local ext = vim.fn.expand '%:e'
   local target = (ext ~= '') and ('**/*.' .. ext) or '*'
 
-  -- 4. 构造命令字符串
-  -- \V 开启 very-nomagic，使得绝大多数特殊字符都被视为普通文本
-  local cmd = string.format(':vimgrep /%s\\C\\V/ %s', pattern, target)
+  -- 4. 构造命令
+  local cmd = string.format(':silent grep %s %s', pattern, target)
 
-  -- 5. 执行 feedkeys
-  -- 先发送 <Esc> 退出 visual mode，否则命令会尝试作用于选区
+  -- 5. 执行 feedkeys，先 Esc 退出 visual mode
   local keys = vim.api.nvim_replace_termcodes('<Esc>' .. cmd, true, false, true)
   vim.api.nvim_feedkeys(keys, 'n', false)
-end, { desc = 'Vimgrep selection with current extension' })
+end, { desc = 'Grep selection with current extension' })
 
 -- resize windwos
 -- Alt + < (即 Alt + Shift + ,)
