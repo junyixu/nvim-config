@@ -67,6 +67,7 @@ nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
 
+-- 先检查光标下的字符是否为括号（parentheses, brackets, or braces）。如果是，则直接触发 do_fallback()，让原本的 matchit 插件来处理成对跳转。
 local function ts_matchit_jump()
   local bufnr = vim.api.nvim_get_current_buf()
   local mode = vim.api.nvim_get_mode().mode
@@ -80,13 +81,24 @@ local function ts_matchit_jump()
     o = '<Plug>(MatchitOperationForward)',
   }
 
-  -- 根据当前模式首字母决定 fallback (处理 o, no, nov 等变体)
   local fallback_key = fallback_map[mode:sub(1, 1)] or fallback_map['n']
 
   local function do_fallback()
     local key = vim.api.nvim_replace_termcodes(fallback_key, true, false, true)
     vim.api.nvim_feedkeys(key, 'm', false)
   end
+
+  -- --- 新增逻辑：检查光标下是否为括号 ---
+  local line = vim.api.nvim_get_current_line()
+  local col = vim.api.nvim_win_get_cursor(0)[2]
+  -- 获取光标下的字符 (注意 Lua 索引从 1 开始)
+  local char = line:sub(col + 1, col + 1)
+
+  -- 如果光标下是常见的配对符号，直接使用 matchit
+  if char:find '[%%(%)%[%]{}]' then
+    return do_fallback()
+  end
+  -- ------------------------------------
 
   -- 2. 检查 Tree-sitter 可用性
   local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
@@ -116,16 +128,16 @@ local function ts_matchit_jump()
 
   -- 4. 向上寻找最近的容器节点
   local parent = node
-  local is_container = false
   while parent do
     local p_type = parent:type()
+    local found = false
     for _, t in ipairs(container_types) do
       if p_type == t then
-        is_container = true
+        found = true
         break
       end
     end
-    if is_container then
+    if found then
       break
     end
     parent = parent:parent()
@@ -143,6 +155,7 @@ local function ts_matchit_jump()
 
   if cur_row == start_row then
     -- 跳到末尾 end 关键字
+    -- 这里减 3 是为了粗略对准 'end' 的位置，matchit 通常能更精确
     vim.api.nvim_win_set_cursor(0, { end_row + 1, math.max(0, end_col - 3) })
   else
     -- 跳到起始关键字 (function, if, 等)
