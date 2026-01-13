@@ -256,12 +256,33 @@ vim.api.nvim_create_autocmd('FileType', {
   callback = function()
     local opts = { buffer = true, silent = true }
 
+    -- 预览窗口打开 (Preview Window)
+    -- 按 p 可以在不离开 QuickFix 窗口的情况下预览代码
+    vim.keymap.set('n', 'p', function()
+      local qf_idx = vim.fn.line '.'
+      local qf_list = vim.fn.getqflist()
+      local entry = qf_list[qf_idx]
+
+      if entry and entry.bufnr > 0 then
+        local filename = vim.api.nvim_buf_get_name(entry.bufnr)
+
+        -- 1. 使用 pedit 在预览窗口打开
+        vim.cmd('pedit +' .. entry.lnum .. ' ' .. vim.fn.fnameescape(filename))
+
+        -- 2. 将该 buffer 设置为不显示在 buffer 列表中 (buflisted = false)
+        -- 我们直接利用 entry.bufnr 来操作
+        vim.api.nvim_set_option_value('buflisted', false, { buf = entry.bufnr })
+
+        -- 可选：如果你希望预览窗口的 buffer 在关闭后自动卸载，可以取消下面这行的注释
+        -- vim.api.nvim_set_option_value('bufhidden', 'hide', { buf = entry.bufnr })
+      end
+    end, opts)
     -- 垂直分割打开 (Vertical Split)
     vim.keymap.set('n', '<C-v>', function()
-      local qf_idx = vim.fn.line '.' -- 获取当前 quickfix 列表的索引
-      vim.cmd 'wincmd p' -- 返回跳转前的上一个窗口 (previous window)
-      vim.cmd 'vsplit' -- 在主编辑区开启垂直分割
-      vim.cmd(qf_idx .. 'cc') -- 跳转到该索引对应的 quickfix 条目
+      local qf_idx = vim.fn.line '.'
+      vim.cmd 'wincmd p'
+      vim.cmd 'vsplit'
+      vim.cmd(qf_idx .. 'cc')
     end, opts)
 
     -- 水平分割打开 (Horizontal Split)
@@ -275,8 +296,8 @@ vim.api.nvim_create_autocmd('FileType', {
     -- 新标签页打开 (New Tab)
     vim.keymap.set('n', '<C-t>', function()
       local qf_idx = vim.fn.line '.'
-      vim.cmd 'tabnew' -- 先开新标签页
-      vim.cmd(qf_idx .. 'cc') -- 在新标签页里跳转
+      vim.cmd 'tabnew'
+      vim.cmd(qf_idx .. 'cc')
     end, opts)
   end,
 })
