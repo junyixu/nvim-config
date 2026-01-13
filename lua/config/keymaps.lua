@@ -266,17 +266,19 @@ vim.api.nvim_create_autocmd('FileType', {
       if entry and entry.bufnr > 0 then
         local filename = vim.api.nvim_buf_get_name(entry.bufnr)
 
-        -- 1. 使用 pedit 在预览窗口打开
-        vim.cmd('pedit +' .. entry.lnum .. ' ' .. vim.fn.fnameescape(filename))
+        -- 使用 noautocmd 执行 pedit，这样不会触发 FileType 事件，LSP 就不会启动
+        vim.cmd('noautocmd pedit +' .. entry.lnum .. ' ' .. vim.fn.fnameescape(filename))
 
-        -- 2. 将该 buffer 设置为不显示在 buffer 列表中 (buflisted = false)
-        -- 我们直接利用 entry.bufnr 来操作
-        vim.api.nvim_set_option_value('buflisted', false, { buf = entry.bufnr })
+        local bufnr = entry.bufnr
+        -- 设置为不进列表
+        vim.bo[bufnr].buflisted = false
 
-        -- 可选：如果你希望预览窗口的 buffer 在关闭后自动卸载，可以取消下面这行的注释
-        -- vim.api.nvim_set_option_value('bufhidden', 'hide', { buf = entry.bufnr })
+        -- 注意：由于禁用了 autocmd，语法高亮可能也会失效。
+        -- 如果你仍然想要语法高亮（但不想要 LSP），可以手动设置一下 syntax：
+        vim.api.nvim_set_option_value('syntax', vim.filetype.match { filename = filename } or '', { buf = bufnr })
       end
     end, opts)
+
     -- 垂直分割打开 (Vertical Split)
     vim.keymap.set('n', '<C-v>', function()
       local qf_idx = vim.fn.line '.'
