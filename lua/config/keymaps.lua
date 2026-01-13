@@ -256,47 +256,83 @@ vim.api.nvim_create_autocmd('FileType', {
   callback = function()
     local opts = { buffer = true, silent = true }
 
-    -- 预览窗口打开 (Preview Window)
-    -- 按 p 可以在不离开 QuickFix 窗口的情况下预览代码
-    vim.keymap.set('n', 'p', function()
+    -- 封装预览逻辑 (保持不变)
+    local function preview_qf_entry()
       local qf_idx = vim.fn.line '.'
       local qf_list = vim.fn.getqflist()
       local entry = qf_list[qf_idx]
-
       if entry and entry.bufnr > 0 then
         local filename = vim.api.nvim_buf_get_name(entry.bufnr)
-
-        -- 使用 noautocmd 执行 pedit，这样不会触发 FileType 事件，LSP 就不会启动
         vim.cmd('noautocmd pedit +' .. entry.lnum .. ' ' .. vim.fn.fnameescape(filename))
-
-        local bufnr = entry.bufnr
-        -- 设置为不进列表
-        vim.bo[bufnr].buflisted = false
-
-        -- 注意：由于禁用了 autocmd，语法高亮可能也会失效。
-        -- 如果你仍然想要语法高亮（但不想要 LSP），可以手动设置一下 syntax：
-        vim.api.nvim_set_option_value('syntax', vim.filetype.match { filename = filename } or '', { buf = bufnr })
+        vim.api.nvim_set_option_value('buflisted', false, { buf = entry.bufnr })
+        local ft = vim.filetype.match { filename = filename }
+        if ft then
+          vim.api.nvim_set_option_value('syntax', ft, { buf = entry.bufnr })
+        end
       end
+    end
+
+    -- 改进后的跳转逻辑：显式寻找主编辑窗口
+    local function jump_to_main(split_cmd)
+      local qf_idx = vim.fn.line '.'
+      vim.cmd 'pclose' -- 关闭预览窗
+
+      -- 1. 寻找一个“正常”的窗口 (非 quickfix, 非预览)
+      local target_win = nil
+      local wins = vim.api.nvim_tabpage_list_wins(0)
+      for _, win in ipairs(wins) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        local is_qf = vim.bo[buf].buftype == 'quickfix'
+        local is_preview = vim.wo[win].previewwindow
+        if not is_qf and not is_preview then
+          target_win = win
+          break
+        end
+      end
+
+      -- 2. 如果找到了主窗口，就跳过去；没找到（比如只有 qf 窗）就在上方开个新窗
+      if target_win then
+        vim.api.nvim_set_current_win(target_win)
+      else
+        vim.cmd 'wincmd k'
+      end
+
+      -- 3. 执行分割命令 (如果有)
+      if split_cmd then
+        vim.cmd(split_cmd)
+      end
+
+      -- 4. 跳转到对应条目
+      vim.cmd(qf_idx .. 'cc')
+    end
+
+    -- --- 快捷键绑定 ---
+
+    -- 预览
+    vim.keymap.set('n', 'p', preview_qf_entry, opts)
+    vim.keymap.set('n', '<M-n>', function()
+      vim.cmd 'normal! j'
+      preview_qf_entry()
+    end, opts)
+    vim.keymap.set('n', '<M-p>', function()
+      vim.cmd 'normal! k'
+      preview_qf_entry()
     end, opts)
 
-    -- 垂直分割打开 (Vertical Split)
+    -- 跳转
     vim.keymap.set('n', '<C-v>', function()
-      local qf_idx = vim.fn.line '.'
-      vim.cmd 'wincmd p'
-      vim.cmd 'vsplit'
-      vim.cmd(qf_idx .. 'cc')
+      jump_to_main 'vsplit'
     end, opts)
-
-    -- 水平分割打开 (Horizontal Split)
     vim.keymap.set('n', '<C-s>', function()
-      local qf_idx = vim.fn.line '.'
-      vim.cmd 'wincmd p'
-      vim.cmd 'split'
-      vim.cmd(qf_idx .. 'cc')
+      jump_to_main 'split'
+    end, opts)
+    vim.keymap.set('n', '<CR>', function()
+      jump_to_main()
     end, opts)
 
-    -- 新标签页打开 (New Tab)
+    -- 新标签页由于会创建全新布局，可以保持简单写法
     vim.keymap.set('n', '<C-t>', function()
+      vim.cmd 'pclose'
       local qf_idx = vim.fn.line '.'
       vim.cmd 'tabnew'
       vim.cmd(qf_idx .. 'cc')
