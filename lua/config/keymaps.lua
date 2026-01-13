@@ -250,80 +250,83 @@ vim.keymap.set('n', '<M-S-=>', '<C-w>+<C-w>+<C-w>+<C-w>+<C-w>-')
 -- Alt + Shift + -
 vim.keymap.set('n', '<M-S-->', '<C-w>-<C-w>-<C-w>-<C-w>-<C-w>+')
 
--- 1. 封装底层的预览逻辑 (Shared Preview Logic)
-local function qf_preview_logic(entry)
-  if not (entry and entry.bufnr > 0) then
-    return
-  end
+-- 1. 基础预览逻辑 (封装以复用)
+local function qf_preview_logic()
+  local qf_idx = vim.fn.line '.'
+  local qf_list = vim.fn.getqflist()
+  local entry = qf_list[qf_idx]
 
-  local filename = vim.api.nvim_buf_get_name(entry.bufnr)
-  -- 使用 noautocmd 防止激活 LSP
-  vim.cmd('noautocmd pedit +' .. entry.lnum .. ' ' .. vim.fn.fnameescape(filename))
+  if entry and entry.bufnr > 0 then
+    local filename = vim.api.nvim_buf_get_name(entry.bufnr)
+    -- 使用 noautocmd 防止预览时启动 LSP
+    vim.cmd('noautocmd pedit +' .. entry.lnum .. ' ' .. vim.fn.fnameescape(filename))
 
-  -- 设置预览 Buffer 属性
-  vim.api.nvim_set_option_value('buflisted', false, { buf = entry.bufnr })
-  local ft = vim.filetype.match { filename = filename }
-  if ft then
-    vim.api.nvim_set_option_value('syntax', ft, { buf = entry.bufnr })
-  end
-end
+    -- 保持 buffer list 干净
+    vim.api.nvim_set_option_value('buflisted', false, { buf = entry.bufnr })
 
--- 2. 封装全局导航逻辑 (Global Navigation & Preview)
-local function qf_nav_and_preview(direction)
-  local qf_info = vim.fn.getqflist { idx = 0, items = 0 }
-  local items = qf_info.items
-  local cur_idx = qf_info.idx
-
-  if #items == 0 then
-    print 'QuickFix list is empty'
-    return
-  end
-
-  -- 计算新索引 (循环跳转)
-  local new_idx
-  if direction == 'next' then
-    new_idx = cur_idx < #items and cur_idx + 1 or 1
-  else
-    new_idx = cur_idx > 1 and cur_idx - 1 or #items
-  end
-
-  -- 更新 QuickFix 列表的当前指向 (不移动焦点)
-  vim.fn.setqflist({}, 'a', { idx = new_idx })
-
-  -- 执行预览
-  qf_preview_logic(items[new_idx])
-
-  -- 同步：如果 QuickFix 窗口可见，移动其光标
-  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == 'quickfix' then
-      vim.api.nvim_win_set_cursor(win, { new_idx, 0 })
+    -- 恢复语法高亮
+    local ft = vim.filetype.match { filename = filename }
+    if ft then
+      vim.api.nvim_set_option_value('syntax', ft, { buf = entry.bufnr })
     end
   end
 end
 
--- 3. 设置全局快捷键 (Global Mappings)
-vim.keymap.set('n', '<M-n>', function()
-  qf_nav_and_preview 'next'
-end, { desc = 'Next QF Entry & Preview' })
-vim.keymap.set('n', '<M-p>', function()
-  qf_nav_and_preview 'prev'
-end, { desc = 'Prev QF Entry & Preview' })
+-- 2. 全局导航逻辑 (当在 QF 外部时调用)
+local function qf_global_nav(direction)
+  local qf_winid = nil
+  for _, win in ipairs(vim.fn.getwininfo()) do
+    if win.quickfix == 1 then
+      qf_winid = win.winid
+      break
+    end
+  end
 
--- 4. QuickFix 窗口内部的专用快捷键 (Buffer-local Mappings)
+  -- 如果 QF 没开，先打开它
+  if not qf_winid then
+    vim.cmd 'copen'
+    qf_winid = vim.api.nvim_get_current_win()
+  end
+
+  -- 跳转到 QF 窗口
+  vim.api.nvim_set_current_win(qf_winid)
+
+  -- 执行移动
+  if direction == 'next' then
+    vim.cmd 'normal! j'
+  else
+    vim.cmd 'normal! k'
+  end
+
+  -- 触发预览
+  qf_preview_logic()
+end
+
+-- 3. 设置全局映射 (外部使用)
+vim.keymap.set('n', '<M-n>', function()
+  qf_global_nav 'next'
+end, { desc = 'Jump to QF and next' })
+vim.keymap.set('n', '<M-p>', function()
+  qf_global_nav 'prev'
+end, { desc = 'Jump to QF and prev' })
+
+-- 4. QuickFix 窗口内部的增强
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'qf',
   group = vim.api.nvim_create_augroup('QuickFixCustomMappings', { clear = true }),
   callback = function()
     local opts = { buffer = true, silent = true }
 
-    -- 跳转到主窗口的逻辑 (显式寻找非 QF, 非 Preview 窗口)
+    -- 内部跳转逻辑：确保跳回真正的编辑窗口 (Main Window)
     local function jump_to_main(split_cmd)
       local qf_idx = vim.fn.line '.'
-      vim.cmd 'pclose'
+      vim.cmd 'pclose' -- 必须关闭预览窗口，重置窗口历史
 
       local target_win = nil
       for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-        if not vim.bo[vim.api.nvim_win_get_buf(win)].buftype == 'quickfix' and not vim.wo[win].previewwindow then
+        local buf = vim.api.nvim_win_get_buf(win)
+        -- 过滤掉 QF 窗口和预览窗口
+        if vim.bo[buf].buftype ~= 'quickfix' and not vim.wo[win].previewwindow then
           target_win = win
           break
         end
@@ -332,7 +335,7 @@ vim.api.nvim_create_autocmd('FileType', {
       if target_win then
         vim.api.nvim_set_current_win(target_win)
       else
-        vim.cmd 'wincmd k'
+        vim.cmd 'wincmd k' -- 保底方案
       end
 
       if split_cmd then
@@ -341,13 +344,19 @@ vim.api.nvim_create_autocmd('FileType', {
       vim.cmd(qf_idx .. 'cc')
     end
 
-    -- 仅在 QF 窗口内生效的快捷键
-    vim.keymap.set('n', 'p', function()
-      local qf_idx = vim.fn.line '.'
-      local items = vim.fn.getqflist()
-      qf_preview_logic(items[qf_idx])
+    -- --- QF 窗口内局部快捷键 (优先级高于全局) ---
+
+    -- M-n / M-p 在内部直接移动并预览
+    vim.keymap.set('n', '<M-n>', function()
+      vim.cmd 'normal! j'
+      qf_preview_logic()
+    end, opts)
+    vim.keymap.set('n', '<M-p>', function()
+      vim.cmd 'normal! k'
+      qf_preview_logic()
     end, opts)
 
+    -- 跳转快捷键
     vim.keymap.set('n', '<C-v>', function()
       jump_to_main 'vsplit'
     end, opts)
@@ -357,6 +366,9 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.keymap.set('n', '<CR>', function()
       jump_to_main()
     end, opts)
+
+    -- 其他 QF 功能
+    vim.keymap.set('n', 'p', qf_preview_logic, opts)
   end,
 })
 
