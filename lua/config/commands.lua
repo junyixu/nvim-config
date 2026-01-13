@@ -34,9 +34,9 @@ do
   end, { nargs = '*' })
 
   vim.cmd [[
-    cabbrev gr Gtags -r
-    cabbrev gs Gtags -s
-    cabbrev gd Gtags -d
+    cabbrev ttr Gtags -r
+    cabbrev tts Gtags -s
+    cabbrev ttd Gtags -d
     cabbrev rg sil grep
   ]]
 end
