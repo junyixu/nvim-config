@@ -115,7 +115,13 @@ return {
       explorer = { enabled = false },
       indent = { enabled = false },
       input = { enabled = true },
-      picker = { enabled = true },
+      picker = {
+        enabled = true,
+        ---@type snacks.picker.matcher.Config
+        matcher = {
+          frecency = true, -- frecency bonus
+        },
+      },
       notifier = { enabled = false },
       quickfile = { enabled = false },
       scope = { enabled = false },
