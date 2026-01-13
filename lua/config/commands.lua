@@ -37,6 +37,7 @@ do
     cabbrev gr Gtags -r
     cabbrev gs Gtags -s
     cabbrev gd Gtags -d
+    cabbrev rg sil grep
   ]]
 end
 
