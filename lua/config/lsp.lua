@@ -40,15 +40,27 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
     end
 
+    local function snacks_picker(method, fallback)
+      return function()
+        local ok, snacks = pcall(require, 'snacks')
+        if ok and snacks.picker and snacks.picker[method] then
+          return snacks.picker[method]()
+        end
+        if fallback then
+          return fallback()
+        end
+      end
+    end
+
     map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
     map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
-    map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-    map('gri', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-    map('grd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+    map('grr', snacks_picker('lsp_references', vim.lsp.buf.references), '[G]oto [R]eferences')
+    map('gri', snacks_picker('lsp_implementations', vim.lsp.buf.implementation), '[G]oto [I]mplementation')
+    map('grd', snacks_picker('lsp_definitions', vim.lsp.buf.definition), '[G]oto [D]efinition')
     map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-    map('gO', require('telescope.builtin').lsp_document_symbols, 'Open Document Symbols')
-    map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
-    map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
+    map('gO', snacks_picker('lsp_symbols', vim.lsp.buf.document_symbol), 'Open Document Symbols')
+    map('gW', snacks_picker('lsp_workspace_symbols', vim.lsp.buf.workspace_symbol), 'Open Workspace Symbols')
+    map('grt', snacks_picker('lsp_type_definitions', vim.lsp.buf.type_definition), '[G]oto [T]ype Definition')
 
     local function client_supports_method(client, method, bufnr)
       if vim.fn.has 'nvim-0.11' == 1 then
