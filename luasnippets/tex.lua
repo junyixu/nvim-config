@@ -101,6 +101,10 @@ local greeks_snipets = {
   parse({ trig = ',y', name = 'psi', snippetType = 'autosnippet' }, '\\psi'),
 }
 
+for _, snippet in ipairs(greeks_snipets) do
+  snippet.wordTrig = false
+end
+
 local math_snipets = {
   s(
     {
