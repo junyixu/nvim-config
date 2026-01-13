@@ -30,9 +30,6 @@ end
 --  See `:help hlsearch`
 nnoremap('<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps
-nnoremap('<leader>qf', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
 -- `clipboard=autoselect` is not implemented yet
 -- https://github.com/neovim/neovim/issues/2325.
 -- You may find this workaround to be useful:
@@ -237,6 +234,11 @@ vim.keymap.set('x', '<leader>*', function()
   local keys = vim.api.nvim_replace_termcodes('<Esc>' .. cmd, true, false, true)
   vim.api.nvim_feedkeys(keys, 'n', false)
 end, { desc = 'Grep selection with current extension' })
+
+vim.keymap.set('n', '<space>qo', ':copen<CR>', { desc = 'Open [Q]uickfix' })
+vim.keymap.set('n', '<space>qc', ':cclose<CR>', { desc = 'Close [Q]uickfix' })
+-- Diagnostic keymaps
+nnoremap('<space>qf', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- resize windwos
 -- Alt + < (即 Alt + Shift + ,)
