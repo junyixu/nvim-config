@@ -114,7 +114,7 @@ return {
       dashboard = { enabled = false },
       explorer = { enabled = false },
       indent = { enabled = false },
-      input = { enabled = false },
+      input = { enabled = true },
       picker = { enabled = true },
       notifier = { enabled = false },
       quickfile = { enabled = false },
