@@ -23,9 +23,11 @@ return {
           -- a table with the mapping as the first element.
           ['<leader>ff'] = {
             function()
-              require('telescope.builtin').find_files {
-                cwd = require('oil').get_current_dir(),
-              }
+              local ok, snacks = pcall(require, 'snacks')
+              if not ok or not snacks.picker then
+                return
+              end
+              snacks.picker.files { cwd = require('oil').get_current_dir() }
             end,
             mode = 'n',
             nowait = true,

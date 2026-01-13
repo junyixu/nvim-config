@@ -3,6 +3,108 @@ return {
     'junyixu/snacks.nvim',
     priority = 1000,
     lazy = false,
+    keys = {
+      {
+        '<leader>fh',
+        function()
+          require('snacks').picker.help()
+        end,
+        desc = '[F]ind [H]elp',
+      },
+      {
+        '<leader>fk',
+        function()
+          require('snacks').picker.keymaps()
+        end,
+        desc = '[F]ind [K]eymaps',
+      },
+      {
+        '<leader>ff',
+        function()
+          require('snacks').picker.files()
+        end,
+        desc = '[F]ind [F]iles',
+      },
+      {
+        '<leader>fs',
+        function()
+          require('snacks').picker()
+        end,
+        desc = '[F]ind [S]elect Picker',
+      },
+      {
+        '<leader>fw',
+        function()
+          require('snacks').picker.grep_word()
+        end,
+        desc = '[F]ind current [W]ord',
+      },
+      {
+        '<leader>fg',
+        function()
+          require('snacks').picker.grep()
+        end,
+        desc = '[F]ind by [G]rep',
+      },
+      {
+        '<leader>fd',
+        function()
+          require('snacks').picker.diagnostics()
+        end,
+        desc = '[F]ind [D]iagnostics',
+      },
+      {
+        '<leader>fr',
+        function()
+          require('snacks').picker.resume()
+        end,
+        desc = '[F]ind [R]esume',
+      },
+      {
+        '<leader>f.',
+        function()
+          require('snacks').picker.recent()
+        end,
+        desc = '[F]ind Recent Files ("." for repeat)',
+      },
+      {
+        '<leader><leader>',
+        function()
+          require('snacks').picker.buffers()
+        end,
+        desc = '[ ] Find existing buffers',
+      },
+
+      {
+        '<leader>/',
+        function()
+          require('snacks').picker.lines()
+        end,
+        desc = '[/] Fuzzily search in current buffer',
+      },
+      {
+        '<leader>s/',
+        function()
+          require('snacks').picker.grep_buffers()
+        end,
+        desc = '[F]ind [/] in Open Files',
+      },
+
+      {
+        '<leader>fn',
+        function()
+          require('snacks').picker.files { cwd = vim.fn.stdpath 'config' }
+        end,
+        desc = '[F]ind [N]eovim files',
+      },
+      {
+        '<leader>fp',
+        function()
+          require('snacks').picker.files { cwd = vim.fs.joinpath(vim.fn.stdpath 'data', 'lazy') }
+        end,
+        desc = '[F]ind Neovim [P]lug files',
+      },
+    },
     ---@type snacks.Config
     opts = {
       -- your configuration comes here
@@ -13,7 +115,7 @@ return {
       explorer = { enabled = false },
       indent = { enabled = false },
       input = { enabled = false },
-      picker = { enabled = false },
+      picker = { enabled = true },
       notifier = { enabled = false },
       quickfile = { enabled = false },
       scope = { enabled = false },
