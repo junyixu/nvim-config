@@ -1,3 +1,74 @@
+local function clamp_buf_pos(buf, pos)
+  if type(pos) ~= 'table' then
+    return pos
+  end
+  local lnum = tonumber(pos[1]) or 0
+  local col = tonumber(pos[2]) or 0
+  if lnum <= 0 then
+    return pos
+  end
+
+  local line_count = vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_line_count(buf) or 1
+  if line_count < 1 then
+    line_count = 1
+  end
+  if lnum > line_count then
+    lnum = line_count
+  elseif lnum < 1 then
+    lnum = 1
+  end
+
+  col = math.max(col, 0)
+  local line = ''
+  if vim.api.nvim_buf_is_valid(buf) then
+    line = vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1] or ''
+  end
+  col = math.min(col, #line)
+
+  return { lnum, col }
+end
+
+local function buffers_confirm(picker, item, action)
+  local items = picker:selected { fallback = true }
+  local first = items[1]
+  if not first then
+    return
+  end
+
+  local buf = first.buf
+  if buf and vim.api.nvim_buf_is_valid(buf) and first.pos then
+    first.pos = clamp_buf_pos(buf, first.pos)
+  end
+
+  local buftype = first.buftype
+  if not buftype and buf and vim.api.nvim_buf_is_valid(buf) then
+    buftype = vim.bo[buf].buftype
+  end
+
+  if buftype == 'terminal' and buf then
+    local cmd = action and action.cmd or 'edit'
+    local open_cmd = ({
+      edit = 'buffer',
+      split = 'sbuffer',
+      vsplit = 'vert sbuffer',
+      tab = 'tab sbuffer',
+      drop = 'buffer',
+      tabdrop = 'tab sbuffer',
+    })[cmd] or 'buffer'
+
+    vim.bo[buf].buflisted = true
+    if picker.opts.jump and picker.opts.jump.close then
+      picker:close()
+    else
+      vim.api.nvim_set_current_win(picker.main)
+    end
+    vim.cmd(('%s %d'):format(open_cmd, buf))
+    return
+  end
+
+  return Snacks.picker.actions.jump(picker, item, action or {})
+end
+
 return {
   {
     'junyixu/snacks.nvim',
@@ -120,6 +191,11 @@ return {
         ---@type snacks.picker.matcher.Config
         matcher = {
           frecency = true, -- frecency bonus
+        },
+        sources = {
+          buffers = {
+            confirm = buffers_confirm,
+          },
         },
       },
       notifier = { enabled = false },
