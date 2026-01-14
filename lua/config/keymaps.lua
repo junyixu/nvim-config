@@ -64,6 +64,13 @@ nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
 
+-- Jump to window N in current tabpage: <space>1..9
+for i = 1, 9 do
+  nnoremap('<space>' .. i, function()
+    vim.cmd(i .. 'wincmd w')
+  end, { desc = 'Go to window ' .. i })
+end
+
 -- 先检查光标下的字符是否为括号（parentheses, brackets, or braces）。如果是，则直接触发 do_fallback()，让原本的 matchit 插件来处理成对跳转。
 local function ts_matchit_jump()
   local bufnr = vim.api.nvim_get_current_buf()
