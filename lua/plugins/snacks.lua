@@ -8,7 +8,11 @@ local function clamp_buf_pos(buf, pos)
     return pos
   end
 
-  local line_count = vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_line_count(buf) or 1
+  if not (vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf)) then
+    return pos
+  end
+
+  local line_count = vim.api.nvim_buf_line_count(buf)
   if line_count < 1 then
     line_count = 1
   end
@@ -26,6 +30,24 @@ local function clamp_buf_pos(buf, pos)
   col = math.min(col, #line)
 
   return { lnum, col }
+end
+
+local function buffers_transform(item)
+  local is_terminal = item
+    and (
+      item.buftype == 'terminal'
+      or (type(item.name) == 'string' and item.name:match '^term://')
+      or (type(item.file) == 'string' and item.file:match '^term://')
+    )
+
+  if is_terminal then
+    item.pos = nil
+    return item
+  end
+  if item and item.buf and item.pos then
+    item.pos = clamp_buf_pos(item.buf, item.pos)
+  end
+  return item
 end
 
 local function buffers_confirm(picker, item, action)
@@ -63,6 +85,8 @@ local function buffers_confirm(picker, item, action)
       vim.api.nvim_set_current_win(picker.main)
     end
     vim.cmd(('%s %d'):format(open_cmd, buf))
+    vim.wo.number = false
+    vim.wo.relativenumber = false
     return
   end
 
@@ -195,6 +219,10 @@ return {
         sources = {
           buffers = {
             confirm = buffers_confirm,
+            transform = buffers_transform,
+            actions = {
+              jump = buffers_confirm,
+            },
           },
         },
       },
