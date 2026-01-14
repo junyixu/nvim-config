@@ -12,23 +12,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- Make terminal windows look like `:terminal` by default.
--- NOTE: `number`/`relativenumber` are window-local, so we need to re-apply them
--- whenever a terminal buffer is shown in a (new) window.
-vim.api.nvim_create_autocmd({ 'TermOpen', 'BufWinEnter', 'WinEnter' }, {
-  group = vim.api.nvim_create_augroup('TerminalWindowLocalOpts', { clear = true }),
-  callback = function(ev)
-    if not (ev and ev.buf and vim.api.nvim_buf_is_valid(ev.buf)) then
-      return
-    end
-    if vim.bo[ev.buf].buftype ~= 'terminal' then
-      return
-    end
-    vim.wo.number = false
-    vim.wo.relativenumber = false
-  end,
-})
-
 local qf = require 'util.quickfix'
 
 vim.api.nvim_create_autocmd('QuickFixCmdPost', {
