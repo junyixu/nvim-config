@@ -19,7 +19,7 @@ end, { nargs = 1, complete = 'file' })
 
 pcall(vim.api.nvim_del_user_command, 'JuliaStackOpen')
 vim.api.nvim_create_user_command('JuliaStackOpen', function()
-  require('util.julia_stacktrace').open_at_cursor { open = 'alternate' }
+  require('util.julia_stacktrace').open_at_cursor { open = 'alternate_split' }
 end, { desc = 'Open Julia stacktrace location under cursor (from @ file:line)' })
 
 do
