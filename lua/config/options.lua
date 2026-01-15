@@ -108,5 +108,11 @@ if vim.fn.executable 'rg' == 1 then
   vim.opt.grepformat = '%f:%l:%c:%m'
 end
 
+-- 补充一个常见坑（你输出里出现了 2>&1| tee ...）：因为你 shellpipe 用了
+-- tee，在 zsh 里默认会把管道退出码变成 tee 的退出码，v:shell_error 常常
+-- 会变成 0（即使 julia 失败）。如果你有依赖退出码的自动逻辑（比如只在失
+-- 败时自动打开 loclist），可以在 init.lua 里加：
+vim.opt.shellcmdflag = '-o pipefail -c'
+
 -- Tabline: prefix each tab with its index (1., 2., ...) and keep window count suffix.
 require('custom.tabline').setup()
