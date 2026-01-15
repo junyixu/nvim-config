@@ -59,12 +59,46 @@ vim.api.nvim_create_autocmd('QuickFixCmdPost', {
 vim.api.nvim_create_autocmd('TermOpen', {
   group = vim.api.nvim_create_augroup('JuliaStacktraceOpen', { clear = true }),
   callback = function(ev)
-    vim.keymap.set('n', 'gF', function()
+    local function julia_stacktrace_open_or_fallback()
       local handled = require('util.julia_stacktrace').try_open_at_cursor()
       if handled then
         return
       end
       vim.cmd.normal { args = { 'gF' }, bang = true }
-    end, { buffer = ev.buf, desc = 'gF: Julia stacktrace open (fallback builtin gF)' })
+    end
+
+    local function move_cursor_to_mouse()
+      local ok, pos = pcall(vim.fn.getmousepos)
+      if not ok or not pos or not pos.winid or pos.winid == 0 then
+        return
+      end
+      pcall(vim.api.nvim_set_current_win, pos.winid)
+      if pos.line and pos.line > 0 and pos.column and pos.column > 0 then
+        pcall(vim.api.nvim_win_set_cursor, pos.winid, { pos.line, math.max(pos.column - 1, 0) })
+      end
+    end
+
+    vim.keymap.set('n', 'gF', julia_stacktrace_open_or_fallback, {
+      buffer = ev.buf,
+      desc = 'gF: Julia stacktrace open (fallback builtin gF)',
+    })
+
+    vim.keymap.set({ 'n', 't' }, '<C-LeftMouse>', function()
+      if vim.fn.mode() == 't' then
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>', true, false, true), 'n', false)
+        vim.schedule(function()
+          move_cursor_to_mouse()
+          julia_stacktrace_open_or_fallback()
+        end)
+        return
+      end
+      move_cursor_to_mouse()
+      julia_stacktrace_open_or_fallback()
+    end, {
+      buffer = ev.buf,
+      desc = 'Ctrl+Click: Julia stacktrace open (like gF)',
+      nowait = true,
+      silent = true,
+    })
   end,
 })
