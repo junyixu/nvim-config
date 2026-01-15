@@ -52,3 +52,72 @@ vim.opt_local.errorformat = table.concat({
   [[%C%.%#]],
   [[%-G%.%#]],
 }, ',')
+
+-- Delete Julia block wrapper (`begin...end` / `let...end`) around cursor.
+-- Intended usage: `ds%`
+vim.keymap.set('n', 'ds%', function()
+  local ok, node = pcall(vim.treesitter.get_node, { bufnr = 0, ignore_injections = false })
+  if not ok or not node then return end
+
+  local target = nil
+  while node do
+    local t = node:type()
+    if t == 'compound_statement' or t == 'let_statement' then
+      target = node
+      break
+    end
+    node = node:parent()
+  end
+  if not target then return end
+
+  local kind = target:type()
+  local start_line = select(1, target:start()) + 1
+  local end_line = select(1, target:end_()) + 1
+  if end_line <= start_line then return end
+
+  local keyword = (kind == 'let_statement') and 'let' or 'begin'
+
+  local buf = 0
+  local getline = function(ln)
+    return (vim.api.nvim_buf_get_lines(buf, ln - 1, ln, true)[1]) or ''
+  end
+  local setline = function(ln, text)
+    vim.api.nvim_buf_set_lines(buf, ln - 1, ln, true, { text })
+  end
+  local delline = function(ln)
+    vim.api.nvim_buf_set_lines(buf, ln - 1, ln, true, {})
+  end
+
+  local is_keyword_only = function(ln, kw)
+    local text = getline(ln)
+    return text:match('^%s*' .. kw .. '%s*;?%s*(#.*)?$') ~= nil
+  end
+
+  local strip_prefix_keyword = function(ln, kw)
+    local text = getline(ln)
+    local indent, rest = text:match('^(%s*)' .. kw .. '%s*(.*)$')
+    if not indent then return false end
+    setline(ln, indent .. (rest or ''))
+    return true
+  end
+
+  local linewise = is_keyword_only(start_line, keyword) and is_keyword_only(end_line, 'end')
+  if linewise then
+    local inner_from, inner_to = start_line + 1, end_line - 1
+    if inner_from <= inner_to then vim.cmd(('silent %d,%d<'):format(inner_from, inner_to)) end
+  end
+
+  if is_keyword_only(end_line, 'end') then
+    delline(end_line)
+  else
+    strip_prefix_keyword(end_line, 'end')
+  end
+
+  if is_keyword_only(start_line, keyword) then
+    delline(start_line)
+  else
+    strip_prefix_keyword(start_line, keyword)
+  end
+
+  vim.api.nvim_win_set_cursor(0, { start_line, 0 })
+end, { buffer = true, desc = 'Delete Julia begin/let wrapper' })
