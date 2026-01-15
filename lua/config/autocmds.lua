@@ -59,11 +59,12 @@ vim.api.nvim_create_autocmd('QuickFixCmdPost', {
 vim.api.nvim_create_autocmd('TermOpen', {
   group = vim.api.nvim_create_augroup('JuliaStacktraceOpen', { clear = true }),
   callback = function(ev)
-    local function open()
-      require('util.julia_stacktrace').open_at_cursor { open = 'alternate' }
-    end
-
-    -- NOTE: Some terminal emulators cannot send a distinct <C-CR>/<C-Enter>.
-    vim.keymap.set('n', '<C-CR>', open, { buffer = ev.buf, desc = 'Open Julia stacktrace location' })
+    vim.keymap.set('n', 'gF', function()
+      local handled = require('util.julia_stacktrace').try_open_at_cursor { open = 'alternate_split' }
+      if handled then
+        return
+      end
+      vim.cmd.normal { args = { 'gF' }, bang = true }
+    end, { buffer = ev.buf, desc = 'gF: Julia stacktrace open (fallback builtin gF)' })
   end,
 })
