@@ -10,7 +10,7 @@ function M.async_make()
   end
 
   -- 处理占位符，例如将 % 扩展为当前文件名
-  local cmd = vim.fn.expand(makeprg)
+  local cmd = vim.fn.expandcmd(makeprg)
 
   -- vim.system 推荐接收 table 形式的命令，但 makeprg 通常是长字符串
   -- 这里简单用 sh -c 执行，或者用 vim.split 拆分
