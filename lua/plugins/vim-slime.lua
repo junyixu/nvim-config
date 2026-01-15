@@ -10,10 +10,10 @@ return {
     vim.g.slime_menu_config = false
     vim.g.slime_input_pid = false
 
-    vim.keymap.set('n', '<Leader>s', '<Plug>SlimeMotionSend', { remap = true, desc = 'Slime: Send Motion' })
-    vim.keymap.set('n', '<Leader>ss', '<Plug>SlimeLineSend', { remap = true, desc = 'Slime: Send Line' })
-    vim.keymap.set('n', '<Leader>sp', '<Plug>SlimeParagraphSend', { remap = true, desc = 'Slime: Send Paragraph' })
-    vim.keymap.set('v', '<Leader>s', '<Plug>SlimeRegionSend', { remap = true, desc = 'Slime: Send Region' })
-    vim.keymap.set('n', '<Leader>sc', '<Plug>SlimeConfig', { remap = true, desc = 'Slime: Configure Target' })
+    vim.keymap.set('n', '<space><space>', '<Plug>SlimeMotionSend', { remap = true, desc = 'Slime: Send Motion' })
+    vim.keymap.set('n', '<space><space><space>', '<Plug>SlimeLineSend', { remap = true, desc = 'Slime: Send Line' })
+    vim.keymap.set('n', '<space><space>p', '<Plug>SlimeParagraphSend', { remap = true, desc = 'Slime: Send Paragraph' })
+    vim.keymap.set('v', '<space><space>', '<Plug>SlimeRegionSend', { remap = true, desc = 'Slime: Send Region' })
+    vim.keymap.set('n', '<space><space>c', '<Plug>SlimeConfig', { remap = true, desc = 'Slime: Configure Target' })
   end,
 }

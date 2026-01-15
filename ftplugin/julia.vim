@@ -75,7 +75,6 @@ vnoremap <buffer><silent> <M-c> :<C-u>JuliaVisualModeCreateCell<CR>
 noremap <buffer><localleader>fb <Cmd>call julia#toggle_function_blockassign()<CR>
 xmap <silent><buffer> <CR> <Plug>SlimeRegionSend
 xmap <silent><buffer> <localleader>r :<c-u>call slime#send("@paste" . "\r")<CR>
-nmap <silent><buffer> <space><space> <Plug>SlimeParagraphSend
 nmap <silent><buffer> <localleader>C <Plug>SlimeConfig
 nmap <silent><buffer> <M-CR> :call <SID>SlimeSendCellSilent()<CR>
 nmap <silent><buffer> <C-CR> :call <SID>SlimeSendCell()<CR>
