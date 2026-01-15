@@ -60,7 +60,7 @@ vim.api.nvim_create_autocmd('TermOpen', {
   group = vim.api.nvim_create_augroup('JuliaStacktraceOpen', { clear = true }),
   callback = function(ev)
     vim.keymap.set('n', 'gF', function()
-      local handled = require('util.julia_stacktrace').try_open_at_cursor { open = 'alternate_split' }
+      local handled = require('util.julia_stacktrace').try_open_at_cursor()
       if handled then
         return
       end
