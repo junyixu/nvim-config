@@ -169,9 +169,8 @@ local function ts_matchit_jump()
 end
 
 -- 6. 绑定键位映射
--- n: 普通模式, x: 可视化模式 (不含 Select), o: 操作符等待模式
-vim.keymap.set({ 'n', 'x', 'o' }, '%', ts_matchit_jump, { desc = 'TS Jump with Matchit Fallback' })
-vim.keymap.set({ 'n', 'x', 'o' }, 'g%', '<Plug>(MatchitNormalBackward)')
+vim.keymap.set('n', '%', ts_matchit_jump, { desc = 'TS Jump with Matchit Fallback' })
+vim.keymap.set('n', 'g%', '<Plug>(MatchitNormalBackward)', { remap = true, desc = 'Matchit backward' })
 
 -- Switch tabs quickly with Alt+number (matches the tabline prefix "1.", "2.", ...).
 for i = 1, 9 do
