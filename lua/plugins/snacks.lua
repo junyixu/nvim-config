@@ -49,14 +49,25 @@ local function buf_set_numbers(buf, number, relativenumber)
   end
 end
 
-local function win_disable_numbers_for_terminal(win)
+local function win_disable_numbers_for_terminal(win, expected_buf)
   if not (win and vim.api.nvim_win_is_valid(win)) then
     return
   end
   vim.api.nvim_win_call(win, function()
+    local current_buf = vim.api.nvim_win_get_buf(win)
+    if expected_buf ~= nil and current_buf ~= expected_buf then
+      return
+    end
+    if not (current_buf and vim.api.nvim_buf_is_valid(current_buf) and vim.bo[current_buf].buftype == 'terminal') then
+      return
+    end
+
     if vim.w._snacks_term_saved_number == nil then
-      vim.w._snacks_term_saved_number = vim.wo.number
-      vim.w._snacks_term_saved_relativenumber = vim.wo.relativenumber
+      -- Terminal windows often start with `nonumber` from Neovim defaults.
+      -- For restoring to a normal buffer, use the global defaults instead of
+      -- capturing the current terminal window state.
+      vim.w._snacks_term_saved_number = vim.o.number
+      vim.w._snacks_term_saved_relativenumber = vim.o.relativenumber
     end
     vim.wo.number = false
     vim.wo.relativenumber = false
@@ -68,15 +79,30 @@ local function win_restore_numbers_if_saved(win)
     return
   end
   vim.api.nvim_win_call(win, function()
-    if vim.w._snacks_term_saved_number ~= nil then
-      vim.wo.number = vim.w._snacks_term_saved_number
-      vim.w._snacks_term_saved_number = nil
+    if vim.w._snacks_term_saved_number == nil and vim.w._snacks_term_saved_relativenumber == nil then
+      return
     end
-    if vim.w._snacks_term_saved_relativenumber ~= nil then
-      vim.wo.relativenumber = vim.w._snacks_term_saved_relativenumber
-      vim.w._snacks_term_saved_relativenumber = nil
+    local buf = vim.api.nvim_get_current_buf()
+    if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == 'terminal' then
+      return
     end
+    vim.wo.number = vim.o.number
+    vim.wo.relativenumber = vim.o.relativenumber
+    vim.w._snacks_term_saved_number = nil
+    vim.w._snacks_term_saved_relativenumber = nil
   end)
+end
+
+local function tab_restore_numbers_if_saved(tab)
+  if not (tab and vim.api.nvim_tabpage_is_valid(tab)) then
+    return
+  end
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+    local cfg = vim.api.nvim_win_get_config(win)
+    if cfg.relative == '' then
+      win_restore_numbers_if_saved(win)
+    end
+  end
 end
 
 local function is_terminal_item(item)
@@ -146,9 +172,9 @@ local function terminal_aware_jump(picker, item, action)
         local cfg = vim.api.nvim_win_get_config(win)
         if cfg.relative == '' and vim.api.nvim_win_get_tabpage(win) == current_tab then
           vim.api.nvim_set_current_win(win)
-          win_disable_numbers_for_terminal(win)
+          win_disable_numbers_for_terminal(win, buf)
           vim.schedule(function()
-            win_disable_numbers_for_terminal(win)
+            win_disable_numbers_for_terminal(win, buf)
           end)
           return
         end
@@ -166,9 +192,9 @@ local function terminal_aware_jump(picker, item, action)
 
     vim.cmd(('%s %d'):format(open_cmd, buf))
     local win = vim.api.nvim_get_current_win()
-    win_disable_numbers_for_terminal(win)
+    win_disable_numbers_for_terminal(win, buf)
     vim.schedule(function()
-      win_disable_numbers_for_terminal(win)
+      win_disable_numbers_for_terminal(win, buf)
     end)
     return
   end
@@ -197,15 +223,27 @@ local function terminal_aware_jump(picker, item, action)
   local opened_is_terminal = vim.bo[buf].buftype == 'terminal'
 
   if opened_is_terminal then
-    win_disable_numbers_for_terminal(win)
+    win_disable_numbers_for_terminal(win, buf)
     vim.schedule(function()
       buf_set_numbers(buf, false, false)
-      win_disable_numbers_for_terminal(win)
+      win_disable_numbers_for_terminal(win, buf)
     end)
     return
   end
 
-  win_restore_numbers_if_saved(win)
+  local post_tab = vim.api.nvim_get_current_tabpage()
+  local post_win = win
+  vim.schedule(function()
+    -- Restore for the destination window, and also any other windows in the tab
+    -- that were previously "terminal-styled" by Snacks.
+    win_restore_numbers_if_saved(post_win)
+    tab_restore_numbers_if_saved(post_tab)
+  end)
+  -- Some Lua callbacks may toggle window options after the jump; run again.
+  vim.defer_fn(function()
+    pcall(win_restore_numbers_if_saved, post_win)
+    pcall(tab_restore_numbers_if_saved, post_tab)
+  end, 10)
 end
 
 return {

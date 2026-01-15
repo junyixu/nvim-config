@@ -322,10 +322,14 @@ vim.api.nvim_create_autocmd('FileType', {
   callback = function()
     local opts = { buffer = true, silent = true }
 
-    -- 跳转逻辑：关闭预览并回到主编辑区
-    local function jump_to_main(split_cmd)
-      local qf_idx = vim.fn.line '.'
-      vim.cmd 'pclose'
+	    -- 跳转逻辑：关闭预览并回到主编辑区
+	    local function jump_to_main(split_cmd)
+	      -- qf window 同时用于 quickfix/location-list，但跳转命令不同：
+	      -- quickfix 用 :cc，location-list 用 :ll，否则会报 E42: No Errors
+	      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1] or {}
+	      local is_loclist = wininfo.loclist == 1
+	      local qf_idx = vim.fn.line '.'
+	      vim.cmd 'pclose'
 
       local target_win = nil
       for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
@@ -342,11 +346,11 @@ vim.api.nvim_create_autocmd('FileType', {
         vim.cmd 'wincmd k'
       end
 
-      if split_cmd then
-        vim.cmd(split_cmd)
-      end
-      vim.cmd(qf_idx .. 'cc')
-    end
+	      if split_cmd then
+	        vim.cmd(split_cmd)
+	      end
+	      vim.cmd(qf_idx .. (is_loclist and 'll' or 'cc'))
+	    end
 
     -- QF 内部 M-n / M-p
     vim.keymap.set('n', '<M-n>', function()
