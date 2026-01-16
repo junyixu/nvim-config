@@ -64,6 +64,13 @@ nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
 
+vim.keymap.set('c', '<C-B>', '<Left>', { desc = 'Emacs-keys: Back one character' })
+-- vim.keymap.set('c', '<C-F>', '<Right>', { desc = 'Emacs-keys: Forward one character' })
+vim.keymap.set('c', '<C-A>', '<Home>', { desc = 'Emacs-keys: Beginning of line' })
+vim.keymap.set('c', '<C-E>', '<End>', { desc = 'Emacs-keys: End of line' })
+vim.keymap.set('c', '<A-b>', '<S-Left>', { desc = 'Emacs-keys: Back one word' })
+vim.keymap.set('c', '<A-f>', '<S-Right>', { desc = 'Emacs-keys: Forward one word' })
+
 -- Jump to window N in current tabpage: <space>1..9
 for i = 1, 9 do
   nnoremap('<space>' .. i, function()
