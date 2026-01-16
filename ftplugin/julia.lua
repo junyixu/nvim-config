@@ -53,9 +53,9 @@ vim.opt_local.errorformat = table.concat({
   [[%-G%.%#]],
 }, ',')
 
--- Delete Julia block wrapper (`begin...end` / `let...end`) around cursor.
--- Intended usage: `ds%`
-vim.keymap.set('n', 'ds%', function()
+-- [D]elete [s]urround Julia bloc[k] wrapper (`begin...end` / `let...end`) around cursor.
+-- Intended usage: `dsk`
+vim.keymap.set('n', 'dsk', function()
   local ok, node = pcall(vim.treesitter.get_node, { bufnr = 0, ignore_injections = false })
   if not ok or not node then
     return
@@ -136,3 +136,57 @@ vim.keymap.set('n', 'ds%', function()
 
   vim.api.nvim_win_set_cursor(0, { start_line, 0 })
 end, { buffer = true, desc = 'Delete Julia begin/let wrapper' })
+
+vim.keymap.set('n', 'tsk', function()
+  local ok, node = pcall(vim.treesitter.get_node, { bufnr = 0, ignore_injections = false })
+  if not ok or not node then
+    return
+  end
+
+  local container_types = {
+    'compound_statement',
+    'let_statement',
+  }
+
+  local target = nil
+  while node do
+    local t = node:type()
+    for _, ct in ipairs(container_types) do
+      if t == ct then
+        target = node
+        break
+      end
+    end
+    if target then
+      break
+    end
+    node = node:parent()
+  end
+  if not target then
+    return
+  end
+
+  local end_line = select(1, target:end_()) + 1
+  local buf = 0
+  local line = vim.api.nvim_buf_get_lines(buf, end_line - 1, end_line, true)[1] or ''
+
+  local indent, rest = line:match '^(%s*)end(.*)$'
+  if not indent then
+    return
+  end
+
+  local comment_start = rest:find('#', 1, true)
+  local before_comment = comment_start and rest:sub(1, comment_start - 1) or rest
+  local comment = comment_start and rest:sub(comment_start) or ''
+
+  local trimmed = before_comment:gsub('%s+', '')
+  if trimmed ~= '' and trimmed ~= ';' then
+    return
+  end
+
+  local has_semicolon = trimmed == ';'
+  local comment_clean = comment:gsub('^%s+', '')
+  local space_before_comment = comment_clean ~= '' and ' ' or ''
+  local new_line = indent .. 'end' .. (has_semicolon and '' or ';') .. space_before_comment .. comment_clean
+  vim.api.nvim_buf_set_lines(buf, end_line - 1, end_line, true, { new_line })
+end, { buffer = true, desc = 'Toggle end; for surrounding block' })
