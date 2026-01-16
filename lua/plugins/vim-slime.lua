@@ -41,11 +41,21 @@ return {
       end
 
       local best = nil
-      while node do
-        if target_types[node:type()] then
-          best = node
+      -- If the cursor is *already* on a target node, send it immediately instead of
+      -- walking up and potentially selecting a larger surrounding block.
+      if target_types[node:type()] then
+        best = node
+      else
+        -- TODO:
+        -- 也许有更简洁的逻辑
+        -- 或许我应该写两个 target_types, 一个是可以直接发送的节点类型
+        -- 另一个是可以继续向上查找的节点类型
+        while node do
+          if target_types[node:type()] then
+            best = node
+          end
+          node = node:parent()
         end
-        node = node:parent()
       end
 
       if not best then
