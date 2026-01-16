@@ -35,31 +35,33 @@ return {
         end
       end
 
+      -- 转换 <Plug> 序列
+      local sendParagraph = vim.api.nvim_replace_termcodes('<Plug>SlimeParagraphSend', true, true, true)
+
+      -- 使用 'm' 模式 (remap) 来确保 <Plug> 能够被正确解析执行
+
       if not node then
-        vim.cmd 'SlimeSend'
+        vim.api.nvim_feedkeys(sendParagraph, 'm', true)
         return
       end
 
       local best = nil
       -- If the cursor is *already* on a target node, send it immediately instead of
       -- walking up and potentially selecting a larger surrounding block.
-      if target_types[node:type()] then
-        best = node
-      else
-        -- TODO:
-        -- 也许有更简洁的逻辑
-        -- 或许我应该写两个 target_types, 一个是可以直接发送的节点类型
-        -- 另一个是可以继续向上查找的节点类型
-        while node do
-          if target_types[node:type()] then
-            best = node
-          end
-          node = node:parent()
+      -- TODO:
+      -- 也许有更简洁的逻辑
+      -- 或许我应该写两个 target_types, 一个是可以直接发送的节点类型
+      -- 另一个是可以继续向上查找的节点类型
+      while node do
+        if target_types[node:type()] then
+          best = node
+          break
         end
+        node = node:parent()
       end
 
       if not best then
-        vim.cmd 'SlimeSend'
+        vim.api.nvim_feedkeys(sendParagraph, 'm', true)
         return
       end
 
