@@ -2,7 +2,32 @@ local M = {}
 
 ---@param line string
 ---@return string? path, integer? lnum
-local function parse_location(line)
+local function normalize_location(path, lnum)
+  if not path or not lnum then
+    return nil, nil
+  end
+
+  if path:sub(1, 1) == '@' then
+    path = path:sub(2)
+  end
+
+  path = vim.fn.expand(path)
+  return path, tonumber(lnum)
+end
+
+local function strip_wrapping(token)
+  if not token or token == '' then
+    return token
+  end
+  token = token:gsub('^[`\'"({%[]+', '')
+  token = token:gsub('[`\'"),:;.%]%}%>]+$', '')
+  return token
+end
+
+--- Parse common Julia stacktrace locations that start with "@".
+---@param line string
+---@return string? path, integer? lnum
+function M.parse_location_stacktrace(line)
   line = (line or ''):gsub('\r', '')
 
   -- Common Julia stacktrace formats:
@@ -17,16 +42,31 @@ local function parse_location(line)
     -- e.g. "in expression starting at /home/user/foo.jl:129"
     path, lnum = line:match 'in expression starting at%s+([^%s]+):(%d+)'
   end
-  if not path or not lnum then
-    return nil, nil
-  end
+  return normalize_location(path, lnum)
+end
 
-  if path:sub(1, 1) == '@' then
-    path = path:sub(2)
+--- Parse a plain "path:line" (no leading "@"), e.g. "/a/b/c.jl:123" or "~/.julia/x.jl:9".
+---@param line string
+---@return string? path, integer? lnum
+function M.parse_location_plain_path(line)
+  line = (line or ''):gsub('\r', '')
+  for token in line:gmatch('%S+') do
+    token = strip_wrapping(token)
+    local path, lnum = token:match '^([~/.][^%s:]+):(%d+)$'
+    if path and lnum then
+      return normalize_location(path, lnum)
+    end
   end
+  return nil, nil
+end
 
-  path = vim.fn.expand(path)
-  return path, tonumber(lnum)
+--- Parse either stacktrace "@ ... path:line" or a plain "path:line".
+---@param line string
+---@return string? path, integer? lnum
+function M.parse_location_stacktrace_or_plain(line)
+  line = (line or ''):gsub('\r', '')
+  local path, lnum = line:match '([%w%._/%~\\%-]+):(%d+)'
+  return normalize_location(path, lnum)
 end
 
 ---@param path string
@@ -77,11 +117,12 @@ local function open_location_alternate_split(path, lnum)
   return true
 end
 
----@param opts? { line?: string }
+---@param opts? { line?: string, parse_location?: fun(line: string): (string?, integer?) }
 ---@return boolean handled
 function M.try_open_at_cursor(opts)
   opts = opts or {}
   local line = opts.line or vim.api.nvim_get_current_line()
+  local parse_location = opts.parse_location or M.parse_location_stacktrace
   local path, lnum = parse_location(line)
   if not path or not lnum then
     return false
