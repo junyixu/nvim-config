@@ -105,7 +105,7 @@ return {
     ai.setup {
       custom_textobjects = {
         i = require('mini.extra').gen_ai_spec.indent(),
-        a = ai.gen_spec.argument { separator = '%s*[,;]%s*' },
+        a = ai.gen_spec.argument { brackets = { '%b()' }, separator = '%s*[,;]%s*' },
         v = gen_subword_regions,
       },
       n_lines = 100,
