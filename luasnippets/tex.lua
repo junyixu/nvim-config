@@ -366,5 +366,4 @@ origin_snippets = {
   }, { condition = is_math }),
 }
 
-math_snipets = vim.list_extend(greeks_snipets, math_snipets)
-return vim.list_extend(math_snipets, origin_snippets)
+return vim.list_extend(math_snipets, origin_snippets), greeks_snipets
