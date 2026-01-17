@@ -44,7 +44,27 @@ return {
       --  而 snippet 只注册在 markdown，
       --  就会查不到，
       --  即便 :set filetype? 显示的是 markdown。
-      ft_func = filetype_funcs.from_cursor_pos,
+      -- 修改后的 ft_func
+      ft_func = function()
+        -- 1. 获取 Tree-sitter 探测到的局部 filetype
+        local fts = filetype_funcs.from_cursor_pos()
+
+        -- 2. 获取当前 Buffer 默认的 filetype
+        local buf_ft = vim.bo.filetype
+
+        -- 3. 如果 Tree-sitter 没拿到结果，直接返回 Buffer 的 ft
+        if #fts == 0 then
+          return { buf_ft }
+        end
+
+        -- 4. 如果 Tree-sitter 拿到了结果，但也确保 Buffer 默认 ft 在列表里
+        -- 这样在 Makefile 这种地方，即便是注释区域也能触发 make 的 snippet
+        if not vim.tbl_contains(fts, buf_ft) then
+          table.insert(fts, buf_ft)
+        end
+
+        return fts
+      end,
       load_ft_func = filetype_funcs.extend_load_ft {
         quarto = { 'markdown', 'r', 'julia', 'python' },
       },
