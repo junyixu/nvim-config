@@ -19,10 +19,10 @@ end
 return {
   -- https://youtu.be/KtQZRAkgLqo?t=808
   s(
-    'req',
+    'require',
     fmt([[local {} = require("{}")]], {
       f(function(import_name)
-        local line = vim.api.nvim_buf_set_lines(0, 0, -1, false)
+        -- local line = vim.api.nvim_buf_get_lines(0, 0, 1, false)
         -- import_name: { {'abc'}, {'abc'} }
         -- import_name[1]: {'abc'}
         -- import_name[1][1]: 'abc'
