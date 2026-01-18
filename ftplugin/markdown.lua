@@ -1,2 +1,2 @@
-vim.b.completion = false
+vim.b.completion = true
 -- vim.opt_local.list = false
