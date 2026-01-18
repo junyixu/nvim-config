@@ -9,6 +9,7 @@ return {
     vim.g.slime_suggest_default = true
     vim.g.slime_menu_config = false
     vim.g.slime_input_pid = false
+    vim.g.slime_collapse_blank_lines = 1
 
     local function slime_send_largest_ts_obj()
       local target_types = {

@@ -75,15 +75,43 @@ function M.ensure()
     require('custom.slime_term').after_send(jobid)
   end
 
-  vim.cmd([[
-    function SlimeOverrideSend(config, text) abort
+  --  SlimeOverrideSend 是 vim-slime “钦定”的扩展点
+  vim.cmd [[
+    function! SlimeOverrideSend(config, text) abort
+      let l:enabled = get(b:, 'slime_collapse_blank_lines', get(g:, 'slime_collapse_blank_lines', 0))
+      let l:text = a:text
+      if l:enabled
+        let l:has_trailing_eol = l:text =~# '\r\?\n\%$'
+        let l:body = substitute(l:text, '\r\?\n\%$', '', '')
+        let l:lines = split(l:body, '\r\?\n', 1)
+
+        let l:out = []
+        let l:blank_run = 0
+        for l:line in l:lines
+          if l:line =~# '^\s*$'
+            let l:blank_run += 1
+            if l:blank_run <= 1
+              call add(l:out, '')
+            endif
+          else
+            let l:blank_run = 0
+            call add(l:out, l:line)
+          endif
+        endfor
+
+        let l:text = join(l:out, "\n")
+        if l:has_trailing_eol
+          let l:text .= "\n"
+        endif
+      endif
+
       let l:target = slime#config#resolve('target')
-      execute 'call slime#targets#' . l:target . '#send(a:config, a:text)'
+      execute 'call slime#targets#' . l:target . '#send(a:config, l:text)'
       if has_key(a:config, 'jobid')
         call v:lua.SlimeTermAfterSend(a:config['jobid'])
       endif
     endfunction
-  ]])
+  ]]
 end
 
 return M
