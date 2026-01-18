@@ -25,6 +25,18 @@ vim.diagnostic.config {
   },
 }
 
+vim.keymap.set('n', '<leader>td', function()
+  local is_enabled = vim.diagnostic.is_enabled()
+  vim.diagnostic.enable(not is_enabled)
+
+  -- Optional: Print the status to the command line
+  if is_enabled then
+    print 'Diagnostics disabled'
+  else
+    print 'Diagnostics enabled'
+  end
+end, { desc = 'Toggle Diagnostics' })
+
 vim.lsp.set_log_level 'ERROR'
 vim.lsp.enable 'pyright'
 vim.lsp.enable 'lua_ls'
