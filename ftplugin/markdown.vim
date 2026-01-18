@@ -10,8 +10,6 @@ inoremap <buffer> <M-v> ![img](<C-r>+)
 map <buffer> <localleader>r <Plug>MarkdownPreview
 map <buffer> <localleader>R <Plug>MarkdownPreviewStop
 
-nnoremap <buffer> <cr> :call MyVimWikiReturn()<CR>
-
 " 我有时不想手写字母大写
 setlocal spellcapcheck=""
 
