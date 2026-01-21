@@ -37,6 +37,18 @@ vim.keymap.set('n', '<leader>td', function()
   end
 end, { desc = 'Toggle Diagnostics' })
 
+vim.keymap.set('n', '<leader>th', function()
+  local is_enabled = vim.lsp.inlay_hint.is_enabled { bufnr = 0 }
+  vim.lsp.inlay_hint.enable(not is_enabled, { bufnr = 0 })
+
+  -- Optional: Print the status to the command line
+  if is_enabled then
+    print 'Inlay Hints disabled'
+  else
+    print 'Inlay Hints enabled'
+  end
+end, { desc = 'Toggle Inlay Hints' })
+
 vim.lsp.set_log_level 'ERROR'
 vim.lsp.enable 'pyright'
 vim.lsp.enable 'lua_ls'
