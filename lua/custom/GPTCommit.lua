@@ -84,23 +84,10 @@ local function openai_request(key, model, messages)
   return content
 end
 
--- 检测 git 仓库根目录，兼容 worktree
-local function get_repo_root(repo_path)
-  -- 检查是否在 worktree 中
-  local git_dir_res = vim.system({ 'git', '-C', repo_path, 'rev-parse', '--absolute-git-dir' }, { text = true }):wait()
-  if git_dir_res.code == 0 then
-    local git_dir = vim.trim(git_dir_res.stdout or '')
-    -- worktree 的 git dir 路径包含 /worktrees/
-    if git_dir:match('/worktrees/') then
-      -- 在 worktree 中，直接使用传入的 repo_path
-      return repo_path
-    end
-  end
-
-  -- 普通仓库，使用 --show-toplevel
-  local root_res = vim.system({ 'git', '-C', repo_path, 'rev-parse', '--show-toplevel' }, { text = true }):wait()
-  local root = root_res.code == 0 and vim.trim(root_res.stdout or '') or ''
-  return root
+-- 获取 git 仓库根目录（兼容 worktree 和普通仓库）
+local function get_repo_root(start_path)
+  local root_res = vim.system({ 'git', '-C', start_path, 'rev-parse', '--show-toplevel' }, { text = true }):wait()
+  return root_res.code == 0 and vim.trim(root_res.stdout or '') or ''
 end
 
 function M.generate(repo_path)
@@ -149,14 +136,12 @@ function M.generate(repo_path)
 end
 
 function M.cmd(_)
-  local bufname = vim.api.nvim_buf_get_name(0)
-  -- 常见场景：在 `.git/COMMIT_EDITMSG` 里执行，需要把 repo root 当作工作目录
-  -- 例如：`/repo/.git/COMMIT_EDITMSG` -> `/repo`
-  local path = bufname ~= '' and (bufname:match '^(.*)/%.git/' or vim.fs.dirname(bufname)) or (vim.uv.cwd() or vim.fn.getcwd())
+  -- 直接使用当前工作目录，兼容 worktree 和普通仓库
+  local cwd = vim.uv.cwd() or vim.fn.getcwd()
 
   vim.notify('Generating commit message...', vim.log.levels.INFO, { title = 'GPTCommit' })
 
-  local msg, err = M.generate(path)
+  local msg, err = M.generate(cwd)
   if not msg then
     vim.notify(err or 'Failed to generate commit message.', vim.log.levels.ERROR, { title = 'GPTCommit' })
     return
