@@ -1,12 +1,15 @@
 local M = {}
 
-function M.tailscale_diff()
+function M.diff()
   -- 在打开 picker 之前先保存当前文件的路径
   local local_file = vim.fn.expand '%:p'
   local local_buf = vim.api.nvim_get_current_buf()
 
   Snacks.picker.pick('tailscale', {
     prompt = 'Tailscale Nodes (Select for Diff)',
+    layout = {
+      preview = false,
+    },
     finder = function(opts, ctx)
       return require('snacks.picker.source.proc').proc(
         ctx:opts {
