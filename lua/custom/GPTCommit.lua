@@ -84,6 +84,25 @@ local function openai_request(key, model, messages)
   return content
 end
 
+-- 检测 git 仓库根目录，兼容 worktree
+local function get_repo_root(repo_path)
+  -- 检查是否在 worktree 中
+  local git_dir_res = vim.system({ 'git', '-C', repo_path, 'rev-parse', '--absolute-git-dir' }, { text = true }):wait()
+  if git_dir_res.code == 0 then
+    local git_dir = vim.trim(git_dir_res.stdout or '')
+    -- worktree 的 git dir 路径包含 /worktrees/
+    if git_dir:match('/worktrees/') then
+      -- 在 worktree 中，直接使用传入的 repo_path
+      return repo_path
+    end
+  end
+
+  -- 普通仓库，使用 --show-toplevel
+  local root_res = vim.system({ 'git', '-C', repo_path, 'rev-parse', '--show-toplevel' }, { text = true }):wait()
+  local root = root_res.code == 0 and vim.trim(root_res.stdout or '') or ''
+  return root
+end
+
 function M.generate(repo_path)
   local key = vim.g.gpt_commit_key or os.getenv 'GITCOMMIT_API_KEY' or os.getenv 'OPENAI_API_KEY' or ''
   if key == '' then
@@ -94,8 +113,7 @@ function M.generate(repo_path)
   local max_lines = tonumber(vim.g.gpt_commit_max_lines) or 160
   local staged = (vim.g.gpt_commit_staged == nil) or (vim.g.gpt_commit_staged == 1)
 
-  local root_res = vim.system({ 'git', '-C', repo_path, 'rev-parse', '--show-toplevel' }, { text = true }):wait()
-  local root = root_res.code == 0 and vim.trim(root_res.stdout or '') or ''
+  local root = get_repo_root(repo_path)
   if root == '' then
     return nil, ('Not a git repository: %s'):format(repo_path)
   end
