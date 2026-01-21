@@ -54,6 +54,17 @@ return {
   cmd = cmd,
   filetypes = { 'julia' },
   root_markers = root_files,
+  settings = {
+    julia = {
+      lint = {
+        missingrefs = 'none',
+        -- options:
+        -- 'none'
+        -- 'symbols'
+        -- 'all'
+      },
+    },
+  },
   on_attach = function(client, bufnr)
     vim.api.nvim_buf_create_user_command(bufnr, 'LspJuliaActivateEnv', function(opts)
       activate_env(opts.args ~= '' and opts.args or nil)
