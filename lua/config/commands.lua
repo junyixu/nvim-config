@@ -83,7 +83,7 @@ end, {
 
 vim.api.nvim_create_user_command(
   'DiffRemotePicker',
-  require('user.telescope_tailscale').tailscale_diff,
+  require('junyi.telescope_tailscale').tailscale_diff,
   { desc = 'Pick a Tailscale node to diff the current file against' }
 )
 
