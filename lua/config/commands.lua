@@ -81,6 +81,12 @@ end, {
   desc = 'Compare current file with its remote counterpart using oil-ssh',
 })
 
+vim.api.nvim_create_user_command(
+  'DiffRemotePicker',
+  require('user.telescope_tailscale').tailscale_diff,
+  { desc = 'Pick a Tailscale node to diff the current file against' }
+)
+
 vim.api.nvim_create_user_command('FixMath', require('util.re').fix_markdown_latex, { desc = 'Convert LaTeX delimiters to $ and $$ with strict spacing' })
 
 vim.api.nvim_create_user_command('Make', require('junyi.make').async_make, {})
