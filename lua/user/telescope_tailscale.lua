@@ -1,4 +1,6 @@
-local function tailscale_diff()
+local M = {}
+
+function M.tailscale_diff()
   -- 在打开 picker 之前先保存当前文件的路径
   local local_file = vim.fn.expand '%:p'
   local local_buf = vim.api.nvim_get_current_buf()
@@ -56,4 +58,4 @@ local function tailscale_diff()
   })
 end
 
-vim.api.nvim_create_user_command('DiffRemotePicker', tailscale_diff, {})
+return M
