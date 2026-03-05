@@ -405,7 +405,7 @@ return {
             font_size = 'large', -- see https://www.sascha-frank.com/latex-font-size.html
             -- for latex documents, the doc packages are included automatically,
             -- but you can add more packages here. Useful for markdown documents.
-            packages = { 'amsmath', 'amssymb', 'amsfonts', 'amscd', 'mathtools', 'braket' },
+            packages = { 'amsmath', 'amssymb', 'mathrsfs','amsfonts', 'amscd', 'mathtools', 'braket' },
             tpl = [[
         \documentclass[preview,border=0pt,varwidth,12pt]{standalone}
         \usepackage{${packages}}
