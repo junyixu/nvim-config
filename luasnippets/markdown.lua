@@ -122,7 +122,7 @@ local math_blocks = {
 
   parse(
     { trig = 'dm', name = 'Block Math', priority = 1, condition = conds.line_begin, snippetType = 'autosnippet' },
-    '\\$\\$\n${0:${TM_SELECTED_TEXT}}\n\\$\\$'
+    '\\$\\$${0:${TM_SELECTED_TEXT}}\\$\\$'
   ),
 }
 
