@@ -174,7 +174,9 @@ local math_snipets = {
   parse({ trig = '~=', name = 'approximate', snippetType = 'autosnippet' }, '\\approx '),
   parse({ trig = '~~', snippetType = 'autosnippet', name = '~' }, '\\sim '),
 
-  parse({ trig = '__', snippetType = 'autosnippet', name = 'subscript' }, '_{$1}$0'),
+  parse({ trig = '__', wordTrig = false, snippetType = 'autosnippet', name = 'subscript' }, '_{$1}$0'),
+
+  parse({ trig = 'o', name = 'circle' }, '\\circ'),
 
   parse({ trig = '=>', snippetType = 'autosnippet', name = 'implies' }, '\\implies'),
   parse({ trig = '=<', snippetType = 'autosnippet', name = 'implied by' }, '\\impliedby'),
