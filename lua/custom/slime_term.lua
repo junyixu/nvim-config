@@ -3,7 +3,7 @@ local M = {}
 local override_installed = false
 
 local function get_option(bufnr, option)
-  local ok, value = pcall(vim.api.nvim_buf_get_option, bufnr, option)
+  local ok, value = pcall(vim.api.nvim_get_option_value, option, { buf = bufnr }) -- 使用新的 API，并通过 opts table 指定 bufnr
   if ok then
     return value
   end
