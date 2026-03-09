@@ -99,6 +99,8 @@ local greeks_snipets = {
   parse({ trig = ',p', name = 'pi', snippetType = 'autosnippet' }, '\\pi'),
   parse({ trig = ',k', name = 'kappa', snippetType = 'autosnippet' }, '\\kappa'),
   parse({ trig = ',y', name = 'psi', snippetType = 'autosnippet' }, '\\psi'),
+  parse({ trig = ',6', name = 'partial', snippetType = 'autosnippet' }, '\\partial'),
+  parse({ trig = ',8', name = 'infty', snippetType = 'autosnippet' }, '\\infty'),
 }
 
 for _, snippet in ipairs(greeks_snipets) do
@@ -207,7 +209,7 @@ local math_snipets = {
   parse({ trig = 'td', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{}' }, '^{$1}$0 '),
   parse({ trig = 'rd', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{()}' }, '^{($1)}$0 '),
 
-  parse({ trig = 'iff', snippetType = 'autosnippet', name = 'iff' }, '\\iff '),
+  parse({ trig = 'iff', snippetType = 'autosnippet', wordTrig = true, name = 'iff' }, '\\iff '),
   parse({ trig = 'stt', snippetType = 'autosnippet', name = 'text subscript' }, '_\\text{$1} $0'),
   parse({ trig = 'tt', snippetType = 'autosnippet', name = 'text' }, '\\text{$1}$0'),
 
@@ -317,6 +319,15 @@ origin_snippets = {
     snippetType = 'autosnippet',
     condition = in_mathzone,
   }, fmta('\\Braket{<>|<>}', { cap(1), cap(2) })),
+
+  s({
+    trig = '\\partial(%a)',
+    regTrig = true,
+    trigEngine = 'pattern',
+    wordTrig = false,
+    snippetType = 'autosnippet',
+    condition = in_mathzone,
+  }, fmta('\\partial_<>', { cap(1), })),
 
   s(
     { trig = 'mat', priority = 100, name = 'bmatrix' },
