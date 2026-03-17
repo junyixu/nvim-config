@@ -18,7 +18,74 @@ local function list_concat(...)
   return out
 end
 
+---@param str string
+local function parse_time(str)
+  local h, m = str:match '(%d+):(%d+)'
+  if h then
+    return tonumber(h) * 60 + tonumber(m)
+  end
+  return nil
+end
+
+---@param diff number
+local function format_duration(diff)
+  if diff < 0 then
+    diff = diff + 24 * 60
+  end
+  local h, m = math.floor(diff / 60), diff % 60
+  if h == 0 then
+    return m .. '分钟'
+  elseif m == 0 then
+    return h .. '小时'
+  else
+    return h .. '小时' .. m .. '分钟'
+  end
+end
+
+local function calc_duration()
+  local line = vim.api.nvim_get_current_line()
+  local cells = {}
+  for cell in line:gmatch '|([^|]+)' do
+    cells[#cells + 1] = vim.trim(cell)
+  end
+  -- | Start Time | Activity | End Time | Duration |
+  --   cells[1]     cells[2]   cells[3]   cells[4]
+  local s = parse_time(cells[1] or '')
+  local e = parse_time(cells[3] or '')
+  if s and e then
+    return format_duration(e - s)
+  end
+  return ''
+end
+
 local snip_table = {
+  s(
+    {
+      trig = '(|%s*%d%d:%d%d%s*|[^|]+|)',
+      regTrig = true,
+      wordTrig = false,
+      name = 'time-tracking row',
+      dscr = 'Complete a time-tracking table row: append end time and computed duration',
+    },
+    {
+      f(function(_, snip)
+        local matched = snip.captures[1]
+        local start_str = matched:match '%d%d:%d%d'
+        local end_time = os.date '%H:%M'
+        local duration = format_duration(parse_time(end_time) - parse_time(start_str))
+        return matched .. ' ' .. end_time .. ' | ' .. duration .. ' |'
+      end, {}),
+    }
+  ),
+  s('dur', { f(calc_duration) }),
+  parse(
+    { trig = 'tt', name = 'time tracking', condition = conds.line_begin },
+    [[
+| Start Time | Activity          | End Time | Duration |
+| :--------- | :---------------- | :------- | :------- |
+|   $0   |          |          |          |
+]]
+  ),
   s(
     { trig = 'ali', name = 'begin{aligned}...end{aligned}', condition = conds.line_begin },
     fmta(
@@ -120,10 +187,7 @@ local code_block = {
 local math_blocks = {
   parse({ trig = 'mk', name = 'Inline Math', snippetType = 'autosnippet' }, '\\$${1:${TM_SELECTED_TEXT}}\\$$0'),
 
-  parse(
-    { trig = 'dm', name = 'Block Math', priority = 1, condition = conds.line_begin, snippetType = 'autosnippet' },
-    '\\$\\$${0:${TM_SELECTED_TEXT}}\\$\\$'
-  ),
+  parse({ trig = 'dm', name = 'Block Math', priority = 1, condition = conds.line_begin, snippetType = 'autosnippet' }, '\\$\\$${0:${TM_SELECTED_TEXT}}\\$\\$'),
 }
 
 local obsidian_callouts = {
