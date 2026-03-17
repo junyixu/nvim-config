@@ -3,7 +3,6 @@
 return {
   'L3MON4D3/LuaSnip',
   version = '2.*',
-  lazy = true,
   event = 'ModeChanged',
   keys = {
     {
@@ -59,9 +58,9 @@ return {
 
         -- 4. 如果 Tree-sitter 拿到了结果，但也确保 Buffer 默认 ft 在列表里
         -- 这样在 Makefile 这种地方，即便是注释区域也能触发 make 的 snippet
-        -- if not vim.tbl_contains(fts, buf_ft) then
-        --   table.insert(fts, buf_ft)
-        -- end
+        if not vim.tbl_contains(fts, buf_ft) then
+          table.insert(fts, buf_ft)
+        end
 
         return fts
       end,
