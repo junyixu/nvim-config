@@ -68,14 +68,18 @@ local snip_table = {
       dscr = 'Complete a time-tracking table row: append end time and computed duration',
     },
     {
-      f(function(_, snip)
+      d(1, function(_, snip)
         local matched = snip.captures[1]
         local start_str = matched:match '%d%d:%d%d'
         local end_time = os.date '%H:%M'
         local duration = format_duration(parse_time(end_time) - parse_time(start_str))
-        return matched .. ' ' .. end_time .. ' | ' .. duration .. ' |'
-      end, {}),
-    }
+        return sn(nil, {
+          t(matched .. ' ' .. end_time .. ' | ' .. duration .. ' '),
+        })
+      end),
+      i(0),   -- 外层 exit，文本位置在 | 之前
+      t(' |'),
+    } 
   ),
   s('dur', { f(calc_duration) }),
   parse(

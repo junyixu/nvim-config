@@ -12,18 +12,44 @@ local function in_markdown_table()
   return false
 end
 
+local function new_table_row()
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  local line = vim.api.nvim_get_current_line()
+  -- count pipes in current row
+  local pipe_count = select(2, line:gsub('|', '|'))
+  -- build new row: pipe_count pipes, each cell is two spaces
+  local new_line = ('|  '):rep(pipe_count - 1) .. '|'
+  vim.api.nvim_buf_set_lines(0, row, row, false, { new_line })
+  -- land on first cell (after "| ")
+  vim.api.nvim_win_set_cursor(0, { row + 1, 2 })
+end
+
 local function table_next_cell()
-  local found = vim.fn.search('|', 'W')
-  if found == 0 then
+  local cur_row, cur_col = unpack(vim.api.nvim_win_get_cursor(0))
+  local line = vim.api.nvim_get_current_line()
+
+  -- find next | on the same line, after cursor
+  local rel = line:sub(cur_col + 2):find '|'
+  if not rel then
+    -- already past all pipes on this line, jump to next row's first |
+    vim.fn.search('|', 'W')
     return
   end
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  local line = vim.api.nvim_get_current_line()
-  local new_col = col + 1
-  if line:sub(new_col + 1, new_col + 1) == ' ' then
-    new_col = new_col + 1
+
+  local pipe_col = cur_col + rel -- 0-indexed col of found |
+
+  -- is this the last | on the line?
+  if line:sub(pipe_col + 2):match '^%s*$' then
+    new_table_row()
+    return
   end
-  vim.api.nvim_win_set_cursor(0, { row, new_col })
+
+  -- normal jump: land one position past |, skip leading space
+  local land = pipe_col + 1
+  if line:sub(land + 1, land + 1) == ' ' then
+    land = land + 1
+  end
+  vim.api.nvim_win_set_cursor(0, { cur_row, land })
 end
 
 -- @/home/junyi/.config/nvim/plugin/luasnip.vim:15-17
