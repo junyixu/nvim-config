@@ -6,6 +6,7 @@ setlocal autoread " 自动加载
 nnoremap <buffer> <localleader>s :AsyncRun! -mode=hide markdown-screenshot.sh<CR>
 inoremap <buffer> <M-v> ![img](<C-r>+)
 
+
 "markdown-preview.nvim
 map <buffer> <localleader>r <Plug>MarkdownPreview
 map <buffer> <localleader>R <Plug>MarkdownPreviewStop

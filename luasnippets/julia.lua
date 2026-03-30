@@ -137,7 +137,7 @@ local result = {
   parse({ trig = '.', desc = 'dot product' }, '⋅'),
   parse({ trig = 'ox', desc = 'tensor product' }, '⊗'),
   parse({ trig = 'o', desc = 'composition operator' }, '·'),
-  parse({ trig = 'x', desc = 'cross product' }, '×'),
+  -- parse({ trig = 'x', desc = 'cross product' }, '×'),
   parse({ trig = 'mkdir', condition = conds.line_begin }, [[!isdir("./figures") && mkpath("./figures")]]),
   s(
     {

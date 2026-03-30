@@ -58,29 +58,74 @@ local function calc_duration()
   return ''
 end
 
+local function prev_end_time()
+  local row = vim.api.nvim_win_get_cursor(0)[1] -- 1-indexed
+  if row < 2 then
+    return ''
+  end
+  local prev = vim.api.nvim_buf_get_lines(0, row - 2, row - 1, false)[1]
+  if not prev then
+    return ''
+  end
+  local cells = {}
+  for cell in prev:gmatch '|([^|]+)' do
+    cells[#cells + 1] = vim.trim(cell)
+  end
+  return cells[3] and cells[3]:match '%d+:%d+' or ''
+end
+
 local snip_table = {
-  s(
-    {
-      trig = '(|%s*%d%d:%d%d%s*|[^|]+|)',
-      regTrig = true,
-      wordTrig = false,
-      name = 'time-tracking row',
-      dscr = 'Complete a time-tracking table row: append end time and computed duration',
-    },
-    {
-      d(1, function(_, snip)
-        local matched = snip.captures[1]
-        local start_str = matched:match '%d%d:%d%d'
-        local end_time = os.date '%H:%M'
-        local duration = format_duration(parse_time(end_time) - parse_time(start_str))
-        return sn(nil, {
-          t(matched .. ' ' .. end_time .. ' | ' .. duration .. ' '),
-        })
-      end),
-      i(0),   -- 外层 exit，文本位置在 | 之前
-      t(' |'),
-    } 
-  ),
+  s({ trig = '|', name = 'time-tracking next row', wordTrig = false, condition = conds.line_begin }, {
+    t '| ',
+    f(function()
+      return prev_end_time()
+    end), -- 自动填上一行的 End Time
+    t ' | ',
+    i(0),
+  }),
+  s({
+    trig = '(|%s*%d%d:%d%d%s*|[^|]+|)',
+    regTrig = true,
+    wordTrig = false,
+    name = 'time-tracking row',
+    dscr = 'Complete a time-tracking table row: append end time and computed duration',
+  }, {
+    d(1, function(_, snip)
+      local matched = snip.captures[1]
+      local start_str = matched:match '%d%d:%d%d'
+      local end_time = os.date '%H:%M'
+      local duration = format_duration(parse_time(end_time) - parse_time(start_str))
+      return sn(nil, {
+        t(matched .. ' ' .. end_time .. ' | ' .. duration .. ' '),
+      })
+    end),
+    i(0), -- 外层 exit，文本位置在 | 之前
+    t ' |',
+  }),
+  s({
+    trig = '(|%s*%d%d:%d%d%s*|[^|]+|%s*%d%d:%d%d%s*|)',
+    regTrig = true,
+    wordTrig = false,
+    name = 'time-tracking duration',
+    dscr = 'Append computed duration after start + end time columns',
+  }, {
+    d(1, function(_, snip)
+      local matched = snip.captures[1]
+      local times = {}
+      for t in matched:gmatch '%d%d:%d%d' do
+        times[#times + 1] = t
+      end
+      local duration = ''
+      if times[1] and times[2] then
+        duration = format_duration(parse_time(times[2]) - parse_time(times[1]))
+      end
+      return sn(nil, {
+        t(matched .. ' ' .. duration),
+      })
+    end),
+    i(0),
+    t ' |',
+  }),
   s('dur', { f(calc_duration) }),
   parse(
     { trig = 'tt', name = 'time tracking', condition = conds.line_begin },
