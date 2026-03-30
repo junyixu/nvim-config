@@ -20,10 +20,13 @@
 "	xmap <silent><buffer> a$ <plug>(vimtex-a$)
 "endif
 
-setlocal noexpandtab
 setlocal suffixesadd=.md
 let b:coc_suggest_disable = 1
 nnoremap <buffer> <C-l> <Cmd>call markdown#toggle_todo()<CR>
 "setlocal comments=fb:*,b:-,fb:+,n:>,b:>
 "setlocal comments+=b:>
 "setlocal fo+=r
+
+setlocal expandtab
+setlocal shiftwidth=2
+setlocal softtabstop=2

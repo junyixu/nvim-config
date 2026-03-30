@@ -1,6 +1,7 @@
 vim.b.completion = true
 -- vim.opt_local.list = false
 --
+---@return boolean
 local function in_markdown_table()
   local node = vim.treesitter.get_node()
   while node do
