@@ -8,6 +8,14 @@ local function nnoremap(lhs, rhs, opts)
   vim.keymap.set('n', lhs, rhs, options)
 end
 
+-- Helper function for normal mode keymaps (nnoremap equivalent)
+local function tnoremap(lhs, rhs, opts)
+  local defaults = { noremap = true, silent = true }
+  local options = vim.tbl_extend('force', defaults, opts or {})
+  vim.keymap.set('t', lhs, rhs, options)
+end
+
+
 local function nmap(lhs, rhs, opts)
   local defaults = { noremap = false, silent = true }
   local options = vim.tbl_extend('force', defaults, opts or {})
@@ -72,9 +80,12 @@ vim.keymap.set('c', '<C-E>', '<End>', { desc = 'Emacs-keys: End of line' })
 vim.keymap.set('c', '<A-b>', '<S-Left>', { desc = 'Emacs-keys: Back one word' })
 vim.keymap.set('c', '<A-f>', '<S-Right>', { desc = 'Emacs-keys: Forward one word' })
 
--- Jump to window N in current tabpage: <space>1..9
+-- Jump to window N in current tabpage: <alt>1..9
 for i = 1, 9 do
-  nnoremap('<space>' .. i, function()
+  nnoremap(string.format('<M-%d>', i), function()
+    vim.cmd(i .. 'wincmd w')
+  end, { desc = 'Go to window ' .. i })
+  tnoremap(string.format('<M-%d>', i), function()
     vim.cmd(i .. 'wincmd w')
   end, { desc = 'Go to window ' .. i })
 end
@@ -180,11 +191,6 @@ end
 vim.keymap.set('n', '%', ts_matchit_jump, { desc = 'TS Jump with Matchit Fallback' })
 vim.keymap.set('n', 'g%', '<Plug>(MatchitNormalBackward)', { remap = true, desc = 'Matchit backward' })
 
--- Switch tabs quickly with Alt+number (matches the tabline prefix "1.", "2.", ...).
-for i = 1, 9 do
-  nnoremap(string.format('<M-%d>', i), string.format('%dgt', i), { desc = string.format('Go to tab %d', i) })
-end
-
 nnoremap('<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
 nnoremap('<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
 
@@ -203,6 +209,8 @@ vim.keymap.set('c', '<C-->', 'expand("")<left><left>', { desc = 'Insert word und
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 vim.keymap.set('t', '<M-n>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+vim.keymap.set('t', '<M-w>', '<C-\\><C-n><C-w>', { desc = 'Enter window command mode (wincmd) and excute next key as window command' })
 
 vim.keymap.set('v', '<M-f>', function()
   vim.lsp.buf.format()
