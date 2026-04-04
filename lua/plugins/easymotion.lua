@@ -5,7 +5,7 @@ return {
     dependencies = "folke/flash.nvim",
     keys = {{
         "s",
-        mode = {"n", "x", "o"},
+        mode = {"n", "o"},
         function()
             require("flash-zh").jump({
                 chinese_only = false
