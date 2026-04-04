@@ -7,6 +7,9 @@
 
 local M = {}
 
+--- `new()` 是工厂函数，每次调用都产生一个新的闭包，闭包内的局部变量
+--- （`job_id`、`term_bufnr` 等）是各自独立的。`julia_term` 和 `python_term`
+--- 是两次不同的 `new()` 调用，互不干扰，即使在不同 Tab 也一样。
 --- @param opts { name: string, cmd: string|fun(): string, term_width?: integer }
 function M.new(opts)
   local slime_term = require 'custom.slime_term'
@@ -18,6 +21,7 @@ function M.new(opts)
 
   local job_id = 0
   local term_bufnr = nil
+  local saved_width = nil
 
   local function configure_slime_job(bufnr)
     if job_id <= 0 then
@@ -50,14 +54,14 @@ function M.new(opts)
     local win = vim.fn.bufwinid(term_bufnr)
     if win ~= -1 then
       vim.api.nvim_set_current_win(win)
-      vim.api.nvim_win_set_width(win, term_width)
+      vim.api.nvim_win_set_width(win, saved_width or term_width)
       slime_term.scroll_buf(term_bufnr)
       return
     end
     vim.cmd 'topleft vsplit'
     vim.cmd.wincmd 'H'
     vim.api.nvim_win_set_buf(0, term_bufnr)
-    vim.api.nvim_win_set_width(0, term_width)
+    vim.api.nvim_win_set_width(0, saved_width or term_width)
     slime_term.scroll_buf(term_bufnr)
     vim.cmd.wincmd 'p'
   end
@@ -74,6 +78,7 @@ function M.new(opts)
       vim.notify('Cannot hide the ' .. name .. ' terminal when it is the only window', vim.log.levels.WARN, { title = title })
       return
     end
+    saved_width = vim.api.nvim_win_get_width(win)
     vim.api.nvim_win_close(win, true)
   end
 
