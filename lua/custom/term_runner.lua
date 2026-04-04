@@ -95,6 +95,12 @@ function M.new(opts)
     vim.api.nvim_win_set_width(0, term_width)
     slime_term.scroll_buf(term_bufnr)
     job_id = vim.bo.channel
+    vim.api.nvim_create_autocmd('BufEnter', {
+      buffer = term_bufnr,
+      callback = function()
+        vim.cmd.startinsert()
+      end,
+    })
     configure_slime_job(source_buf)
     vim.cmd.wincmd 'p'
   end
