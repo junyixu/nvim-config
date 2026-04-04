@@ -82,31 +82,20 @@ function M.open()
   local source_buf = vim.api.nvim_get_current_buf()
   vim.cmd 'topleft vsplit'
   vim.cmd.wincmd 'H'
-  vim.cmd.term()
-  vim.opt_local.wrap = false
-  term_bufnr = vim.api.nvim_get_current_buf()
-  vim.api.nvim_win_set_width(0, term_width)
-  slime_term.scroll_buf(term_bufnr)
-  job_id = vim.bo.channel
-
-  -- 1. 定义基础命令
   local cmd = 'julia --banner=no --project=.'
-
-  -- 2. 查找当前目录下所有以 Sysimage.so 结尾的文件
-  -- 第三个参数 true 表示返回一个 table (list)，方便判断
   local sysimages = vim.fn.glob('*Sysimage.so', false, true)
-
-  -- 3. 如果找到了至少一个文件，取第一个并追加 -J 参数
   if not vim.tbl_isempty(sysimages) then
     local image = sysimages[1]
     cmd = cmd .. ' -J' .. image
     vim.notify('🚀 Auto-detected Sysimage: ' .. image, vim.log.levels.INFO)
   end
 
-  -- 4. 补上换行符
-  cmd = cmd .. '\r\n'
-
-  vim.fn.chansend(job_id, { cmd })
+  vim.cmd('terminal ' .. cmd)
+  vim.opt_local.wrap = false
+  term_bufnr = vim.api.nvim_get_current_buf()
+  vim.api.nvim_win_set_width(0, term_width)
+  slime_term.scroll_buf(term_bufnr)
+  job_id = vim.bo.channel
   configure_slime_job(source_buf)
   vim.cmd.wincmd 'p'
 end
