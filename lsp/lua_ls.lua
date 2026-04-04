@@ -66,31 +66,40 @@
 --- * [Lua.workspace.library](https://luals.github.io/wiki/settings/#workspacelibrary)
 ---
 
-local root_markers1 = {
-  '.emmyrc.json',
-  '.luarc.json',
-  '.luarc.jsonc',
-}
-local root_markers2 = {
-  '.luacheckrc',
-  '.stylua.toml',
-  'stylua.toml',
-  'selene.toml',
-  'selene.yml',
-}
-
 ---@type vim.lsp.Config
 return {
   cmd = { 'lua-language-server' },
   filetypes = { 'lua' },
-  root_markers = vim.fn.has('nvim-0.11.3') == 1 and { root_markers1, root_markers2, { '.git' } }
-    or vim.list_extend(vim.list_extend(root_markers1, root_markers2), { '.git' }),
-  ---@type lspconfig.settings.lua_ls
+  root_markers = vim.fn.has('nvim-0.11.3') == 1
+    and {
+      { '.emmyrc.json', '.luarc.json', '.luarc.jsonc' },
+      { '.luacheckrc', '.stylua.toml', 'stylua.toml', 'selene.toml', 'selene.yml' },
+      { '.git' },
+    }
+    or vim.list_extend(
+      vim.list_extend(
+        { '.emmyrc.json', '.luarc.json', '.luarc.jsonc' },
+        { '.luacheckrc', '.stylua.toml', 'stylua.toml', 'selene.toml', 'selene.yml' }
+      ),
+      { '.git' }
+    ),
   settings = {
     Lua = {
       codeLens = { enable = true },
       hint = { enable = true, semicolon = 'Disable' },
+      runtime = {
+        version = 'LuaJIT',
+        path = { '?.lua', '?/init.lua' },
+        pathStrict = true,
+      },
+      workspace = {
+        checkThirdParty = false,
+        -- 对应 :LazyDev debug 里算出来的那两条路径
+        library = {
+          vim.env.VIMRUNTIME,
+          vim.fn.stdpath('config') .. '/lua',
+        },
+      },
     },
   },
 }
-
