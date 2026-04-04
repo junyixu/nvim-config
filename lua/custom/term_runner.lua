@@ -98,7 +98,11 @@ function M.new(opts)
     vim.api.nvim_create_autocmd('BufEnter', {
       buffer = term_bufnr,
       callback = function()
-        vim.cmd.startinsert()
+        vim.schedule(function()
+          if vim.api.nvim_get_current_buf() == term_bufnr then
+            vim.cmd.startinsert()
+          end
+        end)
       end,
     })
     configure_slime_job(source_buf)
