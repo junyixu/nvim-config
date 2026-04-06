@@ -1,4 +1,5 @@
 local julia_term = require 'custom.julia_term'
+vim.api.nvim_create_user_command('JuliaTerm', function() julia_term.open() end, {})
 
 vim.keymap.set('n', '<leader>st', julia_term.open, { buffer = true, desc = 'open julia term' })
 vim.keymap.set('n', '<leader>tt', julia_term.toggle, { buffer = true, desc = 'toggle julia term' })
