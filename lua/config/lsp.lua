@@ -49,7 +49,6 @@ vim.keymap.set('n', '<leader>th', function()
   end
 end, { desc = 'Toggle Inlay Hints' })
 
-vim.lsp.set_log_level 'ERROR'
 vim.lsp.enable 'pyright'
 vim.lsp.enable 'lua_ls'
 vim.lsp.enable 'stylua'
@@ -77,15 +76,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
       end
     end
 
-    map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
-    map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
-    map('grr', snacks_picker('lsp_references', vim.lsp.buf.references), '[G]oto [R]eferences')
-    map('gri', snacks_picker('lsp_implementations', vim.lsp.buf.implementation), '[G]oto [I]mplementation')
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    -- :help grr
     map('grd', snacks_picker('lsp_definitions', vim.lsp.buf.definition), '[G]oto [D]efinition')
     map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-    map('gO', snacks_picker('lsp_symbols', vim.lsp.buf.document_symbol), 'Open Document Symbols')
     map('gW', snacks_picker('lsp_workspace_symbols', vim.lsp.buf.workspace_symbol), 'Open Workspace Symbols')
-    map('grt', snacks_picker('lsp_type_definitions', vim.lsp.buf.type_definition), '[G]oto [T]ype Definition')
 
     local function client_supports_method(client, method, bufnr)
       if vim.fn.has 'nvim-0.11' == 1 then
