@@ -1,5 +1,6 @@
 local M = require('custom.term_runner').new({
   name = 'Julia',
+  term_width = 80,
   cmd = function()
     local cmd = 'julia --banner=no --project=.'
     local sysimages = vim.fn.glob('*Sysimage.so', false, true)
