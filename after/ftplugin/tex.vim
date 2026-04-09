@@ -7,8 +7,3 @@ nnoremap <buffer> <localleader>lf :call vimtex#fzf#run('ctli', g:fzf_layout)<cr>
 " default: ".,w,b,u,t,i"
 " 更改 <C-n> 补全内容，不加标签
 setlocal cpt-=t
-
-let g:ale_lint_on_text_changed = 'never'
-let g:ale_lint_on_insert_leave = 0
-
-autocmd VimEnter * ++once call timer_start(1000, function('tex#lazy_load_ale'))
