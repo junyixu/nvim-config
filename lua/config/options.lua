@@ -21,12 +21,20 @@ vim.o.showmode = false
 --  See `:help 'clipboard'`
 --  我希望同步 * 剪贴板，而不是 + 剪贴板
 vim.schedule(function()
-  if vim.g.has_wl_copy then
-    if vim.g.is_wsl then
-      vim.o.clipboard = 'unnamedplus'
-      return
-    end
-    vim.o.clipboard = 'unnamed'
+  if os.getenv 'SSH_TTY' then
+    vim.g.clipboard = {
+      name = 'OSC 52',
+      copy = {
+        ['+'] = require('vim.ui.clipboard.osc52').copy '+',
+        ['*'] = require('vim.ui.clipboard.osc52').copy '*',
+      },
+      paste = {
+        ['+'] = require('vim.ui.clipboard.osc52').paste '+',
+        ['*'] = require('vim.ui.clipboard.osc52').paste '*',
+      },
+    }
+  else
+    vim.o.clipboard = vim.g.is_wsl and 'unnamedplus' or 'unnamed'
   end
 end)
 
