@@ -81,8 +81,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Pre-fill picker with Julia type annotations (e.g. ::ParticleLocation)
     -- from the current line, so multiple method definitions can be filtered quickly.
     map('grd', function()
+      if vim.bo.filetype ~= 'julia' then
+        return vim.lsp.buf.definition()
+      end
       local types = {}
-      for ann in vim.api.nvim_get_current_line():gmatch('::[%w%.]+') do
+      for ann in vim.api.nvim_get_current_line():gmatch '::[%w%.]+' do
         types[#types + 1] = ann
       end
 
