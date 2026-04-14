@@ -64,11 +64,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
     end
 
-    local function snacks_picker(method, fallback)
+    local function snacks_picker(method, fallback, opts)
       return function()
         local ok, snacks = pcall(require, 'snacks')
         if ok and snacks.picker and snacks.picker[method] then
-          return snacks.picker[method]()
+          return snacks.picker[method](opts or {})
         end
         if fallback then
           return fallback()
@@ -78,7 +78,20 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     -- :help grr
-    map('grd', snacks_picker('lsp_definitions', vim.lsp.buf.definition), '[G]oto [D]efinition')
+    -- Pre-fill picker with Julia type annotations (e.g. ::ParticleLocation)
+    -- from the current line, so multiple method definitions can be filtered quickly.
+    map('grd', function()
+      local types = {}
+      for ann in vim.api.nvim_get_current_line():gmatch('::[%w%.]+') do
+        types[#types + 1] = ann
+      end
+
+      local ok, snacks = pcall(require, 'snacks')
+      if ok and snacks.picker then
+        return snacks.picker.lsp_definitions { pattern = types[1] }
+      end
+      vim.lsp.buf.definition()
+    end, '[G]oto [D]efinition')
     map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
     map('gW', snacks_picker('lsp_workspace_symbols', vim.lsp.buf.workspace_symbol), 'Open Workspace Symbols')
 
