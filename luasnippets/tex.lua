@@ -123,7 +123,7 @@ local math_snippets = {
   -- \alpha1 -> \alpha_1
   maths({ trig = '(\\%a-)(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
 
-  parse_math(
+  parse(
     { trig = 'beg', name = 'begin...end' },
     [[
   \begin{${1:env}}
