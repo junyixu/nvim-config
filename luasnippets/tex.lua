@@ -20,7 +20,7 @@ local decorator = {
   condition = pipe { is_math, no_backslash },
 }
 
-local parse_snippet = ls.extend_decorator.apply(ls.parser.parse_snippet, decorator) --[[@as function]]
+local parse_math = ls.extend_decorator.apply(ls.parser.parse_snippet, decorator) --[[@as function]]
 local maths = ls.extend_decorator.apply(ls.snippet, decorator) --[[@as function]]
 
 local function paren_fraction(_, snip)
@@ -68,68 +68,60 @@ local function cap(idx)
   end)
 end
 
-local greeks_snipets = {
-  parse({ trig = ',a', name = 'alpha', snippetType = 'autosnippet' }, '\\alpha'),
+local greeks_snippets = {
+  parse_math({ trig = ',a', name = 'alpha', snippetType = 'autosnippet' }, '\\alpha'),
   -- parse({ trig = ',a', name = 'alpha' }, '\\alpha'),
-  parse({ trig = ',b', name = 'beta', snippetType = 'autosnippet' }, '\\beta'),
-  parse({ trig = ',g', name = 'gamma', snippetType = 'autosnippet' }, '\\gamma'),
-  parse({ trig = ',G', name = 'Gamma', snippetType = 'autosnippet' }, '\\Gamma'),
-  parse({ trig = ',d', name = 'delta', snippetType = 'autosnippet' }, '\\delta'),
-  parse({ trig = ',D', name = 'Delta', snippetType = 'autosnippet' }, '\\Delta'),
-  parse({ trig = ',r', name = 'rho', snippetType = 'autosnippet' }, '\\rho'),
-  parse({ trig = ',c', name = 'chi', snippetType = 'autosnippet' }, '\\chi'),
-  parse({ trig = ',x', name = 'xi', snippetType = 'autosnippet' }, '\\xi'),
-  parse({ trig = ',z', name = 'zeta', snippetType = 'autosnippet' }, '\\zeta'),
-  parse({ trig = ',s', name = 'sigma', snippetType = 'autosnippet' }, '\\sigma'),
-  parse({ trig = ',S', name = 'Sigma', snippetType = 'autosnippet' }, '\\Sigma'),
-  parse({ trig = ',t', name = 'tau', snippetType = 'autosnippet' }, '\\tau'),
-  parse({ trig = ',o', name = 'omega', snippetType = 'autosnippet' }, '\\omega'),
-  parse({ trig = ',O', name = 'Omega', snippetType = 'autosnippet' }, '\\Omega'),
-  parse({ trig = ',m', name = 'mu', snippetType = 'autosnippet' }, '\\mu'),
-  parse({ trig = ',n', name = 'nu', snippetType = 'autosnippet' }, '\\nu'),
-  parse({ trig = ',q', name = 'theta', snippetType = 'autosnippet' }, '\\theta'),
-  parse({ trig = ',f', name = 'varphi', snippetType = 'autosnippet' }, '\\varphi'),
-  parse({ trig = ',F', name = 'Phi', snippetType = 'autosnippet' }, '\\Phi'),
-  parse({ trig = ',e', name = 'epsilon', snippetType = 'autosnippet' }, '\\epsilon'),
-  parse({ trig = ',,f', name = 'phi', snippetType = 'autosnippet', priority = 1001 }, '\\phi'),
-  parse({ trig = ',e', name = 'varepsilon', snippetType = 'autosnippet' }, '\\varepsilon'),
-  parse({ trig = ',,e', name = 'epsilon', snippetType = 'autosnippet', priority = 1001 }, '\\epsilon'),
-  parse({ trig = ',l', name = 'lambda', snippetType = 'autosnippet' }, '\\lambda'),
-  parse({ trig = ',L', name = 'Lambda', snippetType = 'autosnippet' }, '\\Lambda'),
-  parse({ trig = ',p', name = 'pi', snippetType = 'autosnippet' }, '\\pi'),
-  parse({ trig = ',k', name = 'kappa', snippetType = 'autosnippet' }, '\\kappa'),
-  parse({ trig = ',y', name = 'psi', snippetType = 'autosnippet' }, '\\psi'),
-  parse({ trig = ',6', name = 'partial', snippetType = 'autosnippet' }, '\\partial'),
-  parse({ trig = ',8', name = 'infty', snippetType = 'autosnippet' }, '\\infty'),
+  parse_math({ trig = ',b', name = 'beta', snippetType = 'autosnippet' }, '\\beta'),
+  parse_math({ trig = ',g', name = 'gamma', snippetType = 'autosnippet' }, '\\gamma'),
+  parse_math({ trig = ',G', name = 'Gamma', snippetType = 'autosnippet' }, '\\Gamma'),
+  parse_math({ trig = ',d', name = 'delta', snippetType = 'autosnippet' }, '\\delta'),
+  parse_math({ trig = ',D', name = 'Delta', snippetType = 'autosnippet' }, '\\Delta'),
+  parse_math({ trig = ',r', name = 'rho', snippetType = 'autosnippet' }, '\\rho'),
+  parse_math({ trig = ',c', name = 'chi', snippetType = 'autosnippet' }, '\\chi'),
+  parse_math({ trig = ',x', name = 'xi', snippetType = 'autosnippet' }, '\\xi'),
+  parse_math({ trig = ',z', name = 'zeta', snippetType = 'autosnippet' }, '\\zeta'),
+  parse_math({ trig = ',s', name = 'sigma', snippetType = 'autosnippet' }, '\\sigma'),
+  parse_math({ trig = ',S', name = 'Sigma', snippetType = 'autosnippet' }, '\\Sigma'),
+  parse_math({ trig = ',t', name = 'tau', snippetType = 'autosnippet' }, '\\tau'),
+  parse_math({ trig = ',o', name = 'omega', snippetType = 'autosnippet' }, '\\omega'),
+  parse_math({ trig = ',O', name = 'Omega', snippetType = 'autosnippet' }, '\\Omega'),
+  parse_math({ trig = ',m', name = 'mu', snippetType = 'autosnippet' }, '\\mu'),
+  parse_math({ trig = ',n', name = 'nu', snippetType = 'autosnippet' }, '\\nu'),
+  parse_math({ trig = ',q', name = 'theta', snippetType = 'autosnippet' }, '\\theta'),
+  parse_math({ trig = ',f', name = 'varphi', snippetType = 'autosnippet' }, '\\varphi'),
+  parse_math({ trig = ',F', name = 'Phi', snippetType = 'autosnippet' }, '\\Phi'),
+  parse_math({ trig = ',e', name = 'epsilon', snippetType = 'autosnippet' }, '\\epsilon'),
+  parse_math({ trig = ',,f', name = 'phi', snippetType = 'autosnippet', priority = 1001 }, '\\phi'),
+  parse_math({ trig = ',e', name = 'varepsilon', snippetType = 'autosnippet' }, '\\varepsilon'),
+  parse_math({ trig = ',,e', name = 'epsilon', snippetType = 'autosnippet', priority = 1001 }, '\\epsilon'),
+  parse_math({ trig = ',l', name = 'lambda', snippetType = 'autosnippet' }, '\\lambda'),
+  parse_math({ trig = ',L', name = 'Lambda', snippetType = 'autosnippet' }, '\\Lambda'),
+  parse_math({ trig = ',p', name = 'pi', snippetType = 'autosnippet' }, '\\pi'),
+  parse_math({ trig = ',k', name = 'kappa', snippetType = 'autosnippet' }, '\\kappa'),
+  parse_math({ trig = ',y', name = 'psi', snippetType = 'autosnippet' }, '\\psi'),
+  parse_math({ trig = ',6', name = 'partial', snippetType = 'autosnippet' }, '\\partial'),
+  parse_math({ trig = ',8', name = 'infty', snippetType = 'autosnippet' }, '\\infty'),
 }
 
-for _, snippet in ipairs(greeks_snipets) do
-  snippet.wordTrig = false
-end
-
-local math_snipets = {
-  s(
+local math_snippets = {
+  maths(
     {
-      -- trig 是正则表达式
-      -- (.+) 捕获前面所有的字符
-      -- <C-/> 在这里假设你直接输入该字符，或通过 mapping 触发
-      -- 注意：如果你的终端将 <C-/> 发送为特定字符，请替换下方触发词
       trig = '(%S+)//',
       priority = 1,
       regTrig = true,
       wordTrig = false,
-      snippetType = 'autosnippet', -- 推荐使用自动触发
+      snippetType = 'autosnippet',
     },
     fmta([[ \frac{<>}{<>}<> ]], {
-      cap(1), -- 填入第一个捕获组的内容，即 \sqrt{3}
-      i(1), -- 分母位置
-      i(0), -- 退出位置
+      cap(1),
+      i(1),
+      i(0),
     })
   ),
   -- a1 -> a_1
-  s({ trig = '([%a])(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
+  maths({ trig = '([%a])(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
   -- \alpha1 -> \alpha_1
-  s({ trig = '(\\%a-)(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
+  maths({ trig = '(\\%a-)(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
 
   parse(
     { trig = 'beg', name = 'begin...end' },
@@ -137,6 +129,15 @@ local math_snipets = {
   \begin{${1:env}}
   $0
   \end{$1}
+  ]]
+  ),
+
+  parse(
+    { trig = 'eq', name = 'begin equation end' },
+    [[
+  \begin{equation}
+  $0
+  \end{equation}
   ]]
   ),
   --   s(
@@ -151,74 +152,74 @@ local math_snipets = {
   --     )
   --   ),
 
-  s({ trig = 'pdv', name = 'partial derivative' }, fmta('\\frac{\\partial <>}{\\partial <>}', { i(1, 'y'), i(2, 'x') })),
-  s({ trig = 'dv', name = 'derivative', priority = 100 }, fmta('\\frac{\\mathrm{d} <>}{\\mathrm{d} <>}', { i(1, 'y'), i(2, 'x') })),
-  parse({ trig = 'lap', name = 'laplace', snippetType = 'autosnippet' }, '\\nabla^2 '),
-  parse({ trig = 'grad', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla}'),
-  parse({ trig = 'curl', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla} \\times '),
-  parse({ trig = 'div', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla} \\cdot '),
+  maths({ trig = 'pdv', name = 'partial derivative' }, fmta('\\frac{\\partial <>}{\\partial <>}', { i(1, 'y'), i(2, 'x') })),
+  maths({ trig = 'dv', name = 'derivative', priority = 100 }, fmta('\\frac{\\mathrm{d} <>}{\\mathrm{d} <>}', { i(1, 'y'), i(2, 'x') })),
+  parse_math({ trig = 'lap', name = 'laplace', snippetType = 'autosnippet' }, '\\nabla^2 '),
+  parse_math({ trig = 'grad', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla}'),
+  parse_math({ trig = 'curl', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla} \\times '),
+  parse_math({ trig = 'div', snippetType = 'autosnippet' }, '\\boldsymbol{\\nabla} \\cdot '),
   -- \alpha,. -> \boldsymbol{\alpha}
-  s({ trig = '(\\?%a+),%.', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
-  s({ trig = '(\\?%a+)%.,', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
+  maths({ trig = '(\\?%a+),%.', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
+  maths({ trig = '(\\?%a+)%.,', regTrig = true, snippetType = 'autosnippet', desc = 'Vector postfix' }, fmta('\\boldsymbol{<>}', { cap(1) })),
 
-  parse({ trig = 'op', name = 'operator' }, '\\operatorname{$1}'),
+  parse_math({ trig = 'op', name = 'operator' }, '\\operatorname{$1}'),
 
-  parse({ trig = 'OO', snippetType = 'autosnippet', name = 'emptyset' }, '\\O'),
-  parse({ trig = 'RR', snippetType = 'autosnippet', name = 'R' }, '\\mathbb{R}'),
-  parse({ trig = 'QQ', snippetType = 'autosnippet', name = 'Q' }, '\\mathbb{Q}'),
-  parse({ trig = 'ZZ', snippetType = 'autosnippet', name = 'Z' }, '\\mathbb{Z}'),
-  parse({ trig = 'NN', snippetType = 'autosnippet', name = 'N' }, '\\mathbb{N}'),
+  parse_math({ trig = 'OO', snippetType = 'autosnippet', name = 'emptyset' }, '\\O'),
+  parse_math({ trig = 'RR', snippetType = 'autosnippet', name = 'R' }, '\\mathbb{R}'),
+  parse_math({ trig = 'QQ', snippetType = 'autosnippet', name = 'Q' }, '\\mathbb{Q}'),
+  parse_math({ trig = 'ZZ', snippetType = 'autosnippet', name = 'Z' }, '\\mathbb{Z}'),
+  parse_math({ trig = 'NN', snippetType = 'autosnippet', name = 'N' }, '\\mathbb{N}'),
 
-  parse({ trig = 'UU', snippetType = 'autosnippet', name = 'cup' }, '\\cup '),
+  parse_math({ trig = 'UU', snippetType = 'autosnippet', name = 'cup' }, '\\cup '),
 
-  parse({ trig = '==', snippetType = 'autosnippet', name = 'equals' }, [[&= $1 \\\\]]),
-  parse({ trig = '!=', snippetType = 'autosnippet', name = 'not equals' }, '\\neq '),
-  parse({ trig = '~=', name = 'approximate', snippetType = 'autosnippet' }, '\\approx '),
-  parse({ trig = '~~', snippetType = 'autosnippet', name = '~' }, '\\sim '),
+  parse_math({ trig = '==', snippetType = 'autosnippet', name = 'equals' }, [[&= $1 \\\\]]),
+  parse_math({ trig = '!=', snippetType = 'autosnippet', name = 'not equals' }, '\\neq '),
+  parse_math({ trig = '~=', name = 'approximate', snippetType = 'autosnippet' }, '\\approx '),
+  parse_math({ trig = '~~', snippetType = 'autosnippet', name = '~' }, '\\sim '),
 
-  parse({ trig = '__', wordTrig = false, snippetType = 'autosnippet', name = 'subscript' }, '_{$1}$0'),
+  parse_math({ trig = '__', wordTrig = false, snippetType = 'autosnippet', name = 'subscript' }, '_{$1}$0'),
 
-  parse({ trig = 'o', name = 'circle' }, '\\circ'),
+  parse_math({ trig = 'o', name = 'circle' }, '\\circ'),
 
-  parse({ trig = '=>', snippetType = 'autosnippet', name = 'implies' }, '\\implies'),
-  parse({ trig = '=<', snippetType = 'autosnippet', name = 'implied by' }, '\\impliedby'),
+  parse_math({ trig = '=>', snippetType = 'autosnippet', name = 'implies' }, '\\implies'),
+  parse_math({ trig = '=<', snippetType = 'autosnippet', name = 'implied by' }, '\\impliedby'),
 
-  parse({ trig = '<<', snippetType = 'autosnippet', name = '<<' }, '\\ll'),
-  parse({ trig = '>>', snippetType = 'autosnippet', name = '<<' }, '\\gg'),
+  parse_math({ trig = '<<', snippetType = 'autosnippet', name = '<<' }, '\\ll'),
+  parse_math({ trig = '>>', snippetType = 'autosnippet', name = '<<' }, '\\gg'),
 
-  parse({ trig = '<=', snippetType = 'autosnippet', name = 'less equal' }, '\\leq '),
-  parse({ trig = '>=', snippetType = 'autosnippet', name = 'greater equal' }, '\\geq '),
+  parse_math({ trig = '<=', snippetType = 'autosnippet', name = 'less equal' }, '\\leq '),
+  parse_math({ trig = '>=', snippetType = 'autosnippet', name = 'greater equal' }, '\\geq '),
 
-  s({ trig = '(\\?%a+)-', regTrig = true }, fmta('\\bar{<>}', { cap(1) })),
+  maths({ trig = '(\\?%a+)-', regTrig = true }, fmta('\\bar{<>}', { cap(1) })),
   -- trig = "(%a+)hat",
-  s({ trig = '(%a)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
-  s({ trig = '(\\%a+)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
-  parse({ trig = 'EE', name = 'exists', snippetType = 'autosnippet' }, '\\exists '),
-  parse({ trig = 'AA', name = 'forall', snippetType = 'autosnippet' }, '\\forall '),
+  maths({ trig = '(%a)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
+  maths({ trig = '(\\%a+)hat', regTrig = true, snippetType = 'autosnippet' }, fmta('\\hat{<>}', { cap(1) })),
+  parse_math({ trig = 'EE', name = 'exists', snippetType = 'autosnippet' }, '\\exists '),
+  parse_math({ trig = 'AA', name = 'forall', snippetType = 'autosnippet' }, '\\forall '),
 
-  parse({ trig = 'cc', name = 'subset', snippetType = 'autosnippet' }, '\\subset '),
-  parse({ trig = 'ooo', name = '\\infty', snippetType = 'autosnippet' }, '\\infty'),
+  parse_math({ trig = 'cc', name = 'subset', snippetType = 'autosnippet' }, '\\subset '),
+  parse_math({ trig = 'ooo', name = '\\infty', snippetType = 'autosnippet' }, '\\infty'),
 
-  parse({ trig = '<!', name = 'normal', snippetType = 'autosnippet' }, '\\triangleleft '),
+  parse_math({ trig = '<!', name = 'normal', snippetType = 'autosnippet' }, '\\triangleleft '),
 
-  parse({ trig = '->', name = 'to', priority = 100, snippetType = 'autosnippet' }, '\\to '),
-  parse({ trig = '-->', name = 'long to', priority = 200, snippetType = 'autosnippet' }, '\\longrightarrow '),
+  parse_math({ trig = '->', name = 'to', priority = 100, snippetType = 'autosnippet' }, '\\to '),
+  parse_math({ trig = '-->', name = 'long to', priority = 200, snippetType = 'autosnippet' }, '\\longrightarrow '),
 
-  parse({ trig = 'cb', wordTrig = false, snippetType = 'autosnippet', name = 'Cube ^3' }, '^3'),
-  parse({ trig = 'sr', wordTrig = false, snippetType = 'autosnippet', name = 'Square ^2' }, '^2'),
-  parse({ trig = 'td', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{}' }, '^{$1}$0 '),
-  parse({ trig = 'rd', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{()}' }, '^{($1)}$0 '),
+  parse_math({ trig = 'cb', wordTrig = false, snippetType = 'autosnippet', name = 'Cube ^3' }, '^3'),
+  parse_math({ trig = 'sr', wordTrig = false, snippetType = 'autosnippet', name = 'Square ^2' }, '^2'),
+  parse_math({ trig = 'td', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{}' }, '^{$1}$0 '),
+  parse_math({ trig = 'rd', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^{()}' }, '^{($1)}$0 '),
 
-  parse({ trig = 'iff', snippetType = 'autosnippet', wordTrig = true, name = 'iff' }, '\\iff '),
-  parse({ trig = 'stt', snippetType = 'autosnippet', name = 'text subscript' }, '_\\text{$1} $0'),
-  parse({ trig = 'tt', snippetType = 'autosnippet', name = 'text' }, '\\text{$1}$0'),
+  parse_math({ trig = 'iff', snippetType = 'autosnippet', wordTrig = true, name = 'iff' }, '\\iff '),
+  parse_math({ trig = 'stt', snippetType = 'autosnippet', name = 'text subscript' }, '_\\text{$1} $0'),
+  parse_math({ trig = 'tt', snippetType = 'autosnippet', name = 'text' }, '\\text{$1}$0'),
 
-  parse({ trig = '...', desc = '\\dots: \\ldots or \\cdots', name = 'dots', snippetType = 'autosnippet', wordTrig = false }, '\\dots '),
+  parse_math({ trig = '...', desc = '\\dots: \\ldots or \\cdots', name = 'dots', snippetType = 'autosnippet', wordTrig = false }, '\\dots '),
 
-  parse({ trig = '.', name = 'dot product' }, '\\cdot '),
-  parse({ trig = '**', snippetType = 'autosnippet', name = 'dot product', priority = 100 }, '\\cdot '),
-  parse_snippet({ trig = 'xx', snippetType = 'autosnippet', name = 'cross product' }, '\\times '),
-  parse_snippet({ trig = ':=', snippetType = 'autosnippet', name = 'colon equals (lhs defined as rhs)' }, '\\coloneqq '),
+  parse_math({ trig = '.', name = 'dot product' }, '\\cdot '),
+  parse_math({ trig = '**', snippetType = 'autosnippet', name = 'dot product', priority = 100 }, '\\cdot '),
+  parse_math({ trig = 'xx', snippetType = 'autosnippet', name = 'cross product' }, '\\times '),
+  parse_math({ trig = ':=', snippetType = 'autosnippet', name = 'colon equals (lhs defined as rhs)' }, '\\coloneqq '),
 
   -- 用 \pu (physics unit) 代替 siunitx
   -- https://forum.obsidian.md/t/question-about-superscripts-and-subscripts/25941/8
@@ -228,11 +229,6 @@ local math_snipets = {
   -- endsnippet
   -- s({ trig = '([%de%.]+)si', name = 'physics unit', regTrig = true, snippetType = 'autosnippet' }, fmta('\\pu{<>}', { cap(1) })),
 }
-
-for _, snip in ipairs(math_snipets) do
-  snip.condition = is_math
-  snip.show_condition = is_math
-end
 
 origin_snippets = {
   maths(
@@ -379,4 +375,4 @@ origin_snippets = {
   }, { condition = is_math }),
 }
 
-return vim.list_extend(math_snipets, origin_snippets), greeks_snipets
+return vim.list_extend(math_snippets, origin_snippets), greeks_snippets
