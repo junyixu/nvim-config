@@ -131,6 +131,15 @@ local math_snippets = {
   \end{$1}
   ]]
   ),
+
+  parse(
+    { trig = 'eq', name = 'begin equation end' },
+    [[
+  \begin{equation}
+  $0
+  \end{equation}
+  ]]
+  ),
   --   s(
   --     { trig = 'beg', name = 'begin...end' },
   --     fmta(

@@ -48,6 +48,7 @@ return {
 
       for key, query in pairs(select_maps) do
         vim.keymap.set({ 'x', 'o' }, key, function()
+          if vim.bo.filetype == 'tex' then return end
           select.select_textobject(query, 'textobjects')
         end)
       end
@@ -78,6 +79,7 @@ return {
 
       for key, conf in pairs(move_maps) do
         vim.keymap.set({ 'n', 'x', 'o' }, key, function()
+          if vim.bo.filetype == 'tex' then return end
           conf.func(conf.query, 'textobjects')
         end)
       end
