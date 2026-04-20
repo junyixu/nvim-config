@@ -5,5 +5,6 @@ return {
   init = function()
     -- VimTeX configuration goes here, e.g.
     vim.g.vimtex_view_method = "zathura_simple"
+    vim.g.vimtex_mappings_override_existing = 1
   end
 }
