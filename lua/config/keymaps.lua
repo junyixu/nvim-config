@@ -428,7 +428,6 @@ end, { expr = true, desc = 'Quickfix filter (exclude)' })
 
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
-nnoremap <leader>gdp :sil !kitten @ launch --type=overlay --cwd=current git difftool -d --no-gui<cr>
 ]]
 -- if vim.env.TERM == 'xterm-kitty' then
 --   local term = vim.api.nvim_replace_termcodes

@@ -409,11 +409,6 @@ return {
             tpl = [[
         \documentclass[preview,border=0pt,varwidth,12pt]{standalone}
         \usepackage{${packages}}
-
-        \makeatletter
-        \renewenvironment{equation}{\begin{equation*}}{\end{equation*}}
-        \makeatother
-
         \begin{document}
         ${header}
         { \${font_size} \selectfont

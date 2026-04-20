@@ -20,11 +20,6 @@ return {
               },
             })
           end,
-          gemini = function()
-            return require('codecompanion.adapters').extend('gemini', {
-              env = { api_key = os.getenv 'GEMINI_API_KEY', },
-            })
-          end,
           deepseek = function()
             return require('codecompanion.adapters').extend('deepseek', {})
           end,
@@ -53,7 +48,7 @@ return {
                 default = {
                   'codex-acp',
                   '-c',
-                  'api_url="https://qinzhiai.com/v1"',
+                  'api_url="https://api.qinzhiai.com/v1"',
                   '-c',
                   'model="gpt-5.2"',
                 },
