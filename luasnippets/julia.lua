@@ -219,7 +219,7 @@ end
       local result = { 'begin' }
       -- 遍历表格中的所有行
       for _, line in ipairs(selected_lines) do
-        table.insert(result, '    ' .. line)
+        table.insert(result, line)
       end
       table.insert(result, 'end')
       return result
