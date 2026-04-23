@@ -123,3 +123,7 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+vim.api.nvim_create_user_command("CloseOtherUIs", function(args)
+  local keep = tonumber(args.args)
+  require("junyi.close_other_uis").close_other_uis({ keep = keep })
+end, { nargs = "?", desc = "Close all attached UIs except the current/specified one" })
