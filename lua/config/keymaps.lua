@@ -15,7 +15,6 @@ local function tnoremap(lhs, rhs, opts)
   vim.keymap.set('t', lhs, rhs, options)
 end
 
-
 local function nmap(lhs, rhs, opts)
   local defaults = { noremap = false, silent = true }
   local options = vim.tbl_extend('force', defaults, opts or {})
@@ -67,7 +66,33 @@ nnoremap('<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
 nnoremap('<M-w>', '<C-w>', { desc = 'Enter window command mode' })
 -- nnoremap('<C-]>', '<C-w>}', { desc = 'Show definition in preview window' })
 nnoremap('<M-w>O', '<CMD>tab split<CR>', { desc = 'Split the window in a new tab' })
-nnoremap('<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
+-- 退出窗口逻辑：如果是全实例最后一个窗口，则 detach
+nnoremap('<M-q>', function()
+  local wins = vim.api.nvim_list_wins()
+  if #wins > 1 then
+    vim.cmd 'q'
+    return
+  end
+
+  -- 最后一个窗口了，开始判断 UI 状态
+  local uis = vim.api.nvim_list_uis()
+  -- 检查是否存在 channel 1 (通常是 stdio)
+  local has_chan_1 = vim.iter(uis):any(function(ui)
+    return ui.chan == 1
+  end)
+
+  if has_chan_1 then
+    -- 本地终端模式，直接退出
+    vim.cmd 'q'
+  else
+    -- 远程或外部 UI 模式，尝试 detach
+    -- 使用 pcall 防止在不支持 detach 的环境下报错
+    local ok = pcall(vim.cmd, 'detach')
+    if not ok then
+      vim.cmd 'q'
+    end
+  end
+end, { desc = 'Quit window or detach (smart)' })
 nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
