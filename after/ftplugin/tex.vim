@@ -1,0 +1,9 @@
+" 不能放在 ~/.vim/ftplugin
+" 必须放在 ~/.vim/after/ftplugin，
+" 才能在 vim 加载完 fzf 的布局的颜色配置后再加载这行
+nnoremap <buffer> <localleader>lf :call vimtex#fzf#run('ctli', g:fzf_layout)<cr>
+
+" complete 缩写 cpt	
+" default: ".,w,b,u,t,i"
+" 更改 <C-n> 补全内容，不加标签
+setlocal cpt-=t
