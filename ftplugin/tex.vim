@@ -89,6 +89,7 @@ setlocal shiftwidth=2
 setlocal softtabstop=2
 " 设置编辑时制表符占用空格数
 setlocal tabstop=2
+setlocal expandtab
 " let b:indentLine_color_term="81" " 蓝色
 " let b:indentLine_color_gui='#81a2be' " 蓝色
 
