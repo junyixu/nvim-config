@@ -109,6 +109,12 @@ return {
         v = gen_subword_regions,
       },
       n_lines = 100,
+      mappings = {
+        around_next = '',
+        inside_next = '',
+        around_last = '',
+        inside_last = '',
+      },
     }
     require('mini.surround').setup {
       custom_surroundings = {
