@@ -17,7 +17,7 @@ return {
       }
 
       -- 建议只在初次安装或更新时运行，也可以直接写在 config 里
-      -- local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'julia', 'python', 'yaml' }
+      -- local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'julia', 'python', 'yaml', 'comment' }
       -- ts.install(parsers)
 
       vim.api.nvim_create_autocmd('FileType', {
