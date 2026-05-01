@@ -455,25 +455,21 @@ vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 nnoremap <leader>gdp :sil !kitten @ launch --type=overlay --cwd=current git difftool -d --no-gui<cr>
 ]]
--- if vim.env.TERM == 'xterm-kitty' then
---   local term = vim.api.nvim_replace_termcodes
---   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), 'j', { noremap = true })
---   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9002;1u', true, true, true), '<M-S-CR>', { noremap = true })
---   --   -- vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), '<Tab>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[105;5u', true, true, true), '<C-i>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[13;2u', true, true, true), '<CR>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[109;5u', true, true, true), '<C-m>', { noremap = true })
---   -- vim.cmd [[
---   -- nnoremap <silent> <M-CR> :tabnew<CR>
---   -- nnoremap <silent> <M-S-CR> :tabclose<CR>
---   -- ]]
--- end
--- vim.cmd [[
--- let &t_TI = "\<Esc>[>4;2m"
--- let &t_TE = "\<Esc>[>4;m"
--- "nnoremap <Tab>f :tabnext<CR>
--- "nnoremap <C-I>f :tabprev<CR>
--- ]]
---
+-- <C-i> 与 <Tab> 分离:
+-- vim/nvim key model 把 <C-i> 归一为 <Tab> (同字节 0x09).
+-- kitty.conf 把 ctrl+i 重映射为 \eOI, 物理 <Tab> 仍发 \t,
+-- 这样 nvim 收到两路独立序列, 可分别绑定.
+--   <Tab>  -> 作为新的 leader 前缀 (<Tab>1..<Tab>9 切到对应 tab)
+--   <C-i>  -> 经 \eOI 还原 :h CTRL-I (jumplist newer)
+vim.keymap.set('n', '<Tab>', '<Nop>', { desc = 'Tab leader prefix' })
+for i = 1, 9 do
+  vim.keymap.set('n', '<Tab>' .. i, i .. 'gt', { desc = 'Go to tab ' .. i })
+end
+vim.keymap.set('n', '<Esc>OI', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
+-- 注意: \eOM 是标准 SS3 keypad-Enter, nvim TUI 把它解码为 <kEnter> keystroke,
+-- keymap 层看到的是 <kEnter>, 不是 raw <Esc>OM. 所以绑 <kEnter> 才对.
+-- (zsh 没这层 SS3 解码, 所以那边可以直接绑 \eOM)
+vim.keymap.set('n', '<kEnter>', '<Cmd>nohlsearch<CR>', { desc = 'Clear search highlight' })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 -- Keymaps moved to config/keymaps.lua
