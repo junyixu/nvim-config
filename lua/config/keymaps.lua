@@ -469,7 +469,13 @@ vim.keymap.set('n', '<Esc>OI', '<C-i>', { desc = 'Jumplist newer (original C-i)'
 -- 注意: \eOM 是标准 SS3 keypad-Enter, nvim TUI 把它解码为 <kEnter> keystroke,
 -- keymap 层看到的是 <kEnter>, 不是 raw <Esc>OM. 所以绑 <kEnter> 才对.
 -- (zsh 没这层 SS3 解码, 所以那边可以直接绑 \eOM)
-vim.keymap.set('n', '<kEnter>', '<Cmd>nohlsearch<CR>', { desc = 'Clear search highlight' })
+vim.keymap.set('n', '<kEnter>', function()
+  local last = vim.fn.histget('cmd', -1)
+  if last == '' then
+    return
+  end
+  vim.cmd(last)
+end, { desc = 'Run last command' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 -- Keymaps moved to config/keymaps.lua
