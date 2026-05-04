@@ -15,7 +15,6 @@ local function tnoremap(lhs, rhs, opts)
   vim.keymap.set('t', lhs, rhs, options)
 end
 
-
 local function nmap(lhs, rhs, opts)
   local defaults = { noremap = false, silent = true }
   local options = vim.tbl_extend('force', defaults, opts or {})
@@ -67,7 +66,33 @@ nnoremap('<M-K>', '<C-w>K', { desc = 'Move window to the upper' })
 nnoremap('<M-w>', '<C-w>', { desc = 'Enter window command mode' })
 -- nnoremap('<C-]>', '<C-w>}', { desc = 'Show definition in preview window' })
 nnoremap('<M-w>O', '<CMD>tab split<CR>', { desc = 'Split the window in a new tab' })
-nnoremap('<M-q>', '<CMD>q<CR>', { desc = 'Quit the current window' })
+-- 退出窗口逻辑：如果是全实例最后一个窗口，则 detach
+nnoremap('<M-q>', function()
+  local wins = vim.api.nvim_list_wins()
+  if #wins > 1 then
+    vim.cmd 'q'
+    return
+  end
+
+  -- 最后一个窗口了，开始判断 UI 状态
+  local uis = vim.api.nvim_list_uis()
+  -- 检查是否存在 channel 1 (通常是 stdio)
+  local has_chan_1 = vim.iter(uis):any(function(ui)
+    return ui.chan == 1
+  end)
+
+  if has_chan_1 then
+    -- 本地终端模式，直接退出
+    vim.cmd 'q'
+  else
+    -- 远程或外部 UI 模式，尝试 detach
+    -- 使用 pcall 防止在不支持 detach 的环境下报错
+    local ok = pcall(vim.cmd, 'detach')
+    if not ok then
+      vim.cmd 'q'
+    end
+  end
+end, { desc = 'Quit window or detach (smart)' })
 nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
@@ -198,10 +223,10 @@ nnoremap('j', 'gj')
 nnoremap('k', 'gk')
 nnoremap('gj', 'j')
 nnoremap('gk', 'k')
-vnoremap('j', 'gj')
-vnoremap('k', 'gk')
-vnoremap('gj', 'j')
-vnoremap('gk', 'k')
+vim.keymap.set('x', 'j', 'gj', { noremap = true, silent = true })
+vim.keymap.set('x', 'k', 'gk', { noremap = true, silent = true })
+vim.keymap.set('x', 'gj', 'j', { noremap = true, silent = true })
+vim.keymap.set('x', 'gk', 'k', { noremap = true, silent = true })
 
 nnoremap('cd', ':tcd %:h<CR>', { desc = 'cd for current tab' })
 -- cmap  expand("")<left><left>
@@ -430,25 +455,27 @@ vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
 nnoremap <leader>gdp :sil !kitten @ launch --type=overlay --cwd=current git difftool -d --no-gui<cr>
 ]]
--- if vim.env.TERM == 'xterm-kitty' then
---   local term = vim.api.nvim_replace_termcodes
---   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), 'j', { noremap = true })
---   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9002;1u', true, true, true), '<M-S-CR>', { noremap = true })
---   --   -- vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[9;2u', true, true, true), '<Tab>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[105;5u', true, true, true), '<C-i>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[13;2u', true, true, true), '<CR>', { noremap = true })
---   --   vim.keymap.set({ 'n', 'i', 'v' }, term('<Esc>[109;5u', true, true, true), '<C-m>', { noremap = true })
---   -- vim.cmd [[
---   -- nnoremap <silent> <M-CR> :tabnew<CR>
---   -- nnoremap <silent> <M-S-CR> :tabclose<CR>
---   -- ]]
--- end
--- vim.cmd [[
--- let &t_TI = "\<Esc>[>4;2m"
--- let &t_TE = "\<Esc>[>4;m"
--- "nnoremap <Tab>f :tabnext<CR>
--- "nnoremap <C-I>f :tabprev<CR>
--- ]]
---
+-- <C-i> 与 <Tab> 分离:
+-- vim/nvim key model 把 <C-i> 归一为 <Tab> (同字节 0x09).
+-- kitty.conf 把 ctrl+i 重映射为 \eOI, 物理 <Tab> 仍发 \t,
+-- 这样 nvim 收到两路独立序列, 可分别绑定.
+--   <Tab>  -> 作为新的 leader 前缀 (<Tab>1..<Tab>9 切到对应 tab)
+--   <C-i>  -> 经 \eOI 还原 :h CTRL-I (jumplist newer)
+vim.keymap.set('n', '<Tab>', '<Nop>', { desc = 'Tab leader prefix' })
+for i = 1, 9 do
+  vim.keymap.set('n', '<Tab>' .. i, i .. 'gt', { desc = 'Go to tab ' .. i })
+end
+vim.keymap.set('n', '<Esc>OI', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
+-- 注意: \eOM 是标准 SS3 keypad-Enter, nvim TUI 把它解码为 <kEnter> keystroke,
+-- keymap 层看到的是 <kEnter>, 不是 raw <Esc>OM. 所以绑 <kEnter> 才对.
+-- (zsh 没这层 SS3 解码, 所以那边可以直接绑 \eOM)
+vim.keymap.set('n', '<kEnter>', function()
+  local last = vim.fn.histget('cmd', -1)
+  if last == '' then
+    return
+  end
+  vim.cmd(last)
+end, { desc = 'Run last command' })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 -- Keymaps moved to config/keymaps.lua

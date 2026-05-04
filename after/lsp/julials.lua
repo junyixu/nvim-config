@@ -1,4 +1,5 @@
 -- ~/.config/nvim/after/lsp/julials.lua
+local joinpath = vim.fs.joinpath
 
 local function exists(path)
   return vim.uv.fs_stat(path) ~= nil
@@ -7,17 +8,15 @@ end
 local function get_julia_env()
   -- 定义默认的 fallback 路径
   local default_path = vim.fn.expand('~/.julia/environments/nvim-lspconfig/')
-  local manifest_path = vim.fn.getcwd() .. '/Manifest.toml'
+  local manifest_path = joinpath(vim.uv.cwd(), 'Manifest.toml')
 
   if exists(manifest_path) then
     -- 使用 io.lines 逐行读取，对大文件更友好
     for line in io.lines(manifest_path) do
       -- 使用 Lua Pattern 提取 major.minor 版本号 (例如 "1.12")
-      local version = string.match(line, '^julia_version%s*=%s*"(%d+%.%d+)')
-      
+      local version = line:match('^julia_version%s*=%s*"(%d+%.%d+)')
       if version then
-        local lsp_path = vim.fn.expand('~/.julia/environments/lsp' .. version .. '/')
-        -- 检查该版本的环境路径是否存在
+        local lsp_path = joinpath('~/.julia/environments/lsp' , version, '')
         if exists(lsp_path) then
           return lsp_path
         end
@@ -32,7 +31,7 @@ end
 
 -- 最终得到的路径
 local env_path = get_julia_env()
-local sysimage_path = env_path .. 'julials.so'
+local sysimage_path = joinpath(env_path, 'julials.so')
 
 -- 1. 定义基础命令（所有情况通用的部分）
 local final_cmd = {
