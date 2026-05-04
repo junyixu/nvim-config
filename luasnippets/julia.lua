@@ -219,12 +219,54 @@ end
       local result = { 'begin' }
       -- 遍历表格中的所有行
       for _, line in ipairs(selected_lines) do
-        table.insert(result, '    ' .. line)
+        table.insert(result, line)
       end
       table.insert(result, 'end')
       return result
     end, {}),
   }),
+
+  -- From vim-snippets/UltiSnips/julia.snippets
+  parse(
+    { trig = 'docf', desc = 'function documentation', condition = conds.line_begin },
+    [[
+#' @description
+#'
+#' ${1:function description}
+#'
+#' ${2:@param ${3:name}::${4:Type} ${5:Description}}
+#'
+#' ${6:@returns ${7:name}::${8:Type} ${9:Description}}
+#'
+#' @examples
+#'
+#' ${10: function call examples}
+]]
+  ),
+  parse(
+    { trig = 'doct', desc = 'type definition', condition = conds.line_begin },
+    [[
+#' @description
+#'
+#' ${1:type description}
+#'
+#' ${2:@field ${3:name}::${4:Type} ${5:Description}}
+#'
+#' @examples
+#'
+#' ${10: constructor examples}
+]]
+  ),
+  parse(
+    { trig = 'par', desc = 'function parameter documentation', condition = conds.line_begin },
+    [[#' @param ${1:name}::${2:Type} ${0:Description}]]
+  ),
+  parse(
+    { trig = 'fld', desc = 'type field documentation', condition = conds.line_begin },
+    [[#' @field ${1:name}::${2:Type} ${0:Description}]]
+  ),
+  parse({ trig = 'deb', desc = 'Debugger breakpoint', condition = conds.line_begin }, 'Main.@bp'),
+  parse({ trig = 'inf', desc = 'Infiltrator breakpoint', condition = conds.line_begin }, 'Main.@infiltrate'),
 }
 
 -- Add unicode snippets using for loop

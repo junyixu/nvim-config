@@ -137,6 +137,7 @@ return {
       per_filetype = {
         codecompanion = { 'codecompanion' },
         markdown = { 'lsp', 'thesaurus' },
+        tex = { 'lsp', 'thesaurus' },
       },
     },
     snippets = { preset = 'luasnip' },
