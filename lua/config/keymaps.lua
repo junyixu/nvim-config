@@ -453,8 +453,14 @@ end, { expr = true, desc = 'Quickfix filter (exclude)' })
 
 vim.cmd [[nnoremap <leader>gdv :Gvdiffsplit<cr>
 nnoremap <leader>gds :Ghdiffsplit<cr>
-nnoremap <leader>gdp :sil !kitten @ launch --type=overlay --cwd=current git difftool -d --no-gui<cr>
 ]]
+
+vim.keymap.set(
+  'n',
+  '<leader>gdp',
+  ':sil !kitten @ launch --type=overlay --cwd=current git difftool -d --no-gui<cr>',
+  { desc = 'Git difftool in kitty overlay' }
+)
 -- <C-i> 与 <Tab> 分离:
 -- vim/nvim key model 把 <C-i> 归一为 <Tab> (同字节 0x09).
 -- kitty.conf 把 ctrl+i 重映射为 \eOI, 物理 <Tab> 仍发 \t,
