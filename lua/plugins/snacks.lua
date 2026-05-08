@@ -409,7 +409,7 @@ return {
         desc = '[/] Fuzzily search in current buffer',
       },
       {
-        '<leader>s/',
+        '<leader>f/',
         function()
           require('snacks').picker.grep_buffers()
         end,
