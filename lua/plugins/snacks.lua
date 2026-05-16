@@ -478,6 +478,7 @@ return {
           -- * end comment:   `// snacks: header end`
           typst = {
             tpl = [[
+        #import "@preview/physica:0.9.8": *
         #set page(width: auto, height: auto, margin: (x: 2pt, y: 2pt))
         #show math.equation.where(block: false): set text(top-edge: "bounds", bottom-edge: "bounds")
         #set text(size: 12pt, fill: rgb("${color}"))

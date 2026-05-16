@@ -56,6 +56,7 @@ vim.lsp.enable 'julials'
 vim.lsp.enable 'clangd'
 vim.lsp.enable 'marksman'
 vim.lsp.enable 'texlab'
+vim.lsp.enable 'tinymist'
 
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
