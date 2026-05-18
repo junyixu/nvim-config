@@ -246,6 +246,84 @@ local function terminal_aware_jump(picker, item, action)
   end, 10)
 end
 
+local function get_tabs()
+  local tabs = {}
+  local tabpages = vim.api.nvim_list_tabpages()
+  for i, tabpage in ipairs(tabpages) do
+    local wins = vim.api.nvim_tabpage_list_wins(tabpage)
+    local cur_win = vim.api.nvim_tabpage_get_win(tabpage)
+    local cur_buf = vim.api.nvim_win_get_buf(cur_win)
+    local cur_name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(cur_buf), ':t')
+    if cur_name == '' then
+      cur_name = '[No Name]'
+    end
+
+    local preview_lines = {}
+    local search_parts = { tostring(i), cur_name }
+    table.insert(preview_lines, ('Tab %d: %d window%s'):format(i, #wins, #wins == 1 and '' or 's'))
+    table.insert(preview_lines, ('%-6s %-8s %s'):format('WinID', 'Buf#', 'File'))
+    table.insert(preview_lines, string.rep('-', 40))
+    for _, win in ipairs(wins) do
+      local win_buf = vim.api.nvim_win_get_buf(win)
+      local bufname = vim.api.nvim_buf_get_name(win_buf)
+      if bufname == '' then
+        bufname = '[No Name]'
+      end
+      local rel = vim.fn.fnamemodify(bufname, ':~:.')
+      local base = vim.fn.fnamemodify(bufname, ':t')
+      table.insert(search_parts, rel)
+      table.insert(search_parts, base)
+      local win_marker = (win == cur_win) and '->' or '  '
+      table.insert(preview_lines, ('%s %-6d %-8d %s'):format(win_marker, win, win_buf, rel))
+    end
+    if #wins == 0 then
+      table.insert(preview_lines, 'No windows in tab')
+    end
+
+    table.insert(tabs, {
+      idx = i,
+      tabnr = i,
+      tabpage = tabpage,
+      label = ('Tab %d: %s'):format(i, cur_name),
+      text = table.concat(search_parts, ' '),
+      preview = {
+        text = table.concat(preview_lines, '\n'),
+        ft = 'text',
+      },
+    })
+  end
+  return tabs
+end
+
+local function tabs_picker()
+  require('snacks').picker {
+    title = 'Tabs',
+    items = get_tabs(),
+    format = function(item)
+      return { { item.label, 'SnacksPickerLabel' } }
+    end,
+    matcher = { fuzzy = true, smartcase = true },
+    confirm = function(picker, item)
+      picker:close()
+      vim.cmd(('tabnext %d'):format(item.tabnr))
+    end,
+    preview = 'preview',
+    actions = {
+      close_tab = function(picker, item)
+        picker:close()
+        vim.cmd(('tabclose %d'):format(item.tabnr))
+      end,
+    },
+    win = {
+      input = {
+        keys = {
+          ['d'] = { 'close_tab', mode = { 'n' } },
+        },
+      },
+    },
+  }
+end
+
 return {
   {
     'junyixu/snacks.nvim',
@@ -331,7 +409,7 @@ return {
         desc = '[/] Fuzzily search in current buffer',
       },
       {
-        '<leader>s/',
+        '<leader>f/',
         function()
           require('snacks').picker.grep_buffers()
         end,
@@ -351,6 +429,11 @@ return {
           require('snacks').picker.files { cwd = vim.fs.joinpath(vim.fn.stdpath 'data', 'lazy') }
         end,
         desc = '[F]ind Neovim [P]lug files',
+      },
+      {
+        '<leader>ft',
+        tabs_picker,
+        desc = '[F]ind [T]abs (fuzzy)',
       },
     },
     ---@type snacks.Config
@@ -395,6 +478,7 @@ return {
           -- * end comment:   `// snacks: header end`
           typst = {
             tpl = [[
+        #import "@preview/physica:0.9.8": *
         #set page(width: auto, height: auto, margin: (x: 2pt, y: 2pt))
         #show math.equation.where(block: false): set text(top-edge: "bounds", bottom-edge: "bounds")
         #set text(size: 12pt, fill: rgb("${color}"))
