@@ -1,42 +1,4 @@
-" 在 Python 文件中将 Tab 展开成空格
-setlocal expandtab
-
-let b:ycm_hover = {
-  \ 'command': 'GetDoc',
-  \ 'syntax': 'markdown'
-  \ }
-
-" nmap <space>x <Plug>JupyterExecute
-" nmap <space>X <Plug>JupyterExecuteAll
-
 let $PYTHONUNBUFFERED=1
-" =================== jupyter vim ========================={{{
-" Run current file
-"nnoremap <buffer> <silent> <localleader>R :JupyterRunFile<CR>
-"nnoremap <buffer> <silent> <localleader>I :PythonImportThisFile<CR>
-
-"" Change to directory of current file
-"nnoremap <buffer> <silent> <localleader>d :JupyterCd %:p:h<CR>
-
-"" Send a selection of lines
-"nnoremap <buffer> <silent> <localleader>X :JupyterSendCell<CR>
-"nnoremap <buffer> <silent> <localleader><CR> :JupyterSendCell<CR>
-"nnoremap <buffer> <silent> <localleader><C-CR> :JupyterSendCell<CR>
-"nnoremap <buffer> <silent> <localleader>E :JupyterSendRange<CR>
-"" nnoremap <buffer> <localleader><localleader> :JupyterSendRange<CR>
-"nmap     <buffer> <silent> <localleader>r <Plug>JupyterRunTextObj
-"vmap     <buffer> <silent> <localleader>r <Plug>JupyterRunVisual
-"" vmap     <buffer> <silent> <localleader><localleader> <Plug>JupyterRunVisual
-
-"nnoremap <buffer> <silent> <localleader>U :JupyterUpdateShell<CR>
-""
-"" Connect
-"nnoremap <buffer> <silent> <localleader>C :JupyterConnect<CR>
-
-"" Debugging maps
-"nnoremap <buffer> <silent> <localleader>b :PythonSetBreak<CR>
-" =================== end jupyter vim =========================}}}
-
 
 command! PythonNormalModeCreateCell :execute 'normal! :set paste<CR>m`O# %%<ESC>``:set nopaste<CR>'
 command! PythonVisualModeCreateCell :execute 'normal! gvD:set paste<CR>O# %%<CR># %%<ESC>P:set nopaste<CR>'
@@ -74,10 +36,7 @@ noremap <buffer> <localleader>s :call slime#send(expand("<cword>").".shape\r")<C
 
 " ===================== end slime ======================}}}
 
-let g:jupyter_ascending_default_mappings=0
-nmap <buffer> <localLeader>x <Plug>JupyterExecute
-nmap <buffer> <localLeader>X <Plug>JupyterExecuteAll
-nnoremap <leader>r :AsyncRun! -mode=hide  manim -pql % DifferentRotations<cr>
+nnoremap <leader>r :!manim -pql % DifferentRotations<cr>
 nmap <silent><buffer> <CR> <Plug>SlimeLineSend
 xmap <silent><buffer> <CR> <Plug>SlimeRegionSend
 nmap <silent><buffer> <space><space> <Plug>SlimeParagraphSend
