@@ -44,6 +44,12 @@ vim.o.breakindent = true
 -- Save undo history
 vim.o.undofile = true
 
+vim.filetype.add({
+  extension = {
+    ['kitty-session'] = 'kitty',
+  },
+})
+
 vim.o.foldlevel = 3
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
