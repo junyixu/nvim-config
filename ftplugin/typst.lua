@@ -6,11 +6,11 @@ vim.keymap.set('n', 'gO', function()
   }
 end, { buffer = 0, desc = 'Typst headings (snacks)' })
 
-local tw = require("junyi/typst_watch")
+local tw = require 'junyi/typst_watch'
 
-vim.api.nvim_buf_create_user_command(0, "TypstWatch",     tw.start,  {})
-vim.api.nvim_buf_create_user_command(0, "TypstWatchStop", tw.stop,   {})
-vim.api.nvim_buf_create_user_command(0, "TypstWatchToggle", tw.toggle, {})
+vim.api.nvim_buf_create_user_command(0, 'TypstWatch', tw.start, {})
+vim.api.nvim_buf_create_user_command(0, 'TypstWatchStop', tw.stop, {})
+vim.api.nvim_buf_create_user_command(0, 'TypstWatchToggle', tw.toggle, {})
+vim.api.nvim_buf_create_user_command(0, 'TypstLog', tw.open_log, {})
 
-vim.keymap.set("n", "<leader>tw", tw.toggle,
-  { buffer = true, desc = "Typst: toggle watch + zathura" })
+vim.keymap.set('n', '<leader>tw', tw.toggle, { buffer = true, desc = 'Typst: toggle watch + zathura' })
