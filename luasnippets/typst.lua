@@ -78,7 +78,10 @@ local math_snippets = {
   -- a1 -> a_1
   maths({ trig = '([%a])(%d)', name = 'automatic subscript', regTrig = true, priority = 500, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
   -- alpha1 -> alpha_1  (typst 无 `\` 前缀, 希腊字母即普通标识符)
-  maths({ trig = '(%a+)(%d)', name = 'automatic subscript (word)', regTrig = true, priority = 600, snippetType = 'autosnippet' }, fmta('<>_<>', { cap(1), cap(2) })),
+  maths(
+    { trig = '(%a+)(%d)', name = 'automatic subscript (word)', regTrig = true, priority = 600, snippetType = 'autosnippet' },
+    fmta('<>_<>', { cap(1), cap(2) })
+  ),
 
   -- display math (单行):  $ ... $
   parse({ trig = 'dm', name = 'display math', snippetType = 'autosnippet' }, [[$ $1 $$0]]),
@@ -157,6 +160,134 @@ mat(
       condition = is_math,
       show_condition = is_math,
     }
+  ),
+  parse({ trig = 'link', name = 'link' }, '#link("$1")[$0]'),
+  --------------------------------
+  --------------------------------
+  -- figures
+  -- (biggest waste of time ever)
+  -- (supposedly advanced snippet practice)
+  --------------------------------
+  --------------------------------
+  s(
+    { trig = 'fig(%a?)', regTrig = true, desc = 'create a figure' },
+    fmt(
+      [[
+	#figure(
+	  {content}
+	  caption: [{caption}],
+	) <{label}>
+	]],
+      {
+        caption = i(2, 'Caption'),
+        label = i(1, 'label'),
+        content = d(3, function(args, snip)
+          if not snip.captures[1] or snip.captures[1] == '' then
+            -- regular figure
+            return sn(
+              nil,
+              fmt(
+                [[
+					image("{path}.{ext}"),
+					]],
+                {
+                  path = f(function()
+                    return 'fig/' .. vim.fn.expand '%:r' .. '/' .. (args[1][1] or nil)
+                  end),
+                  ext = c(1, { t 'svg', t 'jpg', t 'png' }),
+                }
+              )
+            )
+          elseif snip.captures[1] == 't' then
+            return sn(
+              nil,
+              fmt(
+                [[
+					tablef(
+					    columns: {cols},
+					    table.header{head},
+					    {content}
+					  ),
+					]],
+                {
+                  head = i(1, '[Header][Header]'),
+                  content = i(2, '[Content], [Content],'),
+                  cols = f(function(largs)
+                    -- the number of columns is the number of left brackets [ in the header
+                    local _, cnt = string.gsub(largs[1][1], '%[', '')
+                    -- the error for not converting to string was cryptic
+                    -- wasted 10 minutes on this :(
+                    return tostring(cnt)
+                  end, { 1 }),
+                }
+              )
+            )
+          end
+        end, { 1 }),
+      }
+    )
+  ),
+
+  --------------------------------
+  --------------------------------
+  -- document templates
+  --------------------------------
+  --------------------------------
+
+  -- this template is deprecated
+  s(
+    { trig = 'general', desc = 'General document template' },
+    fmt(
+      [[
+	#import "/templates/general.typ": template, lref
+	#import "/templates/libs.typ": *
+	#show: template.with(
+	  title: "{}",
+	  prefix: "{}",
+	  suffix: "{}",
+	)
+
+	]],
+      { i(1), i(2), i(3) }
+    )
+  ),
+
+  -- this template is deprecated
+  s(
+    { trig = 'problem', desc = 'Problem write-up template' },
+    fmt(
+      [[
+	#import "/templates/problems.typ": template, source_code, status, lref
+	#import "/templates/libs.typ": *
+	#show: template.with(
+	  problem_url: "{}",
+	  title: "{}",
+	  stat: "{}",
+	)
+
+	]],
+      { i(1), i(2), t 'incomplete' }
+    )
+  ),
+
+  s(
+    { trig = 'book', desc = 'New notes template' },
+    fmt(
+      [[
+	#import "@local/mousse-notes:0.6.2": *
+	#set page(paper: "us-letter")
+	#show: book.with(
+	  title: [{}],
+	  subtitle: {},
+	  subsubtitle: {},
+	  subsubsubtitle: {},
+	  author: {},
+	)
+
+
+	]],
+      { i(1), i(2, 'none'), i(3, 'none'), i(4, 'none'), i(5, 'none') }
+    )
   ),
 }
 
