@@ -215,6 +215,12 @@ $$]],
       return os.date '%H:%M'
     end, {}),
   }),
+  parse({
+    trig = '...',
+    name = 'ellipsis',
+    wordTrig = false,
+    snippetType = 'autosnippet',
+  }, '…'),
 }
 
 local code_block = {
