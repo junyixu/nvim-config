@@ -95,6 +95,7 @@ vim.api.nvim_create_user_command('LMake', require('junyi.make').async_lmake, {})
 vim.cmd [[
 command! BufOnly execute '%bdelete|edit #|normal `"'
 cabbrev cc CodeCompanion
+cabbrev ccc CodeCompanionChat
 cabbrev make Make
 cabbrev mak Make
 cabbrev lmak LMake

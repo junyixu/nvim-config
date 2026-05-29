@@ -1,7 +1,6 @@
 return {
   {
     'olimorris/codecompanion.nvim',
-    version = '^18.0.0',
     lazy = true,
     cmd = { 'CodeCompanionChat', 'CodeCompanionCmd', 'CodeCompanionActions', 'CodeCompanion' },
     opts = {
