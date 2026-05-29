@@ -323,7 +323,7 @@ origin_snippets = {
     wordTrig = false,
     snippetType = 'autosnippet',
     condition = in_mathzone,
-  }, fmta('\\partial_<>', { cap(1), })),
+  }, fmta('\\partial_<>', { cap(1) })),
 
   s(
     { trig = 'mat', priority = 100, name = 'bmatrix' },
