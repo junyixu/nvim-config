@@ -3,6 +3,14 @@ return {
     'olimorris/codecompanion.nvim',
     lazy = true,
     cmd = { 'CodeCompanionChat', 'CodeCompanionCmd', 'CodeCompanionActions', 'CodeCompanion' },
+    keys = {
+      {
+        '<leader>gm',
+        ':CodeCompanionChat 指出英语语法错误<CR>',
+        mode = 'v',
+        desc = '[C]heck [G]rammar errors in selection',
+      },
+    },
     opts = {
       adapters = {
         http = {
@@ -21,7 +29,7 @@ return {
           end,
           gemini = function()
             return require('codecompanion.adapters').extend('gemini', {
-              env = { api_key = os.getenv 'GEMINI_API_KEY', },
+              env = { api_key = os.getenv 'GEMINI_API_KEY' },
             })
           end,
           deepseek = function()
@@ -241,7 +249,12 @@ return {
       vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { noremap = true, silent = true, desc = 'CodeCompanion Chat [A]dd selection' })
       vim.keymap.set('v', '<leader>ca', '<cmd>CodeCompanionActions<cr>', { noremap = true, silent = true, desc = '[C]odeCompanion [A]ctions' })
       vim.keymap.set('v', '<leader>cg', ":<C-u>'<,'>CodeCompanion /grammar<cr>", { noremap = true, silent = true, desc = '[C]odeCompanion [G]rammar fix' })
-      vim.keymap.set('v', '<leader>cG', ":<C-u>'<,'>CodeCompanion /grammar-explain<cr>", { noremap = true, silent = true, desc = '[C]odeCompanion [G]rammar explain' })
+      vim.keymap.set(
+        'v',
+        '<leader>cG',
+        ":<C-u>'<,'>CodeCompanion /grammar-explain<cr>",
+        { noremap = true, silent = true, desc = '[C]odeCompanion [G]rammar explain' }
+      )
 
       local progress = require 'fidget.progress'
       local handles = {}
