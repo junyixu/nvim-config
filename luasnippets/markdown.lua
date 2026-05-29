@@ -221,6 +221,14 @@ $$]],
     wordTrig = false,
     snippetType = 'autosnippet',
   }, '…'),
+  -- LuaSnip 的 condition object 重载了 -(取反)、*(AND)、+(OR),所以 -conds.line_begin 就是 "不在行首"
+  parse({
+    trig = '---',
+    name = 'em dash',
+    snippetType = 'autosnippet',
+    wordTrig = false,
+    condition = -conds.line_begin,
+  }, '—'),
 }
 
 local code_block = {
