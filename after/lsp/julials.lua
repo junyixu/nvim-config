@@ -8,22 +8,22 @@ end
 local function get_julia_env()
   -- 定义默认的 fallback 路径
   local default_path = vim.fn.expand('~/.julia/environments/lsp1.12')
-  local manifest_path = joinpath(vim.uv.cwd(), 'Manifest.toml')
 
-  if exists(manifest_path) then
-    -- 使用 io.lines 逐行读取，对大文件更友好
-    for line in io.lines(manifest_path) do
-      -- 使用 Lua Pattern 提取 major.minor 版本号 (例如 "1.12")
-      local version = line:match('^julia_version%s*=%s*"(%d+%.%d+)')
-      if version then
-        local lsp_path = joinpath('~/.julia/environments/lsp' , version, '')
-        if exists(lsp_path) then
-          return lsp_path
-        end
-        -- 如果找到了版本但对应的路径不存在，则跳出循环使用默认路径
-        break
-      end
-    end
+  -- 借助 juliaup 获取当前激活版本
+  local result = vim.system({ 'julia', '--project=.', '--startup-file=no', '--history-file=no', '--version' }, { text = true, cwd = vim.uv.cwd() }):wait()
+  if result.code ~= 0 or not result.stdout then
+    return default_path
+  end
+
+  -- 提取 major.minor (例如从 "julia version 1.12.6" 得到 "1.12")
+  local version = result.stdout:match('(%d+%.%d+)%.%d+')
+  if not version then
+    return default_path
+  end
+
+  local lsp_path = vim.fn.expand(joinpath('~/.julia/environments/lsp' .. version, ''))
+  if exists(lsp_path) then
+    return lsp_path
   end
 
   return default_path
@@ -117,14 +117,5 @@ return {
       complete = 'file',
     })
 
-    -- 立即在该 buffer 中禁用 diagnostics
-    vim.diagnostic.enable(false, { bufnr = bufnr })
-
-    -- 设置 15 秒延迟启动
-    vim.defer_fn(function()
-      if vim.api.nvim_buf_is_valid(bufnr) then
-        vim.diagnostic.enable(true, { bufnr = bufnr })
-      end
-    end, 15000)
   end,
 }
