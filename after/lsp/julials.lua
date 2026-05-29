@@ -7,7 +7,7 @@ end
 
 local function get_julia_env()
   -- 定义默认的 fallback 路径
-  local default_path = vim.fn.expand('~/.julia/environments/nvim-lspconfig/')
+  local default_path = vim.fn.expand('~/.julia/environments/lsp1.12')
   local manifest_path = joinpath(vim.uv.cwd(), 'Manifest.toml')
 
   if exists(manifest_path) then
