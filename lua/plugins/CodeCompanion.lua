@@ -1,9 +1,16 @@
 return {
   {
     'olimorris/codecompanion.nvim',
-    version = '^18.0.0',
     lazy = true,
     cmd = { 'CodeCompanionChat', 'CodeCompanionCmd', 'CodeCompanionActions', 'CodeCompanion' },
+    keys = {
+      {
+        '<leader>gm',
+        ':CodeCompanionChat 指出英语语法错误<CR>',
+        mode = 'v',
+        desc = '[C]heck [G]rammar errors in selection',
+      },
+    },
     opts = {
       adapters = {
         http = {
@@ -22,7 +29,7 @@ return {
           end,
           gemini = function()
             return require('codecompanion.adapters').extend('gemini', {
-              env = { api_key = os.getenv 'GEMINI_API_KEY', },
+              env = { api_key = os.getenv 'GEMINI_API_KEY' },
             })
           end,
           deepseek = function()
@@ -151,6 +158,62 @@ return {
           },
         },
       },
+      prompt_library = {
+        ['Grammar Fix'] = {
+          strategy = 'inline',
+          description = 'Proofread selection: grammar, spelling, awkward phrasing',
+          opts = {
+            modes = { 'v' },
+            short_name = 'grammar',
+            auto_submit = true,
+            stop_context_insertion = true,
+            user_prompt = false,
+            adapter = { name = 'deepseek' },
+          },
+          prompts = {
+            {
+              role = 'system',
+              content = [[You are a precise grammar and style editor.
+- Fix grammar, spelling, missing prepositions/articles, awkward phrasing.
+- Preserve original meaning, voice, technical terms, code, math, markup.
+- Do NOT add or remove content. Do NOT explain.
+- Return ONLY the corrected text, nothing else.]],
+            },
+            {
+              role = 'user',
+              content = function(context)
+                local lines = vim.api.nvim_buf_get_lines(context.bufnr, context.start_line - 1, context.end_line, false)
+                return 'Fix the following text:\n\n' .. table.concat(lines, '\n')
+              end,
+              opts = { contains_code = false },
+            },
+          },
+        },
+        ['Grammar Explain'] = {
+          strategy = 'chat',
+          description = 'Explain grammar issues in selection',
+          opts = {
+            modes = { 'v' },
+            short_name = 'grammar-explain',
+            auto_submit = true,
+            user_prompt = false,
+            adapter = { name = 'deepseek' },
+          },
+          prompts = {
+            {
+              role = 'system',
+              content = 'You are a grammar tutor. List each issue with line, problem, fix, brief reason.',
+            },
+            {
+              role = 'user',
+              content = function(context)
+                local lines = vim.api.nvim_buf_get_lines(context.bufnr, context.start_line - 1, context.end_line, false)
+                return 'Review:\n\n' .. table.concat(lines, '\n')
+              end,
+            },
+          },
+        },
+      },
       rules = {
         -- 移除默认规则中的 CLAUDE.md
         myrule = {
@@ -185,6 +248,13 @@ return {
       vim.keymap.set('n', '<leader>tc', '<cmd>CodeCompanionChat Toggle<cr>', { desc = '[T]oggle CodeCompanion [C]hat' })
       vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { noremap = true, silent = true, desc = 'CodeCompanion Chat [A]dd selection' })
       vim.keymap.set('v', '<leader>ca', '<cmd>CodeCompanionActions<cr>', { noremap = true, silent = true, desc = '[C]odeCompanion [A]ctions' })
+      vim.keymap.set('v', '<leader>cg', ":<C-u>'<,'>CodeCompanion /grammar<cr>", { noremap = true, silent = true, desc = '[C]odeCompanion [G]rammar fix' })
+      vim.keymap.set(
+        'v',
+        '<leader>cG',
+        ":<C-u>'<,'>CodeCompanion /grammar-explain<cr>",
+        { noremap = true, silent = true, desc = '[C]odeCompanion [G]rammar explain' }
+      )
 
       local progress = require 'fidget.progress'
       local handles = {}
