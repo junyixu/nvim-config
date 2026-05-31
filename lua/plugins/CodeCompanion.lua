@@ -5,10 +5,39 @@ return {
     cmd = { 'CodeCompanionChat', 'CodeCompanionCmd', 'CodeCompanionActions', 'CodeCompanion' },
     keys = {
       {
-        '<leader>gm',
-        ':CodeCompanionChat 指出英语语法错误<CR>',
+        '<leader>tc',
+        ':CodeCompanionChat Toggle<CR>',
+        desc = '[T]oggle CodeCompanion [C]hat',
+      },
+      {
+        '<leader>ca',
+        ':CodeCompanionActions<CR>',
         mode = 'v',
-        desc = '[C]heck [G]rammar errors in selection',
+        desc = '[C]odeCompanion [A]ctions for selection',
+      },
+      {
+        'gaa',
+        ':CodeCompanionChat Add<CR>',
+        mode = 'v',
+        desc = 'CodeCompanion Chat [A]dd selection',
+      },
+      {
+        '<leader>cg',
+        ":<C-u>CodeCompanion /Grammar Fix<CR>",
+        mode = 'v',
+        desc = '[C]odeCompanion [G]rammar fix for selection',
+      },
+      {
+        '<leader>cG',
+        ":<C-u>CodeCompanion /Grammar Explain<CR>",
+        mode = 'v',
+        desc = '[C]odeCompanion [G]rammar explain for selection',
+      },
+      {
+        'gam',
+        ':CodeCompanionChat 指出英语语法错误<CR>:wincmd p<CR>',
+        mode = 'v',
+        desc = '[A]Add selection and point out [G]rammar errors in selection',
       },
     },
     opts = {
@@ -245,16 +274,6 @@ return {
     config = function(_, opts)
       -- 加载插件并应用配置
       require('codecompanion').setup(opts)
-      vim.keymap.set('n', '<leader>tc', '<cmd>CodeCompanionChat Toggle<cr>', { desc = '[T]oggle CodeCompanion [C]hat' })
-      vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { noremap = true, silent = true, desc = 'CodeCompanion Chat [A]dd selection' })
-      vim.keymap.set('v', '<leader>ca', '<cmd>CodeCompanionActions<cr>', { noremap = true, silent = true, desc = '[C]odeCompanion [A]ctions' })
-      vim.keymap.set('v', '<leader>cg', ":<C-u>'<,'>CodeCompanion /grammar<cr>", { noremap = true, silent = true, desc = '[C]odeCompanion [G]rammar fix' })
-      vim.keymap.set(
-        'v',
-        '<leader>cG',
-        ":<C-u>'<,'>CodeCompanion /grammar-explain<cr>",
-        { noremap = true, silent = true, desc = '[C]odeCompanion [G]rammar explain' }
-      )
 
       local progress = require 'fidget.progress'
       local handles = {}
