@@ -35,9 +35,9 @@ return {
       },
       {
         'gam',
-        ':CodeCompanionChat adapter=deepseek_noreason model=deepseek-v4-flash 指出英语语法错误<CR>:wincmd p<CR>',
+        ":<C-u>CodeCompanion /grammar-errors<CR>",
         mode = 'v',
-        desc = '[A]Add selection and point out [G]rammar errors in selection',
+        desc = '[G]rammar errors in selection',
       },
     },
     opts = {
@@ -248,6 +248,36 @@ return {
                 local lines = vim.api.nvim_buf_get_lines(context.bufnr, context.start_line - 1, context.end_line, false)
                 return 'Review:\n\n' .. table.concat(lines, '\n')
               end,
+            },
+          },
+        },
+        ['Grammar Errors'] = {
+          strategy = 'inline',
+          description = 'Point out grammar errors in selection',
+          opts = {
+            modes = { 'v' },
+            alias = 'grammar-errors',
+            auto_submit = true,
+            stop_context_insertion = true,
+            user_prompt = false,
+            adapter = { name = 'deepseek_noreason', model = 'deepseek-v4-flash' },
+          },
+          prompts = {
+            {
+              role = 'system',
+              content = [[You are a grammar checker. For the given text, list each grammar/spelling error with:
+- The incorrect text
+- What's wrong
+- The correction
+Do NOT rewrite the entire text. Do NOT add or remove content. Just list the errors. Reply in the same language as the input.]],
+            },
+            {
+              role = 'user',
+              content = function(context)
+                local lines = vim.api.nvim_buf_get_lines(context.bufnr, context.start_line - 1, context.end_line, false)
+                return 'Find grammar errors in:\n\n' .. table.concat(lines, '\n')
+              end,
+              opts = { contains_code = false },
             },
           },
         },
