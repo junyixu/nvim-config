@@ -35,7 +35,7 @@ return {
       },
       {
         'gam',
-        ':CodeCompanionChat 指出英语语法错误<CR>:wincmd p<CR>',
+        ':CodeCompanionChat adapter=deepseek_noreason model=deepseek-v4-flash 指出英语语法错误<CR>:wincmd p<CR>',
         mode = 'v',
         desc = '[A]Add selection and point out [G]rammar errors in selection',
       },
@@ -63,6 +63,15 @@ return {
           end,
           deepseek = function()
             return require('codecompanion.adapters').extend('deepseek', {})
+          end,
+          deepseek_noreason = function()
+            return require('codecompanion.adapters').extend('deepseek', {
+              schema = {
+                ['thinking.type'] = {
+                  default = 'disabled',
+                },
+              },
+            })
           end,
           glm = function()
             return require('codecompanion.adapters').extend('openai_compatible', {
