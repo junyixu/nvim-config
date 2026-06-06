@@ -181,6 +181,11 @@ return {
               callback = 'keymaps.yolo_mode',
               description = 'YOLO mode toggle',
             },
+            clear_approvals = {
+              modes = { n = 'gC' },
+              callback = 'keymaps.clear_approvals',
+              description = 'Clear cached tool approvals',
+            },
           },
           opts = {
             register = '*', -- The register to use for yanking code
