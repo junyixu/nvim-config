@@ -23,13 +23,13 @@ return {
       },
       {
         '<leader>cg',
-        ":<C-u>CodeCompanion /Grammar Fix<CR>",
+        ":<C-u>CodeCompanion /grammar<CR>",
         mode = 'v',
         desc = '[C]odeCompanion [G]rammar fix for selection',
       },
       {
         '<leader>cG',
-        ":<C-u>CodeCompanion /Grammar Explain<CR>",
+        ":<C-u>CodeCompanion /grammar-explain<CR>",
         mode = 'v',
         desc = '[C]odeCompanion [G]rammar explain for selection',
       },
@@ -202,7 +202,7 @@ return {
           description = 'Proofread selection: grammar, spelling, awkward phrasing',
           opts = {
             modes = { 'v' },
-            short_name = 'grammar',
+            alias = 'grammar',
             auto_submit = true,
             stop_context_insertion = true,
             user_prompt = false,
@@ -232,7 +232,7 @@ return {
           description = 'Explain grammar issues in selection',
           opts = {
             modes = { 'v' },
-            short_name = 'grammar-explain',
+            alias = 'grammar-explain',
             auto_submit = true,
             user_prompt = false,
             adapter = { name = 'deepseek' },
@@ -252,13 +252,13 @@ return {
           },
         },
         ['Grammar Errors'] = {
-          strategy = 'inline',
+          strategy = 'chat',
           description = 'Point out grammar errors in selection',
+          rules = 'none',
           opts = {
             modes = { 'v' },
             alias = 'grammar-errors',
             auto_submit = true,
-            stop_context_insertion = true,
             user_prompt = false,
             adapter = { name = 'deepseek_noreason', model = 'deepseek-v4-flash' },
           },
