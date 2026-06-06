@@ -35,7 +35,7 @@ return {
       },
       {
         'gam',
-        ":<C-u>CodeCompanion /grammar-errors<CR>",
+        ":<C-u>CodeCompanion /grammar-errors<CR>:wincmd p<CR>",
         mode = 'v',
         desc = '[G]rammar errors in selection',
       },
@@ -265,7 +265,7 @@ return {
           prompts = {
             {
               role = 'system',
-              content = [[You are a grammar checker. For the given text, list each grammar/spelling error with:
+              content = [[You are a grammar checker. For the given text, list each grammar/spelling error with bullets in the format:
 - The incorrect text
 - What's wrong
 - The correction
