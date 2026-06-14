@@ -1,4 +1,10 @@
 local group = vim.api.nvim_create_augroup('UserLoadTemplates', { clear = true })
+local template_dir = vim.fn.expand '~/.config/nvim/templates'
+
+local function load_template(template_name)
+  local template_path = vim.fs.joinpath(template_dir, template_name)
+  vim.fn.setline(1, vim.fn.readfile(template_path))
+end
 
 vim.api.nvim_create_autocmd('BufNewFile', {
   group = group,
@@ -57,5 +63,7 @@ vim.api.nvim_create_autocmd('BufNewFile', {
 vim.api.nvim_create_autocmd('BufNewFile', {
   group = group,
   pattern = '.JuliaFormatter.toml',
-  command = '0read ~/.config/nvim/templates/skeleton.JuliaFormatter.toml | 11',
+  callback = function()
+    load_template 'skeleton.JuliaFormatter.toml'
+  end,
 })
