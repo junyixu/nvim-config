@@ -53,3 +53,9 @@ vim.api.nvim_create_autocmd('BufNewFile', {
   pattern = '.latexmkrc',
   command = '0read ~/.config/nvim/templates/skeleton.latexmkrc | 11',
 })
+
+vim.api.nvim_create_autocmd('BufNewFile', {
+  group = group,
+  pattern = '.JuliaFormatter.toml',
+  command = '0read ~/.config/nvim/templates/skeleton.JuliaFormatter.toml | 11',
+})
