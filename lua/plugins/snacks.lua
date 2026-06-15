@@ -435,7 +435,19 @@ return {
         tabs_picker,
         desc = '[F]ind [T]abs (fuzzy)',
       },
+      {
+        '<leader>fm',
+        function()
+          require('snacks').picker.marks()
+        end,
+        desc = '[F]ind [M]arks',
+      },
     },
+    init = function()
+      vim.api.nvim_create_user_command('Marks', function()
+        require('snacks').picker.marks()
+      end, { desc = 'Fuzzy search marks (snacks picker)' })
+    end,
     ---@type snacks.Config
     opts = {
       -- your configuration comes here
