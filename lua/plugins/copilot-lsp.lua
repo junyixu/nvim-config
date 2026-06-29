@@ -26,6 +26,11 @@ return {
         end
         return '<C-i>'
       end, { expr = true, desc = 'Copilot NES: accept / jumplist newer' })
+      vim.cmd [[
+      imap <silent><expr> <Tab> luasnip#expand_or_jumpable()
+            \ ? '<Plug>luasnip-expand-or-jump'
+            \ : luaeval("vim.lsp.inline_completion.get()") ? '' : "\<Tab>"
+            ]]
     end,
   },
 }
