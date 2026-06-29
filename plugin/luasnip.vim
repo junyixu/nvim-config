@@ -12,9 +12,10 @@
 "
 " press <Tab> to expand or jump in a snippet. These can also be mapped separately
 " via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
+" Copilot ghost text 通过 nvim 内置 LSP inline completion 接受 (copilot_ls)。
 imap <silent><expr> <Tab> luasnip#expand_or_jumpable()
       \ ? '<Plug>luasnip-expand-or-jump'
-      \ : copilot#GetDisplayedSuggestion().text !=# '' ? copilot#Accept("\<Tab>") : "\<Tab>"
+      \ : luaeval("vim.lsp.inline_completion.get()") ? '' : "\<Tab>"
 "imap <silent><expr> <Tab> luasnip#expandable() ? '<Plug>luasnip-expand' : '<Tab>'
 "imap <silent> <Plug>(luasnip-expand-only) <Cmd>lua require'luasnip'.expand()<CR>
 "imap <silent><expr> <Tab> luasnip#expandable() ? '<Plug>(luasnip-expand-only)' : "\<Tab>"
