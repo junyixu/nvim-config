@@ -65,10 +65,8 @@ vim.keymap.set('i', '<Tab>', function()
     table_next_cell()
     return
   end
-  -- copilot fallback
-  -- 我装的是 github/copilot.vim，用 vim.fn 调它的 vimscript API：
-  if vim.fn['copilot#GetDisplayedSuggestion']().text ~= '' then
-    vim.fn['copilot#Accept'] '\t'
+  -- copilot fallback: 接受 nvim 内置 LSP inline completion (copilot_ls) 的 ghost text
+  if vim.lsp.inline_completion.get() then
     return
   end
 

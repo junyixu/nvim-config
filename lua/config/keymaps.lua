@@ -35,7 +35,14 @@ local function vmap(lhs, rhs, opts)
 end
 
 --  See `:help hlsearch`
-nnoremap('<Esc>', '<cmd>nohlsearch<CR>')
+-- 先清除待处理的 Copilot NES (见 lua/plugins/copilot-lsp.lua), 否则 nohlsearch
+nnoremap('<Esc>', function()
+  local ok, nes = pcall(require, 'copilot-lsp.nes')
+  if ok and nes.clear() then
+    return
+  end
+  vim.cmd 'nohlsearch'
+end, { desc = 'Clear Copilot NES / nohlsearch' })
 
 -- `clipboard=autoselect` is not implemented yet
 -- https://github.com/neovim/neovim/issues/2325.
@@ -465,12 +472,8 @@ vim.keymap.set(
 -- vim/nvim key model 把 <C-i> 归一为 <Tab> (同字节 0x09).
 -- kitty.conf 把 ctrl+i 重映射为 \eOI, 物理 <Tab> 仍发 \t,
 -- 这样 nvim 收到两路独立序列, 可分别绑定.
---   <Tab>  -> 作为新的 leader 前缀 (<Tab>1..<Tab>9 切到对应 tab)
+--   <Tab>  -> Copilot NES 接受/walk (见 lua/plugins/copilot-lsp.lua; 无建议时回落 <C-i>)
 --   <C-i>  -> 经 \eOI 还原 :h CTRL-I (jumplist newer)
-vim.keymap.set('n', '<Tab>', '<Nop>', { desc = 'Tab leader prefix' })
-for i = 1, 9 do
-  vim.keymap.set('n', '<Tab>' .. i, i .. 'gt', { desc = 'Go to tab ' .. i })
-end
 vim.keymap.set('n', '<Esc>OI', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
 -- 注意: \eOM 是标准 SS3 keypad-Enter, nvim TUI 把它解码为 <kEnter> keystroke,
 -- keymap 层看到的是 <kEnter>, 不是 raw <Esc>OM. 所以绑 <kEnter> 才对.
