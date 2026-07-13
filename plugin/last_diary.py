@@ -34,7 +34,12 @@ class DiaryNavigator:
         for i in range(self.max_search_days):
             current_date += delta
             diary_filename = f"{current_date.isoformat()}.md"
-            diary_path = os.path.join(self.diary_dir, diary_filename)
+            diary_path = os.path.join(
+                self.diary_dir,
+                f"{current_date.year:04d}",
+                f"{current_date.month:02d}",
+                diary_filename,
+            )
 
             if os.path.exists(diary_path):
                 return diary_path
