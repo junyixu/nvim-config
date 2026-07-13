@@ -84,7 +84,13 @@ local math_snippets = {
   ),
 
   -- display math (单行):  $ ... $
-  parse({ trig = 'dm', name = 'display math', snippetType = 'autosnippet' }, [[$ $1 $$0]]),
+  parse(
+    { trig = 'dm', name = 'display math', snippetType = 'autosnippet' },
+    [[
+$
+  $0
+$]]
+  ),
 
   -- inline math:  $...$
   parse({ trig = 'mk', name = 'inline math', snippetType = 'autosnippet' }, [[$$1$$0]]),
@@ -123,7 +129,6 @@ local math_snippets = {
   parse_math({ trig = 'cb', wordTrig = false, snippetType = 'autosnippet', name = 'Cube ^3' }, '^3'),
   parse_math({ trig = 'sr', wordTrig = false, snippetType = 'autosnippet', name = 'Square ^2' }, '^2'),
   parse_math({ trig = 'td', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^()' }, '^($1)$0 '),
-  parse_math({ trig = 'rd', wordTrig = false, snippetType = 'autosnippet', name = 'to the ... power ^(())' }, '^(($1))$0 '),
 
   -- typst 数学内文本直接用 "..."
   parse_math({ trig = 'stt', snippetType = 'autosnippet', name = 'text subscript' }, '_"$1" $0'),
