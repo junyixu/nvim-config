@@ -17,10 +17,4 @@ vim.g.flog_enable_extended_chars = true
 
 vim.g.snacks_image_enabled = true
 
-vim.g.copilot_filetypes = {
-  xml = false,
-  markdown = false,
-  julia = true,
-}
-
 vim.g.slime_python_ipython = 1
