@@ -39,6 +39,18 @@ return {
         mode = 'v',
         desc = '[G]rammar errors in selection',
       },
+      {
+        'gat',
+        ":<C-u>CodeCompanion /translate<CR>:wincmd p<CR>",
+        mode = 'v',
+        desc = 'Translate Chinese→English (chat, with alternatives)',
+      },
+      {
+        'gaT',
+        ":<C-u>CodeCompanion /translate-inline<CR>",
+        mode = 'v',
+        desc = 'Translate Chinese→English inline replace (best option)',
+      },
     },
     opts = {
       adapters = {
@@ -253,6 +265,58 @@ return {
                 local lines = vim.api.nvim_buf_get_lines(context.bufnr, context.start_line - 1, context.end_line, false)
                 return 'Review:\n\n' .. table.concat(lines, '\n')
               end,
+            },
+          },
+        },
+        ['Translate to English'] = {
+          strategy = 'chat',
+          description = 'Translate selected Chinese text to English with alternatives',
+          opts = {
+            modes = { 'v' },
+            alias = 'translate',
+            auto_submit = true,
+            user_prompt = false,
+            adapter = { name = 'deepseek_noreason', model = 'deepseek-v4-flash' },
+          },
+          prompts = {
+            {
+              role = 'system',
+              content = 'You are a translator. The user will give you Chinese text to translate into English. Provide the best translation as option 1, then 2-3 alternatives that differ in tone or word choice. Format: numbered list. No explanation.',
+            },
+            {
+              role = 'user',
+              content = function(context)
+                local lines = vim.api.nvim_buf_get_lines(context.bufnr, context.start_line - 1, context.end_line, false)
+                return 'Translate to English:\n\n' .. table.concat(lines, '\n')
+              end,
+              opts = { contains_code = false },
+            },
+          },
+        },
+        ['Translate to English Inline'] = {
+          strategy = 'inline',
+          description = 'Replace selected Chinese text with best English translation. Only keep the translated text',
+          opts = {
+            modes = { 'v' },
+            alias = 'translate-inline',
+            auto_submit = true,
+            stop_context_insertion = true,
+            user_prompt = false,
+            placement = 'replace',
+            adapter = { name = 'deepseek_noreason', model = 'deepseek-v4-flash' },
+          },
+          prompts = {
+            {
+              role = 'system',
+              content = 'You are a translator. Translate Chinese text to English. Preserve formatting and technical terms.',
+            },
+            {
+              role = 'user',
+              content = function(context)
+                local lines = vim.api.nvim_buf_get_lines(context.bufnr, context.start_line - 1, context.end_line, false)
+                return 'Translate to English:\n\n' .. table.concat(lines, '\n')
+              end,
+              opts = { contains_code = false },
             },
           },
         },
