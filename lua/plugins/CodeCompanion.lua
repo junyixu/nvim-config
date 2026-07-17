@@ -47,7 +47,16 @@ return {
       },
       {
         'gaT',
-        ":<C-u>CodeCompanion /translate-inline<CR>",
+        function()
+          require('codecompanion.interactions.chat.tools.approvals'):always(
+            vim.api.nvim_get_current_buf(),
+            { tool_name = 'inline' }
+          )
+          vim.api.nvim_input('<Esc>')
+          vim.schedule(function()
+            vim.cmd("'<,'>CodeCompanion /translate-inline")
+          end)
+        end,
         mode = 'v',
         desc = 'Translate Chinese→English inline replace (best option)',
       },
@@ -308,7 +317,7 @@ return {
           prompts = {
             {
               role = 'system',
-              content = 'You are a translator. Translate Chinese text to English. Preserve formatting and technical terms.',
+              content = 'You are a translator. Translate Chinese text to English. Preserve formatting and technical terms. Only keep the translated text.',
             },
             {
               role = 'user',
