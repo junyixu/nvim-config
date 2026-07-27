@@ -1,6 +1,12 @@
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
+-- Reload files changed outside Neovim (e.g. Syncthing)
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold' }, {
+  group = vim.api.nvim_create_augroup('AutoRead', { clear = true }),
+  command = 'checktime',
+})
+
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.hl.on_yank()`
