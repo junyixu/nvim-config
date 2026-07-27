@@ -2,7 +2,7 @@
 --  See `:help lua-guide-autocommands`
 
 vim.o.autoread = true
-vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold' }, {
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'BufWritePost' }, {
   group = vim.api.nvim_create_augroup('AutoRead', { clear = true }),
   command = 'checktime',
 })
