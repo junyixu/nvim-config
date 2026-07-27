@@ -30,6 +30,15 @@ local function diary_template(date_str)
   return header .. body
 end
 
+vim.api.nvim_create_autocmd('BufNewFile', {
+  group = vim.api.nvim_create_augroup('DiaryTemplate', { clear = true }),
+  pattern = vim.fn.expand('~/Notes/diary') .. '/*/*/*.md',
+  callback = function()
+    local date_str = vim.fn.expand '%:t:r'
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(diary_template(date_str), '\n'))
+  end,
+})
+
 local function open_diary(open_cmd)
   local date_str = os.date('%Y-%m-%d')
   local year = os.date('%Y')
@@ -37,16 +46,8 @@ local function open_diary(open_cmd)
   local path = '~/Notes/diary/' .. year .. '/' .. month .. '/' .. date_str .. '.md'
   local expanded = vim.fn.expand(path)
 
-  local is_new = vim.fn.filereadable(expanded) == 0
-  if is_new then
-    vim.fn.mkdir(vim.fn.fnamemodify(expanded, ':h'), 'p')
-  end
-
+  vim.fn.mkdir(vim.fn.fnamemodify(expanded, ':h'), 'p')
   vim.cmd(open_cmd .. ' ' .. vim.fn.fnameescape(expanded))
-
-  if is_new then
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(diary_template(date_str), '\n'))
-  end
   vim.cmd('tcd %:h')
   vim.cmd('tcd ../../..')
 end
