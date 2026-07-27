@@ -34,8 +34,12 @@ vim.api.nvim_create_autocmd('BufNewFile', {
   group = vim.api.nvim_create_augroup('DiaryTemplate', { clear = true }),
   pattern = vim.fn.expand('~/Notes/diary') .. '/*/*/*.md',
   callback = function()
+    local buf = vim.api.nvim_get_current_buf()
     local date_str = vim.fn.expand '%:t:r'
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(diary_template(date_str), '\n'))
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(diary_template(date_str), '\n'))
+    vim.schedule(function()
+      vim.bo[buf].modified = true
+    end)
   end,
 })
 
