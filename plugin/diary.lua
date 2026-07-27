@@ -37,16 +37,16 @@ local function open_diary(open_cmd)
   local path = '~/Notes/diary/' .. year .. '/' .. month .. '/' .. date_str .. '.md'
   local expanded = vim.fn.expand(path)
 
-  if vim.fn.filereadable(expanded) == 0 then
+  local is_new = vim.fn.filereadable(expanded) == 0
+  if is_new then
     vim.fn.mkdir(vim.fn.fnamemodify(expanded, ':h'), 'p')
-    local file = io.open(expanded, 'w')
-    if file then
-      file:write(diary_template(date_str))
-      file:close()
-    end
   end
 
   vim.cmd(open_cmd .. ' ' .. vim.fn.fnameescape(expanded))
+
+  if is_new then
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(diary_template(date_str), '\n'))
+  end
   vim.cmd('tcd %:h')
   vim.cmd('tcd ../../..')
 end
