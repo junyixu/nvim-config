@@ -150,6 +150,17 @@ origin_snippets = {
     condition = in_mathzone,
   }, fmta('diff_<>', { cap(1) })),
 
+  -- <a, b> -> ⟨a, b⟩  (必须含逗号, 避免与不等号冲突)
+  s({
+    trig = '<([^<>]-,[^<>]-)>',
+    regTrig = true,
+    trigEngine = 'pattern',
+    priority = 100,
+    wordTrig = false,
+    snippetType = 'autosnippet',
+    condition = is_math,
+  }, fmta('⟨<>⟩', { cap(1) })),
+
   -- 方括号矩阵
   s(
     { trig = 'mat', priority = 100, name = 'bmatrix' },
