@@ -29,6 +29,15 @@ M.no_backslash = function(line_to_cursor, matched_trigger)
   return not line_to_cursor:find('\\%a+$', -#line_to_cursor)
 end
 
+-- 逗号触发的 snippet: 前一个字符若是操作数结尾（字母/数字/闭括号/点/引号），
+-- 说明这个逗号是列表分隔符（`f(x,y)`、`(2,6)`），不展开。
+-- 允许: 行首、空白、开括号、`^` `_` `/` 等运算符、以及 `,` 本身（双逗号 snippet）。
+M.not_after_operand = function(line_to_cursor, matched_trigger)
+  local before = line_to_cursor:sub(1, #line_to_cursor - #matched_trigger)
+  local char = before:sub(-1)
+  return char == '' or char:match [==[[%w%)%]%}%.'"]]==] == nil
+end
+
 local ts_utils = require 'util.ts_utils'
 M.is_math = function(treesitter)
   if treesitter then
