@@ -26,11 +26,16 @@ return {
         end
         return '<C-i>'
       end, { expr = true, desc = 'Copilot NES: accept / jumplist newer' })
-      vim.cmd [[
-      imap <silent><expr> <Tab> luasnip#expand_or_jumpable()
-            \ ? '<Plug>luasnip-expand-or-jump'
-            \ : luaeval("vim.lsp.inline_completion.get()") ? '' : "\<Tab>"
-            ]]
+      -- <Tab> (insert): Copilot inline completion > LuaSnip expand/jump > literal tab.
+      vim.keymap.set('i', '<Tab>', function()
+        if vim.lsp.inline_completion.get() then
+          return ''
+        elseif require('luasnip').expand_or_locally_jumpable() then
+          return '<Plug>luasnip-expand-or-jump'
+        else
+          return '<Tab>'
+        end
+      end, { expr = true, remap = true, replace_keycodes = true, silent = true, desc = 'LuaSnip expand/jump, Copilot inline, or tab' })
     end,
   },
 }
