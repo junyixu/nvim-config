@@ -8,6 +8,9 @@ local f = ls.function_node
 local s = ls.snippet
 local fmta = require('luasnip.extras.fmt').fmta
 
+local utils = require 'util.utils'
+local pipe, not_after_operand = utils.pipe, utils.not_after_operand
+
 -- typst 数学环境检测: 走 treesitter，查找 `math` 节点祖先
 -- inline math: $E = m c^2$;  display math: $ E = m c^2 $
 local function in_typst_math()
@@ -30,7 +33,14 @@ local decorator = {
   condition = is_math,
 }
 
+-- 逗号触发的希腊字母: 额外要求逗号不是列表分隔符, 见 `utils.not_after_operand`
+-- `f(x,y)` 不展开; `f(x, ,y)` 展开成 `f(x, psi)`
+local comma_decorator = vim.tbl_extend('force', decorator, {
+  condition = pipe { is_math, not_after_operand },
+})
+
 local parse_math = ls.extend_decorator.apply(ls.parser.parse_snippet, decorator) --[[@as function]]
+local parse_comma = ls.extend_decorator.apply(ls.parser.parse_snippet, comma_decorator) --[[@as function]]
 local maths = ls.extend_decorator.apply(ls.snippet, decorator) --[[@as function]]
 
 local function cap(idx)
@@ -40,38 +50,38 @@ local function cap(idx)
 end
 
 local greeks_snippets = {
-  parse_math({ trig = ',a', name = 'alpha', snippetType = 'autosnippet' }, 'alpha'),
-  parse_math({ trig = ',b', name = 'beta', snippetType = 'autosnippet' }, 'beta'),
-  parse_math({ trig = ',g', name = 'gamma', snippetType = 'autosnippet' }, 'gamma'),
-  parse_math({ trig = ',G', name = 'Gamma', snippetType = 'autosnippet' }, 'Gamma'),
-  parse_math({ trig = ',d', name = 'delta', snippetType = 'autosnippet' }, 'delta'),
-  parse_math({ trig = ',D', name = 'Delta', snippetType = 'autosnippet' }, 'Delta'),
-  parse_math({ trig = ',r', name = 'rho', snippetType = 'autosnippet' }, 'rho'),
-  parse_math({ trig = ',c', name = 'chi', snippetType = 'autosnippet' }, 'chi'),
-  parse_math({ trig = ',x', name = 'xi', snippetType = 'autosnippet' }, 'xi'),
-  parse_math({ trig = ',z', name = 'zeta', snippetType = 'autosnippet' }, 'zeta'),
-  parse_math({ trig = ',s', name = 'sigma', snippetType = 'autosnippet' }, 'sigma'),
-  parse_math({ trig = ',S', name = 'Sigma', snippetType = 'autosnippet' }, 'Sigma'),
-  parse_math({ trig = ',t', name = 'tau', snippetType = 'autosnippet' }, 'tau'),
-  parse_math({ trig = ',o', name = 'omega', snippetType = 'autosnippet' }, 'omega'),
-  parse_math({ trig = ',O', name = 'Omega', snippetType = 'autosnippet' }, 'Omega'),
-  parse_math({ trig = ',m', name = 'mu', snippetType = 'autosnippet' }, 'mu'),
-  parse_math({ trig = ',n', name = 'nu', snippetType = 'autosnippet' }, 'nu'),
-  parse_math({ trig = ',q', name = 'theta', snippetType = 'autosnippet' }, 'theta'),
+  parse_comma({ trig = ',a', name = 'alpha', snippetType = 'autosnippet' }, 'alpha'),
+  parse_comma({ trig = ',b', name = 'beta', snippetType = 'autosnippet' }, 'beta'),
+  parse_comma({ trig = ',g', name = 'gamma', snippetType = 'autosnippet' }, 'gamma'),
+  parse_comma({ trig = ',G', name = 'Gamma', snippetType = 'autosnippet' }, 'Gamma'),
+  parse_comma({ trig = ',d', name = 'delta', snippetType = 'autosnippet' }, 'delta'),
+  parse_comma({ trig = ',D', name = 'Delta', snippetType = 'autosnippet' }, 'Delta'),
+  parse_comma({ trig = ',r', name = 'rho', snippetType = 'autosnippet' }, 'rho'),
+  parse_comma({ trig = ',c', name = 'chi', snippetType = 'autosnippet' }, 'chi'),
+  parse_comma({ trig = ',x', name = 'xi', snippetType = 'autosnippet' }, 'xi'),
+  parse_comma({ trig = ',z', name = 'zeta', snippetType = 'autosnippet' }, 'zeta'),
+  parse_comma({ trig = ',s', name = 'sigma', snippetType = 'autosnippet' }, 'sigma'),
+  parse_comma({ trig = ',S', name = 'Sigma', snippetType = 'autosnippet' }, 'Sigma'),
+  parse_comma({ trig = ',t', name = 'tau', snippetType = 'autosnippet' }, 'tau'),
+  parse_comma({ trig = ',o', name = 'omega', snippetType = 'autosnippet' }, 'omega'),
+  parse_comma({ trig = ',O', name = 'Omega', snippetType = 'autosnippet' }, 'Omega'),
+  parse_comma({ trig = ',m', name = 'mu', snippetType = 'autosnippet' }, 'mu'),
+  parse_comma({ trig = ',n', name = 'nu', snippetType = 'autosnippet' }, 'nu'),
+  parse_comma({ trig = ',q', name = 'theta', snippetType = 'autosnippet' }, 'theta'),
   -- typst: phi=ϕ, phi.alt=φ；对应 LaTeX 的 \phi 与 \varphi
-  parse_math({ trig = ',f', name = 'phi.alt (varphi)', snippetType = 'autosnippet' }, 'phi.alt'),
-  parse_math({ trig = ',F', name = 'Phi', snippetType = 'autosnippet' }, 'Phi'),
-  parse_math({ trig = ',,f', name = 'phi', snippetType = 'autosnippet', priority = 1001 }, 'phi'),
+  parse_comma({ trig = ',f', name = 'phi.alt (varphi)', snippetType = 'autosnippet' }, 'phi.alt'),
+  parse_comma({ trig = ',F', name = 'Phi', snippetType = 'autosnippet' }, 'Phi'),
+  parse_comma({ trig = ',,f', name = 'phi', snippetType = 'autosnippet', priority = 1001 }, 'phi'),
   -- typst: epsilon=ε, epsilon.alt=ϵ；对应 LaTeX 的 \varepsilon 与 \epsilon
-  parse_math({ trig = ',e', name = 'epsilon (varepsilon)', snippetType = 'autosnippet' }, 'epsilon'),
-  parse_math({ trig = ',,e', name = 'epsilon.alt', snippetType = 'autosnippet', priority = 1001 }, 'epsilon.alt'),
-  parse_math({ trig = ',l', name = 'lambda', snippetType = 'autosnippet' }, 'lambda'),
-  parse_math({ trig = ',L', name = 'Lambda', snippetType = 'autosnippet' }, 'Lambda'),
-  parse_math({ trig = ',p', name = 'pi', snippetType = 'autosnippet' }, 'pi'),
-  parse_math({ trig = ',k', name = 'kappa', snippetType = 'autosnippet' }, 'kappa'),
-  parse_math({ trig = ',y', name = 'psi', snippetType = 'autosnippet' }, 'psi'),
-  parse_math({ trig = ',6', name = 'diff (partial)', snippetType = 'autosnippet' }, 'diff'),
-  parse_math({ trig = ',8', name = 'infinity', snippetType = 'autosnippet' }, 'oo'),
+  parse_comma({ trig = ',e', name = 'epsilon (varepsilon)', snippetType = 'autosnippet' }, 'epsilon'),
+  parse_comma({ trig = ',,e', name = 'epsilon.alt', snippetType = 'autosnippet', priority = 1001 }, 'epsilon.alt'),
+  parse_comma({ trig = ',l', name = 'lambda', snippetType = 'autosnippet' }, 'lambda'),
+  parse_comma({ trig = ',L', name = 'Lambda', snippetType = 'autosnippet' }, 'Lambda'),
+  parse_comma({ trig = ',p', name = 'pi', snippetType = 'autosnippet' }, 'pi'),
+  parse_comma({ trig = ',k', name = 'kappa', snippetType = 'autosnippet' }, 'kappa'),
+  parse_comma({ trig = ',y', name = 'psi', snippetType = 'autosnippet' }, 'psi'),
+  parse_comma({ trig = ',6', name = 'diff (partial)', snippetType = 'autosnippet' }, 'diff'),
+  parse_comma({ trig = ',8', name = 'infinity', snippetType = 'autosnippet' }, 'oo'),
 }
 
 local math_snippets = {
