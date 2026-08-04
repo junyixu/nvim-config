@@ -122,6 +122,11 @@ $]]
 
   parse_math({ trig = 'o', name = 'circle' }, 'compose'),
 
+  -- musical isomorphism: 降/升指标 (typst 亦可写 `flat` / `sharp`)
+  -- `v^b<Tab>` -> `v^♭`;  wordTrig 防止 `sub<Tab>` 被吃成 `su♭`
+  parse_math({ trig = 'b', wordTrig = true, name = 'flat ♭' }, '♭'),
+  parse_math({ trig = '#', name = 'sharp ♯' }, '♯'),
+
   -- overline:  alpha- -> overline(alpha)
   maths({ trig = '(%a+)-', regTrig = true }, fmta('overline(<>)', { cap(1) })),
   -- hat
