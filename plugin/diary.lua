@@ -64,6 +64,43 @@ vim.keymap.set('n', ',w,t', function()
   open_diary('tabe')
 end, { silent = true, desc = 'Open today\'s diary in new tab' })
 
+-- Collect unchecked tasks from the last N diary files into the quickfix list
+local function diary_tasks(days)
+  local root = vim.fn.expand '~/Notes'
+  local today = os.date '*t'
+  local files = {}
+
+  for i = 0, days - 1 do
+    -- hour=12 keeps day arithmetic DST-safe
+    local t = os.time { year = today.year, month = today.month, day = today.day - i, hour = 12 }
+    local f = root .. os.date('/diary/%Y/%m/%Y-%m-%d.md', t)
+    if vim.fn.filereadable(f) == 1 then
+      files[#files + 1] = vim.fn.fnameescape(f)
+    end
+  end
+
+  if #files == 0 then
+    vim.notify('No diary files in the last ' .. days .. ' days', vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd('silent! vimgrep /\\v^\\s*[-*] \\[ \\]/j ' .. table.concat(files, ' '))
+
+  if vim.fn.getqflist({ size = 0 }).size == 0 then
+    vim.notify('No open tasks in the last ' .. days .. ' days', vim.log.levels.INFO)
+    return
+  end
+
+  vim.fn.setqflist({}, 'a', { title = 'Diary tasks (last ' .. days .. ' days)' })
+  vim.cmd 'copen'
+end
+
+vim.api.nvim_create_user_command('DiaryTasks', function(opts)
+  diary_tasks(tonumber(opts.args) or 7)
+end, { nargs = '?', desc = 'Quickfix list of open diary tasks (default last 7 days)' })
+
+vim.keymap.set('n', ',wq', '<Cmd>DiaryTasks<CR>', { silent = true, desc = 'Diary tasks in quickfix' })
+
 vim.keymap.set('n', ',ww', function()
   vim.cmd('e ~/Notes/index.md')
   vim.cmd('tcd %:h')
