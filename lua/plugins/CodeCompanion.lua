@@ -141,7 +141,7 @@ return {
       },
       interactions = {
         inline = {
-          adapter = 'copilot',
+          adapter = 'deepseek',
         },
         chat = {
           -- adapter = 'glm',
