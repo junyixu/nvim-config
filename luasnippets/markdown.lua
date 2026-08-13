@@ -74,6 +74,17 @@ local function prev_end_time()
   return cells[3] and cells[3]:match '%d+:%d+' or ''
 end
 
+-- 取下一行的 Start Time(第 1 列),作为当前行的 End Time
+local function next_start_time()
+  local row = vim.api.nvim_win_get_cursor(0)[1] -- 1-indexed
+  local nxt = vim.api.nvim_buf_get_lines(0, row, row + 1, false)[1]
+  if not nxt then
+    return nil
+  end
+  local cell = nxt:match '|([^|]+)'
+  return cell and cell:match '%d+:%d+' or nil
+end
+
 local snip_table = {
   s({ trig = '|', name = 'time-tracking next row', wordTrig = false, condition = conds.line_begin }, {
     t '| ',
@@ -93,7 +104,8 @@ local snip_table = {
     d(1, function(_, snip)
       local matched = snip.captures[1]
       local start_str = matched:match '%d%d:%d%d'
-      local end_time = os.date '%H:%M'
+      -- 优先用下一行的 Start Time,没有则退回当前时间
+      local end_time = next_start_time() or os.date '%H:%M'
       local duration = format_duration(parse_time(end_time) - parse_time(start_str))
       return sn(nil, {
         t(matched .. ' ' .. end_time .. ' | ' .. duration .. ' '),
