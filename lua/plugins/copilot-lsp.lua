@@ -10,6 +10,21 @@ return {
     'copilotlsp-nvim/copilot-lsp',
     init = function()
       vim.g.copilot_nes_debounce = 500
+
+      -- Keep the diary private: ~/Notes/diary/YYYY/MM/YYYY-MM-DD.md never gets a
+      -- copilot_ls client. A `root_dir` function that skips its `on_dir` callback
+      -- aborts the start entirely (see lsp_enable_callback in runtime/lua/vim/lsp.lua),
+      -- so no textDocument/didOpen is sent -- unlike detaching on LspAttach, which
+      -- would upload the buffer first.
+      vim.lsp.config('copilot_ls', {
+        root_dir = function(bufnr, on_dir)
+          local name = vim.api.nvim_buf_get_name(bufnr)
+          if not name:match '/diary/%d%d%d%d/%d%d/%d%d%d%d%-%d%d%-%d%d%.md$' then
+            on_dir(vim.uv.cwd())
+          end
+        end,
+      })
+
       vim.lsp.enable 'copilot_ls'
 
       -- insert-mode ghost text; only active in buffers where an
