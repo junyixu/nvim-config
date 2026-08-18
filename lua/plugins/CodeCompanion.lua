@@ -261,6 +261,7 @@ return {
             alias = 'grammar-explain',
             auto_submit = true,
             user_prompt = false,
+            stop_context_insertion = true,
             adapter = { name = 'deepseek' },
           },
           prompts = {
@@ -285,6 +286,7 @@ return {
             alias = 'translate',
             auto_submit = true,
             user_prompt = false,
+            stop_context_insertion = true,
             adapter = { name = 'deepseek_noreason', model = 'deepseek-v4-flash' },
           },
           prompts = {
@@ -338,6 +340,7 @@ return {
             alias = 'grammar-errors',
             auto_submit = true,
             user_prompt = false,
+            stop_context_insertion = true,
             adapter = { name = 'deepseek_noreason', model = 'deepseek-v4-flash' },
           },
           prompts = {
