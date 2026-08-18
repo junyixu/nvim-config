@@ -65,10 +65,8 @@ vim.keymap.set('i', '<Tab>', function()
     table_next_cell()
     return
   end
-  -- copilot fallback: 接受 nvim 内置 LSP inline completion (copilot_ls) 的 ghost text
-  if vim.lsp.inline_completion.get() then
-    return
-  end
+  -- 注意: copilot 行内补全不在这条链上, 它归 <F13> (物理 <C-i>),
+  -- 见 lua/plugins/copilot-lsp.lua
 
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, false, true), 'n', false)
 end, { buffer = true, noremap = true, silent = true })
