@@ -470,11 +470,12 @@ vim.keymap.set(
 )
 -- <C-i> 与 <Tab> 分离:
 -- vim/nvim key model 把 <C-i> 归一为 <Tab> (同字节 0x09).
--- kitty.conf 把 ctrl+i 重映射为 \eOI, 物理 <Tab> 仍发 \t,
--- 这样 nvim 收到两路独立序列, 可分别绑定.
---   <Tab>  -> Copilot NES 接受/walk (见 lua/plugins/copilot-lsp.lua; 无建议时回落 <C-i>)
---   <C-i>  -> 经 \eOI 还原 :h CTRL-I (jumplist newer)
-vim.keymap.set('n', '<Esc>OI', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
+-- kitty.conf 把 ctrl+i 重映射为 \e[25~ (vt220 F13), 物理 <Tab> 仍发 \t,
+-- nvim TUI 把前者解码成独立的 <F13> keystroke, 于是两键可分别绑定.
+-- 分工 (见 lua/plugins/copilot-lsp.lua):
+--   <Tab>  -> normal: Copilot NES 接受/walk;  insert: LuaSnip 展开/跳转, 否则真 tab
+--   <F13>  -> normal: :h CTRL-I (jumplist newer);  insert: 接受 Copilot 行内补全
+vim.keymap.set('n', '<F13>', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
 -- 注意: \eOM 是标准 SS3 keypad-Enter, nvim TUI 把它解码为 <kEnter> keystroke,
 -- keymap 层看到的是 <kEnter>, 不是 raw <Esc>OM. 所以绑 <kEnter> 才对.
 -- (zsh 没这层 SS3 解码, 所以那边可以直接绑 \eOM)
