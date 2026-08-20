@@ -103,6 +103,10 @@ end, { desc = 'Quit window or detach (smart)' })
 nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
+-- <C-y> 让给 Copilot NES 接受 (见 lua/plugins/copilot-lsp.lua), 原本的
+-- "向上滚一行" 挪到 <M-e>; <C-e> 向下滚一行保持不变.
+-- 注意 <M-e> 在 cmdline 模式另有含义 (见下方 cedit), 两者模式不同不冲突.
+vim.keymap.set({ 'n', 'x' }, '<M-e>', '<C-y>', { desc = 'Scroll up one line (was <C-y>)' })
 
 vim.keymap.set('c', '<M-e>', '<C-f>', { noremap = true, desc = '将 vim.opt.cedit 设置为 Alt-e' })
 vim.keymap.set('c', '<C-B>', '<Left>', { desc = 'Emacs-keys: Back one character' })
@@ -472,10 +476,19 @@ vim.keymap.set(
 -- vim/nvim key model 把 <C-i> 归一为 <Tab> (同字节 0x09).
 -- kitty.conf 把 ctrl+i 重映射为 \e[25~ (vt220 F13), 物理 <Tab> 仍发 \t,
 -- nvim TUI 把前者解码成独立的 <F13> keystroke, 于是两键可分别绑定.
--- 分工 (见 lua/plugins/copilot-lsp.lua):
---   <Tab>  -> normal: Copilot NES 接受/walk;  insert: LuaSnip 展开/跳转, 否则真 tab
+-- 分工 (Copilot 侧见 lua/plugins/copilot-lsp.lua):
+--   <Tab>  -> normal: 第二 leader (见下);  insert: LuaSnip 展开/跳转, 否则真 tab
 --   <F13>  -> normal: :h CTRL-I (jumplist newer);  insert: 接受 Copilot 行内补全
+--   <C-y>  -> normal: 接受/walk Copilot NES (原"上滚一行"见上方 <M-e>)
 vim.keymap.set('n', '<F13>', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
+
+-- <Tab> 作为 normal 模式的第二 leader.
+-- 前提是它没有独立动作: 只要存在 <Tab>x 这类映射, 单独按 <Tab> 就会等
+-- 'timeoutlen'; 若不显式占位, 超时后还会落回默认的 <Tab> (= jumplist newer,
+-- 已经归 <F13> 了). 所以这里用 <Nop> 把单按吃掉, which-key 负责弹出候选.
+vim.keymap.set('n', '<Tab>', '<Nop>', { desc = 'Tab leader' })
+-- 往这里加 <Tab>x 系列, 例如:
+--   vim.keymap.set('n', '<Tab>h', '<C-w>h', { desc = 'Window left' })
 -- 注意: \eOM 是标准 SS3 keypad-Enter, nvim TUI 把它解码为 <kEnter> keystroke,
 -- keymap 层看到的是 <kEnter>, 不是 raw <Esc>OM. 所以绑 <kEnter> 才对.
 -- (zsh 没这层 SS3 解码, 所以那边可以直接绑 \eOM)
