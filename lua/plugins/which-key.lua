@@ -42,6 +42,8 @@ return {
       { '<leader>f', group = '[F]inder' },
       { '<leader>t', group = '[T]oggle' },
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+      -- 第二 leader, 见 lua/config/keymaps.lua
+      { '<Tab>', group = 'Tab leader' },
     },
   },
 }
