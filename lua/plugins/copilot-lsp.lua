@@ -1,6 +1,8 @@
 -- GitHub Copilot through the native LSP client (copilot-language-server).
---   * Next Edit Suggestion (NES): normal-mode <C-y> accepts / walks edits;
---     <Esc> dismisses via the global map in lua/config/keymaps.lua.
+--   * Next Edit Suggestion (NES): <C-y> accepts in both modes -- normal mode
+--     here, insert mode through blink's keymap chain in lua/plugins/blink-cmp.lua
+--     (menu accept first). <Esc> dismisses via the global map in
+--     lua/config/keymaps.lua.
 --   * inline ghost text (insert mode): vim.lsp.inline_completion, accepted via
 --     <F13> (= physical <C-i>, see lua/config/keymaps.lua).
 -- Key split rationale: suggestions arrive asynchronously, so a key that also has
@@ -60,9 +62,31 @@ return {
         end
       end, { expr = true, remap = true, replace_keycodes = true, silent = true, desc = 'LuaSnip expand/jump or tab' })
       -- <F13> = physical <C-i>: accept the Copilot ghost text; no-op otherwise.
+      -- NES is not on this key -- it lives on <C-y> in both modes (insert side
+      -- is wired through blink's keymap table, see lua/plugins/blink-cmp.lua).
       vim.keymap.set('i', '<F13>', function()
         vim.lsp.inline_completion.get()
       end, { desc = 'Copilot: accept inline completion' })
+    end,
+    config = function()
+      -- Upstream bug, still present on main (1b6d827): nes/ui.lua:52 reads the
+      -- old text with nvim_buf_get_lines(.., strict_indexing = false), which
+      -- returns {} once the range starts past the last line. Only one branch
+      -- guards num_old_lines == 0 (ui.lua:84-92); every other edit shape falls
+      -- through to `old_lines[1]:sub(..)` at ui.lua:117 and throws out of the
+      -- LSP handler. Happens when the buffer shrinks while the debounced
+      -- request is in flight, or when the server proposes an edit on the
+      -- phantom trailing line that LSP has and Neovim does not.
+      -- An out-of-range suggestion cannot be rendered anyway, so drop it.
+      local nes_ui = require 'copilot-lsp.nes.ui'
+      local display_next_suggestion = nes_ui._display_next_suggestion
+      nes_ui._display_next_suggestion = function(bufnr, ns_id, edits)
+        local edit = edits and edits[1]
+        if edit and edit.range.start.line >= vim.api.nvim_buf_line_count(bufnr) then
+          return false
+        end
+        return display_next_suggestion(bufnr, ns_id, edits)
+      end
     end,
   },
 }
