@@ -22,6 +22,24 @@ return {
       ['<C-u>'] = { 'scroll_signature_up', 'fallback' },
       ['<C-d>'] = { 'scroll_signature_down', 'fallback' },
 
+      -- <C-y> 三级: 补全菜单开着就接受候选 -> 有 pending 的 Copilot NES 就应用
+      -- -> 回落内置 i_CTRL-Y (插入上一行同列字符).
+      -- normal 模式的 <C-y> 同样是 NES 接受, 见 lua/plugins/copilot-lsp.lua.
+      -- 放在 blink 的表里而不是单独 keymap.set: blink 拥有这个键, 这样三级顺序
+      -- 是显式的, 也不依赖 blink 的 fallback 去撞我们自己的映射.
+      -- NES 的两个调用内部都走 vim.schedule, 所以在 blink 的 expr 映射里安全.
+      ['<C-y>'] = {
+        'select_and_accept',
+        function()
+          local ok, nes = pcall(require, 'copilot-lsp.nes')
+          if ok and nes.apply_pending_nes() then
+            nes.walk_cursor_end_edit()
+            return true
+          end
+        end,
+        'fallback',
+      },
+
       -- default in all keymap presets
       ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
       ['<A-1>'] = {
