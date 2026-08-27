@@ -16,9 +16,12 @@ return {
           -- 'mtime',
         },
         keymaps = {
-          ['gd'] = function()
-            require('oil').set_columns { 'icon', 'permissions', 'size', 'mtime' }
-          end,
+          ['gd'] = {
+            function()
+              require('oil').set_columns { 'icon', 'permissions', 'size', 'mtime' }
+            end,
+            desc = 'Show all columns',
+          },
           -- You can pass additional opts to vim.keymap.set by using
           -- a table with the mapping as the first element.
           ['<leader>ff'] = {
