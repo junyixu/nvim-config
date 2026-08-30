@@ -442,6 +442,14 @@ return {
         end,
         desc = '[F]ind [M]arks',
       },
+      {
+        '<leader>te',
+        function()
+          -- ~/.local/share/nvim/lazy/snacks.nvim/doc/snacks.nvim-explorer.txt:19
+          require('snacks').explorer.open()
+        end,
+        desc = '[T]oggle [E]xplorer',
+      },
     },
     init = function()
       vim.api.nvim_create_user_command('Marks', function()
@@ -455,7 +463,7 @@ return {
       -- refer to the configuration section below
       bigfile = { enabled = false },
       dashboard = { enabled = false },
-      explorer = { enabled = false },
+      explorer = { enabled = true },
       indent = { enabled = false },
       input = { enabled = true },
       picker = {
