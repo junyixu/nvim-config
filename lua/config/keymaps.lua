@@ -451,6 +451,33 @@ vim.keymap.set('v', 'gy', function()
   print "已同步到寄存器 'a' 和本地 Primary (*)"
 end, { desc = 'Copy selection to reg a and send via OSC 52 to *' })
 
+-- ============================================================================
+-- Claude Code 行号引用 (原 plugin/claude_keymap.vim)
+-- ============================================================================
+-- 生成 Claude Code 能识别的引用 (如 @lua/config/keymaps.lua:123-456), 再按环境复制:
+--   tmux 中  -> tmux buffer (用 tmux paste-buffer / prefix-] 粘贴)
+--   非 tmux  -> OSC 52, 直接写入终端所在机器的剪贴板
+local function copy_to_smart_clipboard(text)
+  if vim.env.TMUX and vim.env.TMUX ~= '' then
+    vim.system({ 'tmux', 'set-buffer', '--', text }):wait()
+  else
+    -- copy('+') 返回的是处理函数, 入参要求是按行切分的 list
+    require('vim.ui.clipboard.osc52').copy '+'(vim.split(text, '\n', { plain = true }))
+  end
+end
+
+local function copy_line_reference()
+  copy_to_smart_clipboard(vim.fn['claude#get_line_reference']())
+end
+
+nnoremap('<leader>y', copy_line_reference, { desc = 'Copy Claude line reference' })
+vnoremap('<leader>y', function()
+  -- 先退出 visual 模式: claude#get_line_reference 读 '< / '> 标记, 而这两个标记
+  -- 要离开 visual 模式后才更新 (原 vimscript 映射靠 :<C-u> 达到同样效果)
+  vim.cmd 'normal! \27'
+  copy_line_reference()
+end, { desc = 'Copy Claude line reference (selection)' })
+
 vim.keymap.set('n', '<leader>cf', function()
   if vim.fn.exists ':Cfilter' == 2 then
     return ':Cfilter! //<Left>'
