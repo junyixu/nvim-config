@@ -50,7 +50,9 @@ function! utils#copy_to_smart_clipboard(text) abort
         " 在tmux中使用tmux剪贴板
         call system('tmux set-buffer -- ' . shellescape(a:text))
     else
-        " 非tmux环境使用系统剪贴板
-        call setreg('+', a:text)
+        " 非tmux环境用 OSC 52 直接写入终端所在机器的剪贴板
+        " copy('+') 返回的是处理函数，入参要求是按行切分的 list
+        call luaeval("require('vim.ui.clipboard.osc52').copy('+')(_A)",
+                    \ split(a:text, "\n", 1))
     endif
 endfunction
