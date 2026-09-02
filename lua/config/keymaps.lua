@@ -466,16 +466,25 @@ local function copy_to_smart_clipboard(text)
   end
 end
 
-local function copy_line_reference()
-  copy_to_smart_clipboard(vim.fn['claude#get_line_reference']())
+local claude = require 'util.claude'
+
+--- @param line_start? integer 省略则取光标所在行
+--- @param line_end? integer 省略则与起始行相同
+local function copy_line_reference(line_start, line_end)
+  local reference = claude.get_line_reference(line_start, line_end)
+  copy_to_smart_clipboard(reference)
+  vim.api.nvim_echo({ { 'Generated reference: ' .. reference } }, true, {})
 end
 
-nnoremap('<leader>y', copy_line_reference, { desc = 'Copy Claude line reference' })
-vnoremap('<leader>y', function()
-  -- 先退出 visual 模式: claude#get_line_reference 读 '< / '> 标记, 而这两个标记
-  -- 要离开 visual 模式后才更新 (原 vimscript 映射靠 :<C-u> 达到同样效果)
-  vim.cmd 'normal! \27'
+nnoremap('<leader>y', function()
   copy_line_reference()
+end, { desc = 'Copy Claude line reference' })
+
+vnoremap('<leader>y', function()
+  -- 先在 visual 模式仍活跃时读出选区, 再退出 visual 模式 (对齐原 :<C-u> 的行为)
+  local line_start, line_end = claude.visual_range()
+  vim.cmd 'normal! \27'
+  copy_line_reference(line_start, line_end)
 end, { desc = 'Copy Claude line reference (selection)' })
 
 vim.keymap.set('n', '<leader>cf', function()
