@@ -6,7 +6,12 @@ return {
     keys = {
       { '<leader>ta', '<cmd>AerialToggle<CR>', desc = 'Toggle Aerial' },
     },
-    opts = {},
+    opts = {
+      filter_kind = {
+        ['_'] = { 'Class', 'Constructor', 'Enum', 'Function', 'Interface', 'Module', 'Method', 'Struct' },
+        typst = { 'Namespace' },
+      },
+    },
     -- Optional dependencies
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
