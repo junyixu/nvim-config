@@ -9,6 +9,10 @@ return {
   --- @module 'blink.cmp'
   --- @type blink.cmp.Config
   opts = {
+    -- typr (Monkeytype-like 打字练习) 里不需要补全, 且补全窗口会抢焦点打断打字
+    enabled = function()
+      return vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false and vim.bo.filetype ~= 'typr'
+    end,
     keymap = {
       -- NOTE: Keep Blink's default preset but let the plain Neovim mappings in
       -- lua/plugins/copilot-lsp.lua own <Tab>/<S-Tab>, so snippet expansion/jumps
