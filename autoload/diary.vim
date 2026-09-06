@@ -8,8 +8,9 @@ function! diary#load_python() abort
     return
   endif
 
-  " Load Python code from plugin directory
-  let s:py_file = expand('<script>:p:h:h') .. '/plugin/last_diary.py'
+  " Load Python code from bin/ (kept out of Neovim's plugin/ftplugin/etc.
+  " runtime-loaded directories on purpose)
+  let s:py_file = expand('<script>:p:h:h') .. '/bin/last_diary.py'
   execute 'py3file' s:py_file
   let s:python_loaded = 1
 endfunction
