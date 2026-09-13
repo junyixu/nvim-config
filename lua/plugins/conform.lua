@@ -31,6 +31,8 @@ return {
       lua = { 'stylua' },
       markdown = { 'prettier' },
       tex = { 'tex-fmt' },
+      sh = { 'shfmt' },
+      bash = { 'shfmt' },
     },
   },
 }
