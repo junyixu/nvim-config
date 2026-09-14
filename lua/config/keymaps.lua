@@ -116,6 +116,23 @@ vim.keymap.set('c', '<C-E>', '<End>', { desc = 'Emacs-keys: End of line' })
 vim.keymap.set('c', '<A-b>', '<S-Left>', { desc = 'Emacs-keys: Back one word' })
 vim.keymap.set('c', '<A-f>', '<S-Right>', { desc = 'Emacs-keys: Forward one word' })
 
+-- 搜索模式 (/ 或 ?) 下连续输入三个 '-' 自动替换为 em dash '—'
+-- NOTE: cmdline 的 expr 映射只会把返回值当纯文本插入, <BS> 等特殊键不会被执行,
+-- 所以这里改用 CmdlineChanged + setcmdline() 直接改写命令行内容.
+vim.api.nvim_create_autocmd('CmdlineChanged', {
+  callback = function()
+    local cmdtype = vim.fn.getcmdtype()
+    if cmdtype ~= '/' and cmdtype ~= '?' then
+      return
+    end
+    local line = vim.fn.getcmdline()
+    if line:sub(-3) == '---' then
+      vim.fn.setcmdline(line:sub(1, -4) .. '—')
+    end
+  end,
+  desc = '搜索模式: --- 转 em dash',
+})
+
 -- Jump to window N in current tabpage: <alt>1..9
 for i = 1, 9 do
   nnoremap(string.format('<M-%d>', i), function()
