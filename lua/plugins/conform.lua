@@ -30,6 +30,7 @@ return {
     formatters_by_ft = {
       lua = { 'stylua' },
       markdown = { 'prettier' },
+      html = { 'prettier' },
       tex = { 'tex-fmt' },
       sh = { 'shfmt' },
       bash = { 'shfmt' },
