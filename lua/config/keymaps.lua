@@ -244,6 +244,27 @@ end
 vim.keymap.set('n', '%', ts_matchit_jump, { desc = 'TS Jump with Matchit Fallback' })
 vim.keymap.set('n', 'g%', '<Plug>(MatchitNormalBackward)', { remap = true, desc = 'Matchit backward' })
 
+-- 跳到下一个/上一个 *已关闭* 的折叠 (原生 zj/zk 不区分折叠开关状态)
+-- 覆盖原生 ]z/[z (跳到当前打开折叠的首尾)
+local function goto_closed_fold(cmd)
+  local view = vim.fn.winsaveview()
+  vim.cmd "normal! m'"
+  for _ = 1, vim.v.count1 do
+    while true do
+      local prev = vim.fn.line '.'
+      vim.cmd('keepjumps normal! ' .. cmd)
+      local cur = vim.fn.line '.'
+      if cur == prev then -- 没有更多折叠, 回到原位
+        vim.fn.winrestview(view)
+        return
+      end
+      if vim.fn.foldclosed(cur) ~= -1 then break end
+    end
+  end
+end
+vim.keymap.set({ 'n', 'x' }, ']z', function() goto_closed_fold 'zj' end, { desc = 'Next closed fold' })
+vim.keymap.set({ 'n', 'x' }, '[z', function() goto_closed_fold 'zk' end, { desc = 'Prev closed fold' })
+
 nnoremap('<C-n>', '<CMD>cnext<CR>', { desc = 'cnext' })
 nnoremap('<C-p>', '<CMD>cprev<CR>', { desc = 'cnext' })
 
