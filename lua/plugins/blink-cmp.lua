@@ -131,6 +131,8 @@ return {
       default = { 'lsp', 'path', 'cmdline', 'lazydev', 'snippets' },
       providers = {
         lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+        -- inkycap #wikilink("笔记名", label: "标签") 补全, 见 lua/junyi/blink_wikilink.lua
+        wikilink = { name = 'wikilink', module = 'junyi.blink_wikilink', score_offset = 100 },
         thesaurus = {
           name = 'blink-cmp-words',
           module = 'blink-cmp-words.thesaurus',
@@ -159,7 +161,7 @@ return {
       per_filetype = {
         codecompanion = { 'codecompanion' },
         markdown = { 'lsp', 'thesaurus' },
-        typst = { 'lsp', 'thesaurus' },
+        typst = { 'wikilink', 'lsp', 'thesaurus' },
         tex = { 'lsp', 'thesaurus' },
       },
     },
