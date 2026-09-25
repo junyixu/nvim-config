@@ -82,7 +82,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- :help grr
     -- Pre-fill picker with Julia type annotations (e.g. ::ParticleLocation)
     -- from the current line, so multiple method definitions can be filtered quickly.
+    -- typst: 光标在 inkycap 的 #wikilink(...) 上时跳到目标笔记的 <label> 行
     map('grd', function()
+      if vim.bo.filetype == 'typst' and require('junyi.typst_wikilink').jump() then
+        return
+      end
       if vim.bo.filetype ~= 'julia' then
         return vim.lsp.buf.definition()
       end
