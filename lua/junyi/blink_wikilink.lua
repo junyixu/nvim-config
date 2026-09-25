@@ -69,7 +69,7 @@ function source:get_completions(ctx, callback)
     local path = vim.fs.joinpath(wikilink.root(ctx.bufnr), name .. '.typ')
     for _, l in ipairs(wikilink.labels(path)) do
       if match_all(typed, l.label) then
-        items[#items + 1] = item(l.label, row, col - #typed, col, kinds.Reference, l.heading)
+        items[#items + 1] = item(l.label, row, col - #typed, col, kinds.Reference, l.detail)
       end
     end
   else
