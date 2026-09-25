@@ -17,6 +17,12 @@ end
 
 -- 光标所在的 #wikilink(...) call 节点 (调用内任意位置, 包括开头的 `#`)
 local function wikilink_at_cursor(buf)
+  -- buffer 没开 treesitter 高亮时语法树可能还没生成, 先 parse (增量, 已解析过就很快)
+  local has_parser, parser = pcall(vim.treesitter.get_parser, buf, 'typst')
+  if not has_parser or not parser then
+    return
+  end
+  parser:parse()
   local ok, node = pcall(vim.treesitter.get_node, { bufnr = buf })
   if not ok then
     return
@@ -71,20 +77,33 @@ function M.root(buf)
   return vim.fs.root(buf, '.inkycap') or vim.fs.dirname(vim.api.nvim_buf_get_name(buf))
 end
 
---- 文件里所有标题标签: { { label = 'sec:…', heading = '== …' }, … }
-function M.labels(path)
-  local ok, lines = pcall(vim.fn.readfile, path)
+local label_query
+
+-- lines 里所有标签: { { label = 'sec:…', detail = '== …', row = 0 起, col = 0 起 }, … }
+-- 用 treesitter 的 (label) 节点, 所以公式/代码/注释/字符串里的 `<…>` 不算;
+-- detail = 标签所在行去掉标签后的文字, 标签单独一行时取上面最近的非空行.
+local function collect_labels(lines)
+  local src = table.concat(lines, '\n')
+  label_query = label_query or vim.treesitter.query.parse('typst', '(label) @label')
+  local root = vim.treesitter.get_string_parser(src, 'typst'):parse()[1]:root()
   local res = {}
-  if not ok then
-    return res
-  end
-  for _, line in ipairs(lines) do
-    local label = line:match '^%s*=+%s.-<([^%s<>]+)>%s*$'
-    if label then
-      res[#res + 1] = { label = label, heading = vim.trim((line:gsub('<[^%s<>]+>%s*$', ''))) }
+  for _, node in label_query:iter_captures(root, src) do
+    local row, col = node:start()
+    local detail = vim.trim((lines[row + 1]:gsub('<[^%s<>]+>', '')))
+    local r = row
+    while detail == '' and r > 0 do
+      r = r - 1
+      detail = vim.trim(lines[r + 1])
     end
+    res[#res + 1] = { label = text(node, src):sub(2, -2), detail = detail, row = row, col = col }
   end
   return res
+end
+
+--- 文件里所有标签 (读磁盘), 格式见 collect_labels
+function M.labels(path)
+  local ok, lines = pcall(vim.fn.readfile, path)
+  return ok and collect_labels(lines) or {}
 end
 
 --- 光标在 #wikilink 上就跳转并返回 true; 否则返回 false (交给 LSP)
@@ -117,12 +136,16 @@ function M.jump()
     return true
   end
 
-  vim.api.nvim_win_set_cursor(0, { 1, 0 })
-  if vim.fn.search('\\V<' .. vim.fn.escape(label, '\\') .. '>', 'cW') == 0 then
-    vim.notify(('wikilink: %s 里没有标签 <%s>'):format(name, label), vim.log.levels.WARN)
-  else
-    vim.cmd 'normal! zv'
+  -- 解析 buffer 而不是磁盘文件: 目标可能已打开且有未保存的修改
+  for _, l in ipairs(collect_labels(vim.api.nvim_buf_get_lines(0, 0, -1, false))) do
+    if l.label == label then
+      vim.api.nvim_win_set_cursor(0, { l.row + 1, l.col })
+      vim.cmd 'normal! zv'
+      return true
+    end
   end
+  vim.api.nvim_win_set_cursor(0, { 1, 0 })
+  vim.notify(('wikilink: %s 里没有标签 <%s>'):format(name, label), vim.log.levels.WARN)
   return true
 end
 
