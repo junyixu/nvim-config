@@ -1,8 +1,6 @@
 return {
 {
     "rainzm/flash-zh.nvim",
-    -- event = "VeryLazy",
-    dependencies = "folke/flash.nvim",
     -- `-` 同时匹配 ASCII 连字符与破折号/连接号（— – ―）
     opts = {
         char_map = {
