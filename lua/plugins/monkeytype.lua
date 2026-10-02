@@ -1,5 +1,6 @@
 return {
   "nvzone/typr",
+  enabled = vim.g.full,
   dependencies = { "nvzone/volt" },
   cmd = { "Typr", "TyprStats" },
   opts = {

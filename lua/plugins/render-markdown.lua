@@ -19,6 +19,7 @@ return {
   },
   {
     'HakonHarnes/img-clip.nvim',
+    enabled = vim.g.full,
     event = 'VeryLazy',
     opts = {
       filetypes = {

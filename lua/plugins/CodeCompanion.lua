@@ -1,6 +1,7 @@
 return {
   {
     'olimorris/codecompanion.nvim',
+    enabled = vim.g.full,
     lazy = true,
     cmd = { 'CodeCompanionChat', 'CodeCompanionCmd', 'CodeCompanionActions', 'CodeCompanion' },
     keys = {
