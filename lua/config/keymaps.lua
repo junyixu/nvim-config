@@ -563,6 +563,16 @@ vim.keymap.set('n', '<F13>', '<C-i>', { desc = 'Jumplist newer (original C-i)' }
 vim.keymap.set('n', '<Tab>', '<Nop>', { desc = 'Tab leader' })
 -- 往这里加 <Tab>x 系列, 例如:
 --   vim.keymap.set('n', '<Tab>h', '<C-w>h', { desc = 'Window left' })
+-- <Tab> (insert): LuaSnip expand/jump > literal tab. No Copilot here on
+-- purpose; ftplugin/markdown.lua extends this chain with table-cell nav.
+vim.keymap.set('i', '<Tab>', function()
+  if require('luasnip').expand_or_locally_jumpable() then
+    return '<Plug>luasnip-expand-or-jump'
+  else
+    return '<Tab>'
+  end
+end, { expr = true, remap = true, replace_keycodes = true, silent = true, desc = 'LuaSnip expand/jump or tab' })
+
 -- 注意: \eOM 是标准 SS3 keypad-Enter, nvim TUI 把它解码为 <kEnter> keystroke,
 -- keymap 层看到的是 <kEnter>, 不是 raw <Esc>OM. 所以绑 <kEnter> 才对.
 -- (zsh 没这层 SS3 解码, 所以那边可以直接绑 \eOM)

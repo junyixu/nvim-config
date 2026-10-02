@@ -18,6 +18,7 @@
 return {
   {
     'copilotlsp-nvim/copilot-lsp',
+    enabled = vim.g.full,
     init = function()
       vim.g.copilot_nes_debounce = 500
 
@@ -52,15 +53,6 @@ return {
           local _ = nes.walk_cursor_start_edit() or (nes.apply_pending_nes() and nes.walk_cursor_end_edit())
         end
       end, { desc = 'Copilot NES: accept / walk' })
-      -- <Tab> (insert): LuaSnip expand/jump > literal tab. No Copilot here on
-      -- purpose; ftplugin/markdown.lua extends this chain with table-cell nav.
-      vim.keymap.set('i', '<Tab>', function()
-        if require('luasnip').expand_or_locally_jumpable() then
-          return '<Plug>luasnip-expand-or-jump'
-        else
-          return '<Tab>'
-        end
-      end, { expr = true, remap = true, replace_keycodes = true, silent = true, desc = 'LuaSnip expand/jump or tab' })
       -- <F13> = physical <C-i>: accept the Copilot ghost text; no-op otherwise.
       -- NES is not on this key -- it lives on <C-y> in both modes (insert side
       -- is wired through blink's keymap table, see lua/plugins/blink-cmp.lua).

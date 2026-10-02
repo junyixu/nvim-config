@@ -2,7 +2,7 @@
 
 return {
   'saghen/blink.cmp',
-  dependencies = { 'archie-judd/blink-cmp-words' },
+  dependencies = vim.g.full and { 'archie-judd/blink-cmp-words' } or {},
   lazy = true,
   event = 'VimEnter',
   version = '1.*',
@@ -133,7 +133,7 @@ return {
         lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         -- inkycap #wikilink("笔记名", label: "标签") 补全, 见 lua/junyi/blink_wikilink.lua
         wikilink = { name = 'wikilink', module = 'junyi.blink_wikilink', score_offset = 100 },
-        thesaurus = {
+        thesaurus = vim.g.full and {
           name = 'blink-cmp-words',
           module = 'blink-cmp-words.thesaurus',
           -- All available options
@@ -156,13 +156,13 @@ return {
             -- 2 is similar words of similar words, etc. Increasing this may slow results.
             similarity_depth = 2,
           },
-        },
+        } or nil,
       },
       per_filetype = {
         codecompanion = { 'codecompanion' },
-        markdown = { 'lsp', 'thesaurus' },
-        typst = { 'wikilink', 'lsp', 'thesaurus' },
-        tex = { 'lsp', 'thesaurus' },
+        markdown = vim.g.full and { 'lsp', 'thesaurus' } or { 'lsp' },
+        typst = vim.g.full and { 'wikilink', 'lsp', 'thesaurus' } or { 'wikilink', 'lsp' },
+        tex = vim.g.full and { 'lsp', 'thesaurus' } or { 'lsp' },
       },
     },
     snippets = { preset = 'luasnip' },

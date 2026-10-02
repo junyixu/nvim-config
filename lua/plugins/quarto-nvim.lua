@@ -2,6 +2,7 @@
 
 return {
   'quarto-dev/quarto-nvim',
+  enabled = vim.g.full,
   ft = { 'quarto' },
   dependencies = {
     'jmbuhr/otter.nvim',
