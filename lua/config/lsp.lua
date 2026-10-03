@@ -52,7 +52,9 @@ end, { desc = 'Toggle Inlay Hints' })
 vim.lsp.enable 'pyright'
 vim.lsp.enable 'lua_ls'
 vim.lsp.enable 'stylua'
-if vim.fn.executable 'julia' == 1 then
+-- julials needs a LanguageServer env (~/.julia/environments/lsp<ver>, see
+-- after/lsp/julials.lua); without one it exits with code 1 on every Julia buffer.
+if vim.fn.executable 'julia' == 1 and vim.fn.glob '~/.julia/environments/lsp*/Manifest.toml' ~= '' then
   vim.lsp.enable 'julials'
 end
 vim.lsp.enable 'clangd'
