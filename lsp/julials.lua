@@ -2,16 +2,19 @@
 ---
 --- https://github.com/julia-vscode/julia-vscode
 ---
---- LanguageServer.jl, SymbolServer.jl and StaticLint.jl can be installed with `julia` and `Pkg`:
+--- LanguageServer.jl, SymbolServer.jl and StaticLint.jl are installed per Julia version into
+--- `~/.julia/environments/lsp<major.minor>` (e.g. `lsp1.12`). From inside nvim run `:JuliaInstallLSP`,
+--- or from a shell (install `juliaup` first: `curl -fsSL https://install.julialang.org | sh`):
 --- ```sh
---- julia --project=~/.julia/environments/nvim-lspconfig -e 'using Pkg; Pkg.add("LanguageServer"); Pkg.add("SymbolServer"); Pkg.add("StaticLint")'
+--- ver=$(julia --startup-file=no -e 'print(VERSION.major, ".", VERSION.minor)')
+--- julia --project="$HOME/.julia/environments/lsp$ver" -e 'using Pkg; Pkg.add("LanguageServer"); Pkg.add("SymbolServer"); Pkg.add("StaticLint")'
 --- ```
---- where `~/.julia/environments/nvim-lspconfig` is the location where
---- the default configuration expects LanguageServer.jl, SymbolServer.jl and StaticLint.jl to be installed.
+--- A `julials.so` sysimage in that directory (PackageCompiler.create_sysimage) is used when present.
+--- The lookup lives in `lua/util/julials.lua`; `after/lsp/julials.lua` overrides `cmd` below.
 ---
 --- To update an existing install, use the following command:
 --- ```sh
---- julia --project=~/.julia/environments/nvim-lspconfig -e 'using Pkg; Pkg.update()'
+--- julia --project="$HOME/.julia/environments/lsp$ver" -e 'using Pkg; Pkg.update()'
 --- ```
 ---
 --- Note: In order to have LanguageServer.jl pick up installed packages or dependencies in a

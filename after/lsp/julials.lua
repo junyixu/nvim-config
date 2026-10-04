@@ -1,68 +1,6 @@
 -- ~/.config/nvim/after/lsp/julials.lua
-local joinpath = vim.fs.joinpath
-
-local function exists(path)
-  return vim.uv.fs_stat(path) ~= nil
-end
-
-local function get_julia_env()
-  -- 定义默认的 fallback 路径
-  local default_path = vim.fn.expand('~/.julia/environments/lsp1.12')
-
-  -- 借助 juliaup 获取当前激活版本
-  local result = vim.system({ 'julia', '--project=.', '--startup-file=no', '--history-file=no', '--version' }, { text = true, cwd = vim.uv.cwd() }):wait()
-  if result.code ~= 0 or not result.stdout then
-    return default_path
-  end
-
-  -- 提取 major.minor (例如从 "julia version 1.12.6" 得到 "1.12")
-  local version = result.stdout:match('(%d+%.%d+)%.%d+')
-  if not version then
-    return default_path
-  end
-
-  local lsp_path = vim.fn.expand(joinpath('~/.julia/environments/lsp' .. version, ''))
-  if exists(lsp_path) then
-    return lsp_path
-  end
-
-  return default_path
-end
-
--- 最终得到的路径
-local env_path = get_julia_env()
-local sysimage_path = joinpath(env_path, 'julials.so')
-
--- 1. 定义基础命令（所有情况通用的部分）
-local final_cmd = {
-  'julia',
-  '--project=' .. env_path,
-  '--startup-file=no',
-  '--history-file=no',
-}
-
--- 2. 如果 sysimage 存在，动态插入 flags
--- 注意：这里使用之前定义的 exists 函数（返回 boolean）
-if exists(sysimage_path) then
-  vim.list_extend(final_cmd, {
-    '--sysimage=' .. sysimage_path,
-    '--sysimage-native-code=yes',
-  })
-end
-
--- 3. 最后拼接执行脚本的部分
-vim.list_extend(final_cmd, {
-  '-e',
-  [[
-    using LanguageServer, SymbolServer, StaticLint
-    depot_path = get(ENV, "JULIA_DEPOT_PATH", "")
-    project_path = dirname(something(Base.current_project(pwd()), Base.load_path_expand(LOAD_PATH[2])))
-    @info "LSP Started" project_path depot_path
-    server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, depot_path);
-    server.runlinter = true;
-    run(server);
-  ]],
-})
+-- Environment lookup (sysimage / lsp<ver> env) lives in `util.julials`; see `:JuliaInstallLSP`.
+local julials = require 'util.julials'
 local root_files = { 'Project.toml', 'JuliaProject.toml' }
 
 -- 定义 activate_env 函数，否则下面 nvim_buf_create_user_command 会报错
@@ -94,9 +32,25 @@ local function activate_env(path)
 end
 
 return {
-  cmd = final_cmd ,
+  -- Resolved when the server starts, so `:JuliaInstallLSP` takes effect without restarting nvim.
+  cmd = function(dispatchers, config)
+    local info = assert(julials.resolve(config.root_dir), 'no Julia LSP environment')
+    return vim.lsp.rpc.start(julials.cmd(info), dispatchers, { cwd = config.cmd_cwd, env = config.cmd_env, detached = config.detached })
+  end,
   filetypes = { 'julia' },
-  root_markers = root_files,
+  -- Only start when an LSP environment exists; otherwise point at `:JuliaInstallLSP` once.
+  root_dir = function(bufnr, on_dir)
+    local root = vim.fs.root(bufnr, root_files)
+    if julials.resolve(root) then
+      on_dir(root)
+    elseif not julials.warned then
+      julials.warned = true
+      vim.notify(
+        ('No Julia LSP environment found (%s/lsp<major.minor>); run :JuliaInstallLSP'):format(julials.environments_dir()),
+        vim.log.levels.WARN
+      )
+    end
+  end,
   settings = {
     julia = {
       lint = {
@@ -116,6 +70,5 @@ return {
       nargs = '?',
       complete = 'file',
     })
-
   end,
 }

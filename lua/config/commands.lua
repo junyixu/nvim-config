@@ -25,6 +25,11 @@ vim.api.nvim_create_user_command('JuliaStackOpen', function()
   end
 end, { desc = 'Open Julia stacktrace location under cursor (from @ file:line)' })
 
+pcall(vim.api.nvim_del_user_command, 'JuliaInstallLSP')
+vim.api.nvim_create_user_command('JuliaInstallLSP', function()
+  require('util.julials').install()
+end, { desc = 'Install LanguageServer/SymbolServer/StaticLint into ~/.julia/environments/lsp<major.minor>' })
+
 do
   local gtags_ref = require 'custom.gtags_ref'
   gtags_ref.setup {
