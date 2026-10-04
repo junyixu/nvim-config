@@ -3,7 +3,7 @@
 vim.g.mapleader = ','
 vim.g.maplocalleader = ' '
 
--- Full plugin set (AI, LaTeX/Typst/Quarto, thesaurus, ...) only when NVIM_FULL is set;
+-- Full plugin set (AI, LaTeX/Typst/Quarto, thesaurus, ...) only when NVIM_FULL is set in `/etc/environment`;
 -- VPS/docker stay lean by default. Heavy specs use `enabled = vim.g.full`.
 vim.g.full = vim.env.NVIM_FULL ~= nil
 
