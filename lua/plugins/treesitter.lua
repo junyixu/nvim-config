@@ -17,7 +17,7 @@ return {
       }
 
       -- 建议只在初次安装或更新时运行，也可以直接写在 config 里
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'julia', 'python', 'yaml' }
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'latex', 'query', 'vim', 'vimdoc', 'julia', 'python', 'yaml' }
       -- 没有 tree-sitter CLI 无法编译 parser（如 VPS 精简环境），跳过安装
       if vim.fn.executable 'tree-sitter' == 1 then
         ts.install(parsers)
