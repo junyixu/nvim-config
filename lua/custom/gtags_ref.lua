@@ -20,16 +20,21 @@ local function parse_global_ctags_mod(out)
   return items
 end
 
-local function run_global(option, pattern, action, title_prefix)
+local function resolve_query(pattern, title_prefix)
   local query = pattern
-  if query == '' then
+  if query == nil or query == '' then
     query = vim.fn.input('Gtags for pattern: ', vim.fn.expand '<cword>')
   end
   if query == '' then
     echo((title_prefix or 'Gtags') .. ': pattern not specified.', 'ErrorMsg')
-    return
+    return nil
   end
+  return query
+end
 
+-- Run `global` and return the parsed items: nil when the query itself failed,
+-- an empty table when it simply matched nothing (both already echoed here).
+local function query_global(option, query, title_prefix)
   -- Always pass `-e` so patterns starting with '-' are treated as a pattern.
   local cmd = 'global --path-style=absolute --result=ctags-mod -q ' .. option .. ' -e ' .. vim.fn.shellescape(query)
   local out = vim.fn.system(cmd)
@@ -37,19 +42,18 @@ local function run_global(option, pattern, action, title_prefix)
   if vim.v.shell_error ~= 0 then
     echo(((title_prefix or 'Gtags') .. ': global failed (%d)'):format(vim.v.shell_error), 'ErrorMsg')
     echo(cmd)
-    return
+    return nil
   end
 
   if out == '' then
     echo((title_prefix or 'Gtags') .. ': not found: ' .. query, 'WarningMsg')
-    if action == 'r' then
-      vim.fn.setqflist({}, 'r', { title = (title_prefix or 'Gtags') .. ': ' .. query, items = {} })
-      vim.cmd.cclose()
-    end
-    return
+    return {}
   end
 
-  local items = parse_global_ctags_mod(out)
+  return parse_global_ctags_mod(out)
+end
+
+local function fill_quickfix(items, title, action)
   if action == 'a' then
     -- Append to the current quickfix list and keep cursor position.
     vim.fn.setqflist(items, 'a')
@@ -59,10 +63,88 @@ local function run_global(option, pattern, action, title_prefix)
   end
 
   -- Replace the current quickfix list and jump to the first match.
-  vim.fn.setqflist({}, 'r', { title = (title_prefix or 'Gtags') .. ': ' .. query, items = items })
+  vim.fn.setqflist({}, 'r', { title = title, items = items })
   vim.cmd 'botright copen'
   adjust_quickfix_height(#items)
   pcall(vim.cmd.cfirst)
+end
+
+local function run_global(option, pattern, action, title_prefix)
+  local query = resolve_query(pattern, title_prefix)
+  if not query then
+    return
+  end
+
+  local items = query_global(option, query, title_prefix)
+  if not items then
+    return
+  end
+
+  if #items == 0 then
+    if action == 'r' then
+      vim.fn.setqflist({}, 'r', { title = (title_prefix or 'Gtags') .. ': ' .. query, items = {} })
+      vim.cmd.cclose()
+    end
+    return
+  end
+
+  fill_quickfix(items, (title_prefix or 'Gtags') .. ': ' .. query, action)
+end
+
+--- LSP-`grr`-style lookup: jump straight to a lone match, or fuzzy-pick when
+--- there are several. Either way the pre-jump position goes on the tag stack,
+--- so `<C-t>` comes back (`:help tagstack`).
+--- @param option string `global` flag, e.g. '-r' for references
+--- @param pattern string|nil pattern; prompts with <cword> when empty
+--- @param title_prefix string|nil
+function M.jump_or_pick(option, pattern, title_prefix)
+  local query = resolve_query(pattern, title_prefix)
+  if not query then
+    return
+  end
+
+  local items = query_global(option, query, title_prefix)
+  if not items or #items == 0 then
+    return
+  end
+
+  local title = (title_prefix or 'Gtags') .. ': ' .. query
+
+  if #items == 1 then
+    local item = items[1]
+    local win = vim.api.nvim_get_current_win()
+    local from = { vim.fn.bufnr '%', vim.fn.line '.', vim.fn.col '.', 0 }
+
+    -- Mirror what the built-in LSP single-location jump does: jumplist first,
+    -- then tag stack, then land on the match.
+    vim.cmd.normal { "m'", bang = true }
+    vim.fn.settagstack(win, { items = { { tagname = query, from = from } } }, 't')
+    vim.cmd.edit(vim.fn.fnameescape(item.filename))
+    vim.api.nvim_win_set_cursor(win, { item.lnum, 0 })
+    vim.cmd.normal { 'zv', bang = true }
+    return
+  end
+
+  local ok, snacks = pcall(require, 'snacks')
+  if not ok or not snacks.picker then
+    return fill_quickfix(items, title, 'r')
+  end
+
+  snacks.picker {
+    title = title,
+    items = vim.tbl_map(function(item)
+      return {
+        file = item.filename,
+        pos = { item.lnum, 0 },
+        line = item.text,
+        -- what the fuzzy matcher sees: path plus the matched line
+        text = item.filename .. ' ' .. item.text,
+      }
+    end, items),
+    format = 'file',
+    -- snacks pushes the pre-jump position onto the tag stack itself
+    jump = { tagstack = true, reuse_win = true },
+  }
 end
 
 local function parse_args(qargs)

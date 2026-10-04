@@ -21,6 +21,22 @@ end
 if vim.fn.executable 'gtags' == 1 then
   local julia_gtags = require 'custom.julia_gtags'
   julia_gtags.attach(0)
+
+  -- `grr` 默认直接走 LSP（见 :help grr），julials 没能启动时它会静默失败。
+  -- 这里改成：有支持 references 的客户端就照旧用 LSP，否则退回 GNU Global
+  -- 的引用搜索（`global -r`）——唯一匹配时直接跳过去，多处匹配时开 snacks
+  -- 模糊搜索；两种情况都会压 tag 栈，所以 <C-t> 能跳回来。
+  vim.keymap.set('n', 'grr', function()
+    if next(vim.lsp.get_clients { bufnr = 0, method = vim.lsp.protocol.Methods.textDocument_references }) then
+      return vim.lsp.buf.references()
+    end
+
+    local word = vim.fn.expand '<cword>'
+    if word == '' then
+      return
+    end
+    require('custom.gtags_ref').jump_or_pick('-r', word, 'Gtags -r')
+  end, { buffer = true, desc = 'LSP: [G]oto [R]eferences (gtags fallback)' })
 end
 
 -- vim.opt_local.makeprg = 'julia --project=@. %'
