@@ -28,7 +28,8 @@ end
 --   1. 有支持 references 的客户端 -> 照旧用 LSP
 --   2. 否则 GNU Global（`global -r`）：唯一匹配直接跳，多处匹配开 snacks
 --      模糊搜索，两种情况都压 tag 栈，<C-t> 能跳回来
---   3. Global 用不了（没装 / 没 GTAGS）或查不到 -> 直接 grep <cword>
+--   3. Global 用不了（没装 / 没 GTAGS）或查不到 -> grep <cword>，并排除光标
+--      当前所在的那处匹配：剩下唯一一处就直接跳过去，多处才开 picker
 -- 映射本身不进 gtags 守卫：grep 兜底的意义恰恰是 Global 用不了的时候。
 vim.keymap.set('n', 'grr', function()
   if next(vim.lsp.get_clients { bufnr = 0, method = vim.lsp.protocol.Methods.textDocument_references }) then
@@ -45,14 +46,12 @@ vim.keymap.set('n', 'grr', function()
     return
   end
 
-  local ok, snacks = pcall(require, 'snacks')
-  if ok and snacks.picker then
-    -- grep_word：固定按单词边界匹配，再在结果里模糊过滤
-    return snacks.picker.grep_word { search = word, jump = { tagstack = true, reuse_win = true } }
+  if require('custom.grep_ref').jump_or_pick(word) then
+    return
   end
 
+  -- 连 rg 都没有：退回 grepprg（quickfix 窗口由 QuickFixCmdPost 的 autocmd 打开）
   vim.cmd { cmd = 'grep', args = { '-w', '--', vim.fn.shellescape(word) }, bang = true, mods = { silent = true } }
-  vim.cmd 'botright copen'
 end, { buffer = true, desc = 'LSP: [G]oto [R]eferences (gtags/grep fallback)' })
 
 -- vim.opt_local.makeprg = 'julia --project=@. %'
