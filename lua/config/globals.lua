@@ -3,6 +3,10 @@
 vim.g.mapleader = ','
 vim.g.maplocalleader = ' '
 
+-- Full plugin set (AI, LaTeX/Typst/Quarto, thesaurus, ...) only when NVIM_FULL is set;
+-- VPS/docker stay lean by default. Heavy specs use `enabled = vim.g.full`.
+vim.g.full = vim.env.NVIM_FULL ~= nil
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 

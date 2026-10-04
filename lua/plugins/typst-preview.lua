@@ -1,5 +1,6 @@
 return {
   'chomosuke/typst-preview.nvim',
+  enabled = vim.g.full,
   ft = 'typst',
   version = '1.*',
   opts = {

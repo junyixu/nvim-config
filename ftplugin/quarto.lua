@@ -1,5 +1,8 @@
 local julia_term = require 'custom.julia_term'
-local runner = require 'quarto.runner'
+local ok, runner = pcall(require, 'quarto.runner')
+if not ok then
+  return
+end
 
 local next_chunk_pattern = [[\v^\s*```\{]]
 
