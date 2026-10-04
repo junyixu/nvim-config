@@ -23,9 +23,11 @@ if vim.fn.executable 'gtags' == 1 then
   julia_gtags.attach(0)
 
   -- `grr` 默认直接走 LSP（见 :help grr），julials 没能启动时它会静默失败。
-  -- 这里改成：有支持 references 的客户端就照旧用 LSP，否则退回 GNU Global
-  -- 的引用搜索（`global -r`）——唯一匹配时直接跳过去，多处匹配时开 snacks
-  -- 模糊搜索；两种情况都会压 tag 栈，所以 <C-t> 能跳回来。
+  -- 这里改成三级回退：
+  --   1. 有支持 references 的客户端 -> 照旧用 LSP
+  --   2. 否则 GNU Global（`global -r`）：唯一匹配直接跳，多处匹配开 snacks
+  --      模糊搜索，两种情况都压 tag 栈，<C-t> 能跳回来
+  --   3. Global 用不了（没 GTAGS / 没装）或查不到 -> 直接 grep <cword>
   vim.keymap.set('n', 'grr', function()
     if next(vim.lsp.get_clients { bufnr = 0, method = vim.lsp.protocol.Methods.textDocument_references }) then
       return vim.lsp.buf.references()
@@ -35,8 +37,21 @@ if vim.fn.executable 'gtags' == 1 then
     if word == '' then
       return
     end
-    require('custom.gtags_ref').jump_or_pick('-r', word, 'Gtags -r')
-  end, { buffer = true, desc = 'LSP: [G]oto [R]eferences (gtags fallback)' })
+
+    -- silent：Global 失败/无结果时不要刷屏，因为后面还有 grep 兜底
+    if require('custom.gtags_ref').jump_or_pick('-r', word, 'Gtags -r', { silent = true }) then
+      return
+    end
+
+    local ok, snacks = pcall(require, 'snacks')
+    if ok and snacks.picker then
+      -- grep_word：固定按单词边界匹配，再在结果里模糊过滤
+      return snacks.picker.grep_word { search = word, jump = { tagstack = true, reuse_win = true } }
+    end
+
+    vim.cmd { cmd = 'grep', args = { '-w', '--', vim.fn.shellescape(word) }, bang = true, mods = { silent = true } }
+    vim.cmd 'botright copen'
+  end, { buffer = true, desc = 'LSP: [G]oto [R]eferences (gtags/grep fallback)' })
 end
 
 -- vim.opt_local.makeprg = 'julia --project=@. %'

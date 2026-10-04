@@ -32,21 +32,26 @@ local function resolve_query(pattern, title_prefix)
   return query
 end
 
--- Run `global` and return the parsed items: nil when the query itself failed,
--- an empty table when it simply matched nothing (both already echoed here).
-local function query_global(option, query, title_prefix)
+-- Run `global` and return the parsed items: nil when the query itself failed
+-- (no GTAGS, no `global`, ...), an empty table when it simply matched nothing.
+-- Both are echoed unless `silent` -- callers with a further fallback stay quiet.
+local function query_global(option, query, title_prefix, silent)
   -- Always pass `-e` so patterns starting with '-' are treated as a pattern.
   local cmd = 'global --path-style=absolute --result=ctags-mod -q ' .. option .. ' -e ' .. vim.fn.shellescape(query)
   local out = vim.fn.system(cmd)
 
   if vim.v.shell_error ~= 0 then
-    echo(((title_prefix or 'Gtags') .. ': global failed (%d)'):format(vim.v.shell_error), 'ErrorMsg')
-    echo(cmd)
+    if not silent then
+      echo(((title_prefix or 'Gtags') .. ': global failed (%d)'):format(vim.v.shell_error), 'ErrorMsg')
+      echo(cmd)
+    end
     return nil
   end
 
   if out == '' then
-    echo((title_prefix or 'Gtags') .. ': not found: ' .. query, 'WarningMsg')
+    if not silent then
+      echo((title_prefix or 'Gtags') .. ': not found: ' .. query, 'WarningMsg')
+    end
     return {}
   end
 
@@ -97,15 +102,20 @@ end
 --- @param option string `global` flag, e.g. '-r' for references
 --- @param pattern string|nil pattern; prompts with <cword> when empty
 --- @param title_prefix string|nil
-function M.jump_or_pick(option, pattern, title_prefix)
+--- @param opts { silent?: boolean }|nil `silent` mutes the "not found" /
+---   "global failed" messages, for callers that fall back to something else
+--- @return boolean handled false when `global` is unusable or found nothing
+function M.jump_or_pick(option, pattern, title_prefix, opts)
+  opts = opts or {}
+
   local query = resolve_query(pattern, title_prefix)
   if not query then
-    return
+    return false
   end
 
-  local items = query_global(option, query, title_prefix)
+  local items = query_global(option, query, title_prefix, opts.silent)
   if not items or #items == 0 then
-    return
+    return false
   end
 
   local title = (title_prefix or 'Gtags') .. ': ' .. query
@@ -122,12 +132,13 @@ function M.jump_or_pick(option, pattern, title_prefix)
     vim.cmd.edit(vim.fn.fnameescape(item.filename))
     vim.api.nvim_win_set_cursor(win, { item.lnum, 0 })
     vim.cmd.normal { 'zv', bang = true }
-    return
+    return true
   end
 
   local ok, snacks = pcall(require, 'snacks')
   if not ok or not snacks.picker then
-    return fill_quickfix(items, title, 'r')
+    fill_quickfix(items, title, 'r')
+    return true
   end
 
   snacks.picker {
@@ -145,6 +156,8 @@ function M.jump_or_pick(option, pattern, title_prefix)
     -- snacks pushes the pre-jump position onto the tag stack itself
     jump = { tagstack = true, reuse_win = true },
   }
+
+  return true
 end
 
 local function parse_args(qargs)
