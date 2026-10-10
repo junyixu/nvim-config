@@ -1,29 +1,5 @@
 " autoload/diary.vim
-" Diary Navigation - Lazy Loading Support
-
-let s:python_loaded = 0
-
-function! diary#load_python() abort
-  if s:python_loaded
-    return
-  endif
-
-  " Load Python code from bin/ (kept out of Neovim's plugin/ftplugin/etc.
-  " runtime-loaded directories on purpose)
-  let s:py_file = expand('<script>:p:h:h') .. '/bin/last_diary.py'
-  execute 'py3file' s:py_file
-  let s:python_loaded = 1
-endfunction
-
-function! diary#prev() abort
-  call diary#load_python()
-  python3 last_diary()
-endfunction
-
-function! diary#next() abort
-  call diary#load_python()
-  python3 next_diary()
-endfunction
+" Diary template helpers (navigation lives in lua/junyi/last_diary.lua)
 
 " 自动填充日记模板和日期
 " 解决 vim-template 插件无法计算日期的问题
