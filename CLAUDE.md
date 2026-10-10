@@ -41,15 +41,17 @@ dropped into `lua/plugins/` or lazy.nvim will try to treat them as a plugin tabl
 
 ## Standalone scripts
 
-`bin/` holds non-Neovim source that Neovim must not auto-load (e.g. `bin/last_diary.py`, sourced via
-`py3file` with an absolute path built at runtime). Deliberately not `plugin/`, `autoload/`, etc. —
+`bin/` holds non-Neovim source that Neovim must not auto-load (e.g. `bin/epub_to_typr_phrases.py`, a
+CLI script run by hand). Deliberately not `plugin/`, `autoload/`, etc. —
 those directories are scanned/sourced by Neovim itself, and `bin/` is not, so plain Python (or other
 non-vim/lua) helpers belong there instead.
 
 ## Non-plugin personal modules
 
 - `lua/junyi/` — standalone user utilities, `require`d individually where needed (e.g.
-  `junyi.make` backs the `:Make`/`:LMake` commands, `junyi.close_other_uis`).
+  `junyi.make` backs the `:Make`/`:LMake` commands, `junyi.close_other_uis`). For lazy loading, a
+  thin `plugin/*.lua` stub can define commands/keymaps that `require` the module only on first use —
+  `plugin/last_diary.lua` → `junyi.last_diary` (`:DiaryPrev`/`:DiaryNext`) is the example.
 - `lua/util/` — editor-level helper functions used across configs/keymaps (clipboard incl. OSC 52
   for non-tmux copy, quickfix helpers, treesitter utils, git-merge helpers, the Claude Code
   line-reference helper `util/claude.lua`).
