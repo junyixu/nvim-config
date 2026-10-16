@@ -52,10 +52,18 @@ end, { desc = 'Toggle Inlay Hints' })
 vim.lsp.enable 'pyright'
 vim.lsp.enable 'lua_ls'
 vim.lsp.enable 'stylua'
+-- Julia: julials and jetls are mutually exclusive, only one is enabled.
+-- Priority: julials with a prebuilt sysimage (julials.so) > jetls > julials without sysimage.
 -- julials needs a LanguageServer env (~/.julia/environments/lsp<ver>, see
 -- after/lsp/julials.lua); without one it exits with code 1 on every Julia buffer.
-if vim.fn.executable 'julia' == 1 and vim.fn.glob '~/.julia/environments/lsp*/Manifest.toml' ~= '' then
-  vim.lsp.enable 'julials'
+if vim.fn.executable 'julia' == 1 then
+  if vim.fn.glob '~/.julia/environments/lsp*/julials.so' ~= '' then
+    vim.lsp.enable 'julials'
+  elseif vim.fn.executable(vim.fn.expand '~/.julia/bin/jetls') == 1 then
+    vim.lsp.enable 'jetls'
+  elseif vim.fn.glob '~/.julia/environments/lsp*/Manifest.toml' ~= '' then
+    vim.lsp.enable 'julials'
+  end
 end
 vim.lsp.enable 'clangd'
 vim.lsp.enable 'marksman'
