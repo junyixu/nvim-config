@@ -493,14 +493,20 @@ end, { desc = 'Copy selection to reg a and send via OSC 52 to *' })
 -- Claude Code 行号引用 (原 plugin/claude_keymap.vim)
 -- ============================================================================
 -- 生成 Claude Code 能识别的引用 (如 @lua/config/keymaps.lua:123-456), 再按环境复制:
---   tmux 中  -> tmux buffer (用 tmux paste-buffer / prefix-] 粘贴)
---   非 tmux  -> OSC 52, 直接写入终端所在机器的剪贴板
+--   tmux 中   -> tmux buffer (用 tmux paste-buffer / prefix-] 粘贴)
+--   终端 UI   -> OSC 52, 直接写入终端所在机器的剪贴板
+--   GUI UI    -> + 寄存器, 走 clipboard provider (如 Neovide)
 local function copy_to_smart_clipboard(text)
   if vim.env.TMUX and vim.env.TMUX ~= '' then
     vim.system({ 'tmux', 'set-buffer', '--', text }):wait()
-  else
+  elseif vim.iter(vim.api.nvim_list_uis()):any(function(ui)
+    return ui.stdout_tty
+  end) then
     -- copy('+') 返回的是处理函数, 入参要求是按行切分的 list
     require('vim.ui.clipboard.osc52').copy '+'(vim.split(text, '\n', { plain = true }))
+  else
+    -- nvim_ui_send 只发给 stdout_tty 的 UI, GUI 收不到 OSC 52
+    vim.fn.setreg('+', text)
   end
 end
 
