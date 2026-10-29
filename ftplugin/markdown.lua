@@ -91,8 +91,9 @@ if vim.bo.buftype == '' then
   vim.keymap.set('n', '<space>f', op(), { buffer = true, expr = true, desc = 'Claude: Send Motion' })
   vim.keymap.set('x', '<space>f', send_visual, { buffer = true, desc = 'Claude: Send Region' })
   vim.keymap.set('n', '<space>fc', function()
-    local id = require('custom.claude_kitty').window(true)
-    vim.notify('claude_kitty: target window ' .. tostring(id))
+    require('custom.claude_kitty').window(true, function(id)
+      vim.notify('claude_kitty: target window ' .. id)
+    end)
   end, { buffer = true, desc = 'Claude: Pick Kitty Window' })
 end
 -- ===================== end send to claude ======================

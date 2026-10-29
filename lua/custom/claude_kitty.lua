@@ -21,14 +21,11 @@
 --   C. 其他（本地 zsh、本地 vim……）                                        → 排除，
 --      以免把 markdown 当命令执行
 --
--- 选择顺序，结果缓存在 b:claude_kitty_window：
---   1. 当前 tab 的确认 agent
---   2. 当前 tab 的未确认 ssh
---   3. 其他 tab 的确认 agent
---   4. 其他 tab 的未确认 ssh
---   5. 都没有就手动输入 window_id
--- 其他 tab 里，各 OS 窗口当前显示的 tab (is_active) 优先，其余按 kitty 的 tab 顺序。
--- 同一 tab 里有多个时取最近活动过的那个（active_window_history）。
+-- 选择，结果缓存在 b:claude_kitty_window：
+--   1. 当前 tab 有确认 agent → 直接选（多个时取最近活动过的，active_window_history）
+--   2. 否则提示「当前 tab 没有 agent」，用 vim.ui.select 列出候选让用户挑：
+--      所有确认 agent 和所有 ssh 窗口（未确认的也列，确认逻辑可能漏判），
+--      当前 tab 在前，其他 tab 里各 OS 窗口当前显示的 tab 优先；最后一项是手动输入 window_id
 local M = {}
 
 -- paste 结束到发送回车之间的等待，太短 Claude Code 可能吞掉回车
@@ -80,20 +77,16 @@ local function is_agent(win)
   return false
 end
 
---- 普通 ssh 看不到远端进程，只能猜；已确认回到提示符的除外
-local function is_guessable(win)
-  return ssh_kind(win) == 'plain' and win.at_prompt ~= true
-end
-
---- @return integer? window_id
-local function detect_window()
+--- 当前 tab 在前，其余 tab 里各 OS 窗口当前显示的 (is_active) 优先，再按 kitty 的 tab 顺序
+--- @return table? current, table[] others
+local function list_tabs()
   local res = kitty { 'ls' }
   if res.code ~= 0 then
-    return nil
+    return nil, {}
   end
   local ok, os_windows = pcall(vim.json.decode, res.stdout)
   if not ok then
-    return nil
+    return nil, {}
   end
 
   local current, others = nil, {}
@@ -109,7 +102,7 @@ local function detect_window()
       end
     end
   end
-  -- 各 OS 窗口当前显示的 tab 优先；table.sort 不稳定，用原序号保持 kitty 的 tab 顺序
+  -- table.sort 不稳定，用原序号保持 kitty 的 tab 顺序
   for i, tab in ipairs(others) do
     tab._order = i
   end
@@ -119,51 +112,104 @@ local function detect_window()
     end
     return a._order < b._order
   end)
+  return current, others
+end
 
-  --- tab 里除自身外的窗口，最近活动的排前面
-  local function candidates(tab)
-    local recency = {}
-    for i, id in ipairs(tab.active_window_history or {}) do
-      recency[id] = i
-    end
-    local wins = vim.tbl_filter(function(w)
-      return not w.is_self
-    end, tab.windows)
-    table.sort(wins, function(a, b)
-      return (recency[a.id] or 0) > (recency[b.id] or 0)
-    end)
-    return wins
+--- tab 里除自身外的窗口，最近活动的排前面
+local function candidates(tab)
+  local recency = {}
+  for i, id in ipairs(tab.active_window_history or {}) do
+    recency[id] = i
+  end
+  local wins = vim.tbl_filter(function(w)
+    return not w.is_self
+  end, tab.windows)
+  table.sort(wins, function(a, b)
+    return (recency[a.id] or 0) > (recency[b.id] or 0)
+  end)
+  return wins
+end
+
+local function describe(tab, win, is_current)
+  local kind = is_agent(win) and 'agent' or (ssh_kind(win) == 'kitten' and 'kitten ssh' or 'ssh')
+  local cmd = type(win.last_reported_cmdline) == 'string' and win.last_reported_cmdline or ''
+  return ('%s #%d [%s] %s  %s'):format(is_current and 'this tab' or ('tab ' .. (tab.title or tab.id)), win.id, kind, win.title or '', cmd)
+end
+
+local function ask_id(cb)
+  local id = tonumber(vim.fn.input 'kitty window_id: ')
+  if id then
+    cb(id)
+  end
+end
+
+--- @param force? boolean 忽略缓存重新确定
+--- @param cb fun(id: integer) 确定了目标窗口才会调用；用户取消则不调用
+function M.window(force, cb)
+  -- vim.ui.select 是异步的，回调时当前 buffer 可能已经换了
+  local buf = vim.api.nvim_get_current_buf()
+  local function done(id)
+    vim.b[buf].claude_kitty_window = id
+    cb(id)
   end
 
-  --- @param tabs table[]
-  --- @param pred fun(win: table): boolean
-  local function pick(tabs, pred)
-    for _, tab in ipairs(tabs) do
-      for _, win in ipairs(candidates(tab)) do
-        if pred(win) then
-          return win.id
-        end
+  if not force and vim.b[buf].claude_kitty_window then
+    return cb(vim.b[buf].claude_kitty_window)
+  end
+
+  local current, others = list_tabs()
+  if current then
+    for _, win in ipairs(candidates(current)) do
+      if is_agent(win) then
+        return done(win.id)
       end
     end
   end
 
-  local here = { current }
-  return pick(here, is_agent) or pick(here, is_guessable) or pick(others, is_agent) or pick(others, is_guessable)
-end
-
---- @param force? boolean 忽略缓存重新确定
---- @return integer? window_id
-function M.window(force)
-  if not force and vim.b.claude_kitty_window then
-    return vim.b.claude_kitty_window
+  local items = {}
+  local tabs = vim.list_extend(current and { current } or {}, others)
+  for _, tab in ipairs(tabs) do
+    for _, win in ipairs(candidates(tab)) do
+      if is_agent(win) or ssh_kind(win) then
+        table.insert(items, { id = win.id, label = describe(tab, win, tab == current) })
+      end
+    end
   end
-  local id = detect_window() or tonumber(vim.fn.input 'kitty window_id: ')
-  vim.b.claude_kitty_window = id
-  return id
+  if #items == 0 then
+    return ask_id(done)
+  end
+  table.insert(items, { label = 'enter window_id manually' })
+
+  vim.notify('claude_kitty: no agent detected in this tab, pick a window', vim.log.levels.WARN)
+  vim.ui.select(items, {
+    prompt = 'Send to kitty window',
+    format_item = function(item)
+      return item.label
+    end,
+  }, function(item)
+    if not item then
+      return
+    end
+    if item.id then
+      done(item.id)
+    else
+      ask_id(done)
+    end
+  end)
 end
 
 local function send_text(id, text)
   return kitty({ 'send-text', '--match', 'id:' .. id, '--stdin' }, text).code == 0
+end
+
+local function paste_and_submit(id, payload)
+  if not send_text(id, payload) then
+    return false
+  end
+  vim.defer_fn(function()
+    send_text(id, '\r')
+  end, SUBMIT_DELAY_MS)
+  return true
 end
 
 --- @param text string
@@ -173,23 +219,18 @@ function M.send(text)
     return
   end
 
-  local id = M.window()
   local payload = '\27[200~' .. text .. '\27[201~'
-  -- 缓存的窗口可能已关闭，重新确定一次再试
-  if id and not send_text(id, payload) then
-    id = M.window(true)
-    if id and not send_text(id, payload) then
-      id = nil
+  M.window(false, function(id)
+    if paste_and_submit(id, payload) then
+      return
     end
-  end
-  if not id then
-    vim.notify('claude_kitty: no kitty window to send to', vim.log.levels.WARN)
-    return
-  end
-
-  vim.defer_fn(function()
-    send_text(id, '\r')
-  end, SUBMIT_DELAY_MS)
+    -- 缓存的窗口可能已关闭，重新确定一次再试
+    M.window(true, function(new_id)
+      if not paste_and_submit(new_id, payload) then
+        vim.notify('claude_kitty: failed to send to kitty window ' .. new_id, vim.log.levels.WARN)
+      end
+    end)
+  end)
 end
 
 local saved_cursor
