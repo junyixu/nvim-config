@@ -4,10 +4,13 @@
 -- 在 Claude Code 里 "\n" (Ctrl-J) 是插入换行而非提交。这里改为
 -- bracketed paste 粘贴正文，稍等片刻再发 "\r" 提交。
 --
--- 目标窗口按以下顺序确定，结果缓存在 b:claude_kitty_window：
---   1. 前台进程是 AGENTS 之一的窗口：当前 tab 优先，其次其他 tab；
---      有多个时取最近活动过的那个（active_window_history）
---   2. 找不到就手动输入 window_id
+-- 只在 nvim 所在的 kitty tab 里找目标窗口，结果缓存在 b:claude_kitty_window：
+--   1. 确认在跑 AGENTS 之一的窗口：本地前台进程就是 agent，或者是 ssh 窗口、
+--      且远端 shell integration（kitten ssh 默认开启）报告的命令是 agent 并且还没回到提示符
+--   2. ssh 窗口（普通 ssh 看不到远端进程，只能猜），已确认回到提示符的除外
+--   3. 找不到就手动输入 window_id
+-- 同一层里有多个时取最近活动过的那个（active_window_history）。
+-- 不会选本地 shell 窗口，以免把 markdown 当命令执行；也不跨 tab，以免发给别处的 agent
 local M = {}
 
 -- paste 结束到发送回车之间的等待，太短 Claude Code 可能吞掉回车
@@ -25,14 +28,32 @@ end
 -- 都是 TUI，bracketed paste + 回车提交的行为一致
 local AGENTS = { claude = true, opencode = true, pi = true, codex = true }
 
+local function names_agent(word)
+  -- npm 装的会是 `node .../bin/codex.js` 这种形式
+  return AGENTS[(vim.fs.basename(word):gsub('%.[cm]?js$', ''))] ~= nil
+end
+
+local function is_ssh(win)
+  for _, proc in ipairs(win.foreground_processes or {}) do
+    local cmdline = proc.cmdline or {}
+    local exe = cmdline[1] and vim.fs.basename(cmdline[1])
+    -- `ssh host` / `kitten ssh host` / `kitty +kitten ssh host`
+    if exe == 'ssh' or ((exe == 'kitten' or exe == 'kitty') and vim.list_contains(cmdline, 'ssh')) then
+      return true
+    end
+  end
+  return false
+end
+
 local function is_agent(win)
   for _, proc in ipairs(win.foreground_processes or {}) do
-    for _, arg in ipairs(proc.cmdline or {}) do
-      -- npm 装的会是 `node .../bin/codex.js` 这种形式
-      if AGENTS[vim.fs.basename(arg):gsub('%.[cm]?js$', '')] then
-        return true
-      end
+    if vim.iter(proc.cmdline or {}):any(names_agent) then
+      return true
     end
+  end
+  local remote_cmd = win.last_reported_cmdline
+  if is_ssh(win) and win.at_prompt == false and type(remote_cmd) == 'string' then
+    return vim.iter(remote_cmd:gmatch '%S+'):any(names_agent)
   end
   return false
 end
@@ -48,29 +69,36 @@ local function detect_window()
     return nil
   end
 
-  -- 只认跑着 agent 的窗口；当前 tab 优先，同一 tab 内越近活动越优先
-  local best, best_rank
   for _, os_win in ipairs(os_windows) do
     for _, tab in ipairs(os_win.tabs) do
-      local recency = {}
-      for i, id in ipairs(tab.active_window_history or {}) do
-        recency[id] = i
-      end
-      local is_current = vim.iter(tab.windows):any(function(w)
+      if vim.iter(tab.windows):any(function(w)
         return w.is_self
-      end)
+      end) then
+        local recency = {}
+        for i, id in ipairs(tab.active_window_history or {}) do
+          recency[id] = i
+        end
+        local candidates = vim.tbl_filter(function(w)
+          return not w.is_self
+        end, tab.windows)
+        table.sort(candidates, function(a, b)
+          return (recency[a.id] or 0) > (recency[b.id] or 0)
+        end)
 
-      for _, win in ipairs(tab.windows) do
-        if not win.is_self and is_agent(win) then
-          local rank = (is_current and 1e6 or 0) + (recency[win.id] or 0)
-          if not best_rank or rank > best_rank then
-            best, best_rank = win.id, rank
+        for _, win in ipairs(candidates) do
+          if is_agent(win) then
+            return win.id
           end
         end
+        for _, win in ipairs(candidates) do
+          if is_ssh(win) and win.at_prompt ~= true then
+            return win.id
+          end
+        end
+        return nil
       end
     end
   end
-  return best
 end
 
 --- @param force? boolean 忽略缓存重新确定
