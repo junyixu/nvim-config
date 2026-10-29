@@ -64,6 +64,21 @@ local function ssh_kind(win)
   return kind
 end
 
+-- 包一层再执行真正命令的前缀，如 `env FOO=1 claude`、`exec codex`
+local WRAPPERS = { env = true, exec = true, nohup = true, command = true, builtin = true, time = true }
+
+--- shell 报告的命令行里真正执行的程序：跳过 `FOO=bar` 环境变量前缀和 WRAPPERS，
+--- 只看第一个词，避免 `vim pi`、`cd claude` 这类参数里出现 agent 名的误判
+--- @param cmdline string
+--- @return string?
+local function command_program(cmdline)
+  for word in cmdline:gmatch '%S+' do
+    if not word:match '^[%a_][%w_]*=' and not WRAPPERS[word] then
+      return word
+    end
+  end
+end
+
 local function is_agent(win)
   for _, proc in ipairs(win.foreground_processes or {}) do
     if vim.iter(proc.cmdline or {}):any(names_agent) then
@@ -72,7 +87,8 @@ local function is_agent(win)
   end
   local remote_cmd = win.last_reported_cmdline
   if ssh_kind(win) and win.at_prompt == false and type(remote_cmd) == 'string' then
-    return vim.iter(remote_cmd:gmatch '%S+'):any(names_agent)
+    local program = command_program(remote_cmd)
+    return program ~= nil and names_agent(program)
   end
   return false
 end
