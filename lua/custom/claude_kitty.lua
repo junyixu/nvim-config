@@ -13,18 +13,21 @@
 --          远端 shell 每次执行命令前用 OSC 133;C 报告命令行
 --          - last_reported_cmdline 是 agent 且 at_prompt == false           → 确认是 agent
 --          - at_prompt == true（远端已回到提示符）                          → 排除
---          - 其他（alias 启动、远端 tmux 里、二跳 ssh、integration 被禁用）→ 未确认的 ssh
+--          - 其他（alias 启动、远端 tmux 里、二跳 ssh、integration 被禁用）→ 排除
+--            （kitten ssh 本该能确认，确认不了多半不是 agent，不去猜）
 --      B2. 普通 ssh：远端没有 integration，last_reported_cmdline 停留在本地 shell
 --          报告的 `ssh vps`，at_prompt 恒为 false                           → 未确认的 ssh
---          （若在远端手动装了 kitty shell integration，则同 B1）
+--          （若在远端手动装了 kitty shell integration，则同 B1，确认不了时仍算未确认）
 --   C. 其他（本地 zsh、本地 vim……）                                        → 排除，
 --      以免把 markdown 当命令执行
 --
 -- 选择顺序，结果缓存在 b:claude_kitty_window：
 --   1. 当前 tab 的确认 agent
 --   2. 当前 tab 的未确认 ssh
---   3. 其他 tab 的确认 agent（按 kitty 的 tab 顺序；不考虑其他 tab 的未确认 ssh）
---   4. 都没有就手动输入 window_id
+--   3. 其他 tab 的确认 agent
+--   4. 其他 tab 的未确认 ssh
+--   5. 都没有就手动输入 window_id
+-- 其他 tab 里，各 OS 窗口当前显示的 tab (is_active) 优先，其余按 kitty 的 tab 顺序。
 -- 同一 tab 里有多个时取最近活动过的那个（active_window_history）。
 local M = {}
 
@@ -48,16 +51,20 @@ local function names_agent(word)
   return AGENTS[(vim.fs.basename(word):gsub('%.[cm]?js$', ''))] ~= nil
 end
 
-local function is_ssh(win)
+--- @return 'kitten'|'plain'|nil
+local function ssh_kind(win)
+  local kind
   for _, proc in ipairs(win.foreground_processes or {}) do
     local cmdline = proc.cmdline or {}
     local exe = cmdline[1] and vim.fs.basename(cmdline[1])
-    -- `ssh host` / `kitten ssh host` / `kitty +kitten ssh host`
-    if exe == 'ssh' or ((exe == 'kitten' or exe == 'kitty') and vim.list_contains(cmdline, 'ssh')) then
-      return true
+    -- `kitten ssh host` / `kitty +kitten ssh host`；kitten ssh 自己也会起一个 ssh 子进程，所以 kitten 优先
+    if (exe == 'kitten' or exe == 'kitty') and vim.list_contains(cmdline, 'ssh') then
+      return 'kitten'
+    elseif exe == 'ssh' then
+      kind = 'plain'
     end
   end
-  return false
+  return kind
 end
 
 local function is_agent(win)
@@ -67,10 +74,15 @@ local function is_agent(win)
     end
   end
   local remote_cmd = win.last_reported_cmdline
-  if is_ssh(win) and win.at_prompt == false and type(remote_cmd) == 'string' then
+  if ssh_kind(win) and win.at_prompt == false and type(remote_cmd) == 'string' then
     return vim.iter(remote_cmd:gmatch '%S+'):any(names_agent)
   end
   return false
+end
+
+--- 普通 ssh 看不到远端进程，只能猜；已确认回到提示符的除外
+local function is_guessable(win)
+  return ssh_kind(win) == 'plain' and win.at_prompt ~= true
 end
 
 --- @return integer? window_id
@@ -97,6 +109,16 @@ local function detect_window()
       end
     end
   end
+  -- 各 OS 窗口当前显示的 tab 优先；table.sort 不稳定，用原序号保持 kitty 的 tab 顺序
+  for i, tab in ipairs(others) do
+    tab._order = i
+  end
+  table.sort(others, function(a, b)
+    if (a.is_active == true) ~= (b.is_active == true) then
+      return a.is_active == true
+    end
+    return a._order < b._order
+  end)
 
   --- tab 里除自身外的窗口，最近活动的排前面
   local function candidates(tab)
@@ -113,28 +135,20 @@ local function detect_window()
     return wins
   end
 
-  if current then
-    local wins = candidates(current)
-    for _, win in ipairs(wins) do
-      if is_agent(win) then
-        return win.id
-      end
-    end
-    for _, win in ipairs(wins) do
-      if is_ssh(win) and win.at_prompt ~= true then
-        return win.id
+  --- @param tabs table[]
+  --- @param pred fun(win: table): boolean
+  local function pick(tabs, pred)
+    for _, tab in ipairs(tabs) do
+      for _, win in ipairs(candidates(tab)) do
+        if pred(win) then
+          return win.id
+        end
       end
     end
   end
 
-  -- 别的 tab 只认确认在跑 agent 的窗口，不猜 ssh 窗口
-  for _, tab in ipairs(others) do
-    for _, win in ipairs(candidates(tab)) do
-      if is_agent(win) then
-        return win.id
-      end
-    end
-  end
+  local here = { current }
+  return pick(here, is_agent) or pick(here, is_guessable) or pick(others, is_agent) or pick(others, is_guessable)
 end
 
 --- @param force? boolean 忽略缓存重新确定
