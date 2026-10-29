@@ -14,7 +14,9 @@ LSP behavior works interactively.
   with no output means no startup errors). To exercise one changed file in isolation without a full
   session: `nvim --headless -u NONE -c "luafile <path>" -c 'qa' 2>&1`.
 - **Plugin management**: `:Lazy` (status), `:Lazy sync` / `:Lazy update` (install/update). Plugin
-  versions are **not pinned** — `lazy-lock.json` is gitignored, so updates float.
+  versions are pinned by the tracked `lazy-lock.json`; `:Lazy restore` checks out the locked commits.
+  Lazy rewrites the lockfile when a machine skips plugins (e.g. those gated behind `NVIM_FULL`), so
+  don't commit lockfile changes that only drop entries.
 - **LSP/health**: `:LspInfo`, `:checkhealth`.
 - **Format Lua**: handled by `conform.nvim` (`stylua`), either on save or via `<space>F`; can also be
   run directly from the CLI as `stylua .` (style is pinned in `.stylua.toml`: 2-space indent, prefer
