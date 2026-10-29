@@ -82,10 +82,12 @@ end
 local function list_tabs()
   local res = kitty { 'ls' }
   if res.code ~= 0 then
+    vim.notify('claude_kitty: `kitty @ ls` failed: ' .. vim.trim(res.stderr or ''), vim.log.levels.WARN)
     return nil, {}
   end
   local ok, os_windows = pcall(vim.json.decode, res.stdout)
   if not ok then
+    vim.notify('claude_kitty: cannot parse `kitty @ ls` output', vim.log.levels.WARN)
     return nil, {}
   end
 
@@ -131,13 +133,18 @@ local function candidates(tab)
 end
 
 local function describe(tab, win, is_current)
-  local kind = is_agent(win) and 'agent' or (ssh_kind(win) == 'kitten' and 'kitten ssh' or 'ssh')
+  local kind = is_agent(win) and 'agent' or ({ kitten = 'kitten ssh', plain = 'ssh' })[ssh_kind(win) or ''] or 'local'
   local cmd = type(win.last_reported_cmdline) == 'string' and win.last_reported_cmdline or ''
   return ('%s #%d [%s] %s  %s'):format(is_current and 'this tab' or ('tab ' .. (tab.title or tab.id)), win.id, kind, win.title or '', cmd)
 end
 
-local function ask_id(cb)
-  local id = tonumber(vim.fn.input 'kitty window_id: ')
+--- @param guess? { id: integer, label: string } 最可能的窗口，作为默认值
+local function ask_id(cb, guess)
+  local prompt = 'kitty window_id: '
+  if guess then
+    prompt = ('most likely: %s\nkitty window_id: '):format(guess.label)
+  end
+  local id = tonumber(vim.fn.input(prompt, guess and tostring(guess.id) or ''))
   if id then
     cb(id)
   end
@@ -175,10 +182,18 @@ function M.window(force, cb)
       end
     end
   end
-  if #items == 0 then
-    return ask_id(done)
+  -- 最可能的：列表第一项，没有就取当前 tab 里上一个活动窗口
+  local guess = items[1]
+  if not guess and current then
+    local prev = candidates(current)[1]
+    if prev then
+      guess = { id = prev.id, label = describe(current, prev, true) }
+    end
   end
-  table.insert(items, { label = 'enter window_id manually' })
+  if #items == 0 then
+    return ask_id(done, guess)
+  end
+  table.insert(items, { label = 'enter window_id manually', guess = guess })
 
   vim.notify('claude_kitty: no agent detected in this tab, pick a window', vim.log.levels.WARN)
   vim.ui.select(items, {
@@ -193,7 +208,7 @@ function M.window(force, cb)
     if item.id then
       done(item.id)
     else
-      ask_id(done)
+      ask_id(done, item.guess)
     end
   end)
 end
