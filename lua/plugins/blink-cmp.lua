@@ -133,6 +133,8 @@ return {
         lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         -- inkycap #wikilink("笔记名", label: "标签") 补全, 见 lua/junyi/blink_wikilink.lua
         wikilink = { name = 'wikilink', module = 'junyi.blink_wikilink', score_offset = 100 },
+        -- markdown 里 Claude Code 风格的 @路径 补全, 见 lua/junyi/blink_at_path.lua
+        at_path = { name = 'at_path', module = 'junyi.blink_at_path', score_offset = 100 },
         thesaurus = vim.g.full and {
           name = 'blink-cmp-words',
           module = 'blink-cmp-words.thesaurus',
@@ -160,7 +162,7 @@ return {
       },
       per_filetype = {
         codecompanion = { 'codecompanion' },
-        markdown = vim.g.full and { 'lsp', 'thesaurus' } or { 'lsp' },
+        markdown = vim.g.full and { 'at_path', 'lsp', 'thesaurus' } or { 'at_path', 'lsp' },
         typst = vim.g.full and { 'wikilink', 'lsp', 'thesaurus' } or { 'wikilink', 'lsp' },
         tex = vim.g.full and { 'lsp', 'thesaurus' } or { 'lsp' },
       },
