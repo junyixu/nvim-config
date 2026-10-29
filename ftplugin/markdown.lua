@@ -70,3 +70,29 @@ vim.keymap.set('i', '<Tab>', function()
 
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, false, true), 'n', false)
 end, { buffer = true, noremap = true, silent = true })
+
+-- ===================== send to claude (kitty) ======================
+-- 键位同 python/julia 的 slime，但目标是 kitty 里的 Claude Code，见 lua/custom/claude_kitty.lua
+-- LSP hover 等浮窗也是 markdown filetype，只给普通文件 buffer 加
+if vim.bo.buftype == '' then
+  local function op(motion)
+    return function()
+      return require('custom.claude_kitty').operator() .. (motion or '')
+    end
+  end
+  local function send_visual()
+    require('custom.claude_kitty').send_visual()
+  end
+
+  vim.keymap.set('n', '<CR>', op '_', { buffer = true, expr = true, desc = 'Claude: Send Line' })
+  vim.keymap.set('x', '<CR>', send_visual, { buffer = true, desc = 'Claude: Send Region' })
+  vim.keymap.set('n', '<space><space>', op 'ip', { buffer = true, expr = true, desc = 'Claude: Send Paragraph' })
+  vim.keymap.set('n', '<space>fp', op 'ip', { buffer = true, expr = true, desc = 'Claude: Send Paragraph' })
+  vim.keymap.set('n', '<space>f', op(), { buffer = true, expr = true, desc = 'Claude: Send Motion' })
+  vim.keymap.set('x', '<space>f', send_visual, { buffer = true, desc = 'Claude: Send Region' })
+  vim.keymap.set('n', '<space>fc', function()
+    local id = require('custom.claude_kitty').window(true)
+    vim.notify('claude_kitty: target window ' .. tostring(id))
+  end, { buffer = true, desc = 'Claude: Pick Kitty Window' })
+end
+-- ===================== end send to claude ======================
