@@ -4,14 +4,28 @@
 -- 在 Claude Code 里 "\n" (Ctrl-J) 是插入换行而非提交。这里改为
 -- bracketed paste 粘贴正文，稍等片刻再发 "\r" 提交。
 --
--- 目标窗口按以下顺序确定，结果缓存在 b:claude_kitty_window：
---   1. 当前 tab 里确认在跑 AGENTS 之一的窗口：本地前台进程就是 agent，或者是 ssh 窗口、
---      且远端 shell integration（kitten ssh 默认开启）报告的命令是 agent 并且还没回到提示符
---   2. 当前 tab 里的 ssh 窗口（普通 ssh 看不到远端进程，只能猜），已确认回到提示符的除外
---   3. 其他 tab 里确认在跑 agent 的窗口（同 1 的判定，不做 2 那样的猜测）
---   4. 找不到就手动输入 window_id
+-- 窗口分类（nvim 自身窗口除外），字段都来自 `kitty @ ls`：
+--
+--   A. 本地前台进程 (foreground_processes) 的 cmdline 里有 agent
+--      如 `claude`、`node …/codex.js`、`kitten ssh host claude`            → 确认是 agent
+--   B. 本地前台进程是 ssh
+--      B1. kitten ssh：远端自动开启 shell integration（kitty.conf 没禁用时），
+--          远端 shell 每次执行命令前用 OSC 133;C 报告命令行
+--          - last_reported_cmdline 是 agent 且 at_prompt == false           → 确认是 agent
+--          - at_prompt == true（远端已回到提示符）                          → 排除
+--          - 其他（alias 启动、远端 tmux 里、二跳 ssh、integration 被禁用）→ 未确认的 ssh
+--      B2. 普通 ssh：远端没有 integration，last_reported_cmdline 停留在本地 shell
+--          报告的 `ssh vps`，at_prompt 恒为 false                           → 未确认的 ssh
+--          （若在远端手动装了 kitty shell integration，则同 B1）
+--   C. 其他（本地 zsh、本地 vim……）                                        → 排除，
+--      以免把 markdown 当命令执行
+--
+-- 选择顺序，结果缓存在 b:claude_kitty_window：
+--   1. 当前 tab 的确认 agent
+--   2. 当前 tab 的未确认 ssh
+--   3. 其他 tab 的确认 agent（按 kitty 的 tab 顺序；不考虑其他 tab 的未确认 ssh）
+--   4. 都没有就手动输入 window_id
 -- 同一 tab 里有多个时取最近活动过的那个（active_window_history）。
--- 不会选本地 shell 窗口，以免把 markdown 当命令执行
 local M = {}
 
 -- paste 结束到发送回车之间的等待，太短 Claude Code 可能吞掉回车
