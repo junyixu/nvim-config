@@ -17,16 +17,26 @@ return {
     {
       ']c',
       function()
-        require('gitsigns').nav_hunk 'next'
+        -- diff 模式下（:DiffRemote / :Gdiffsplit 等）回退到内置 ]c
+        if vim.wo.diff then
+          vim.cmd.normal { vim.v.count1 .. ']c', bang = true }
+        else
+          require('gitsigns').nav_hunk 'next'
+        end
       end,
-      desc = 'Next Git Hunk',
+      desc = 'Next Git Hunk / Diff Change',
     },
     {
       '[c',
       function()
-        require('gitsigns').nav_hunk 'prev'
+        -- diff 模式下（:DiffRemote / :Gdiffsplit 等）回退到内置 [c
+        if vim.wo.diff then
+          vim.cmd.normal { vim.v.count1 .. '[c', bang = true }
+        else
+          require('gitsigns').nav_hunk 'prev'
+        end
       end,
-      desc = 'Previous Git Hunk',
+      desc = 'Previous Git Hunk / Diff Change',
     },
     -- 模仿 mini.diff: ghgh (Stage Hunk)
     {
