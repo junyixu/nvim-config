@@ -360,6 +360,76 @@ local function last_sync(c)
   return s and vim.trim(s) or '从未同步'
 end
 
+-- 解析 md5sum 输出: { ['./path'] = hash }
+local function parse_md5(stdout)
+  local hashes = {}
+  for line in (stdout or ''):gmatch '[^\n]+' do
+    local h, p = line:match '^(%x+)  (.*)$'
+    if h then
+      hashes[p] = h
+    end
+  end
+  return hashes
+end
+
+-- diff_sides 只看 size/mtime，会把“内容相同、只是 mtime 不同”的文件误判成两边不一致
+-- （典型来源：手工合并冲突、编辑器重写、cp 不带 -p）。这里对两边都有的那批文件——通常
+-- 很少——再做一次真实内容校验，只保留内容确实不同的路径。校验失败时保留原判定（宁严勿松）。
+local function refine_side_diff(c, side_diff, loc, rem)
+  local paths = {}
+  for _, p in ipairs(sorted_keys(side_diff)) do
+    if loc[p] and rem[p] then
+      paths[#paths + 1] = p
+    end
+  end
+  if #paths == 0 then
+    return side_diff
+  end
+
+  local stdin = table.concat(paths, '\n') .. '\n'
+  local hash_cmd = "xargs -r -d '\\n' md5sum --"
+  local ssh = { 'ssh' }
+  vim.list_extend(ssh, c.ssh_opts)
+  -- ssh 会把 host 之后的参数拼成一条命令串，所以路径要自己转义
+  vim.list_extend(ssh, { c.host, 'cd ' .. vim.fn.shellescape(c.remote) .. ' && ' .. hash_cmd })
+  local rl = run({ 'sh', '-c', hash_cmd }, { cwd = c.local_dir, stdin = stdin })
+  local rr = run(ssh, { stdin = stdin })
+  -- xargs 返回 123 表示 md5sum 对部分文件出错；对应路径没有哈希，按“不同”处理
+  if (rl.code ~= 0 and rl.code ~= 123) or (rr.code ~= 0 and rr.code ~= 123) then
+    say 'trixi-sync: 警告: 内容校验失败，本次回退到 size/mtime 判定'
+    return side_diff
+  end
+
+  local hl, hr = parse_md5(rl.stdout), parse_md5(rr.stdout)
+  local s = vim.deepcopy(side_diff)
+  for _, p in ipairs(paths) do
+    if hl[p] and hl[p] == hr[p] then
+      s[p] = nil
+    end
+  end
+  return s
+end
+
+-- pull 留下的冲突名单可能已经手工合并完，status 时顺手清掉过期条目
+local function prune_conflicts(c, st)
+  local path = c.state .. '/conflicts'
+  local rec = read_file(path)
+  if not rec or rec == '' then
+    return
+  end
+  local keep = {}
+  for p in rec:gmatch '[^\n]+' do
+    if st.conflict[p] or st.diverged[p] then
+      keep[p] = true
+    end
+  end
+  if next(keep) then
+    write_lines(path, sorted_keys(keep))
+  else
+    os.remove(path)
+  end
+end
+
 local function collect_status(c)
   local base_l = read_scan(c.state .. '/base.local')
   local base_r = read_scan(c.state .. '/base.remote')
@@ -377,12 +447,15 @@ local function collect_status(c)
   st.local_only = minus(st.cl, st.cr)
   st.remote_only = minus(st.cr, st.cl)
 
-  local side_diff = diff_sides(st.loc, st.rem)
+  local side_diff = refine_side_diff(c, diff_sides(st.loc, st.rem), st.loc, st.rem)
   st.conflict = inter(both, side_diff)
   st.both_same = minus(both, side_diff)
 
   -- 两边内容不一样、但各自都没相对基线改动（例如上次 pull 跳过了冲突）
   st.diverged = minus(side_diff, vim.tbl_extend('force', {}, st.cl, st.cr))
+
+  -- 冲突记录里已经不再有差异（或消失）的条目自动剔除，免得一直提示
+  prune_conflicts(c, st)
   return st
 end
 
