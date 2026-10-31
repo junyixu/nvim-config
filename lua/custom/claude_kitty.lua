@@ -18,7 +18,10 @@
 --      B2. 普通 ssh：远端没有 integration，last_reported_cmdline 停留在本地 shell
 --          报告的 `ssh vps`，at_prompt 恒为 false                           → 未确认的 ssh
 --          （若在远端手动装了 kitty shell integration，则同 B1，确认不了时仍算未确认）
---   C. 其他（本地 zsh、本地 vim……）                                        → 排除，
+--   C. 经 zmx 会话跑的 agent：前台进程 cmdline 或 last_reported_cmdline（at_prompt == false）
+--      里 `zmx` 之后出现 agent，如 `zmx attach dev claude`、`ssh vps -t 'zmx a dev claude'` → 确认是 agent
+--   D. 窗口标题含 ◐                                                         → 确认是 agent
+--   E. 其他（本地 zsh、本地 vim……）                                        → 排除，
 --      以免把 markdown 当命令执行
 --
 -- 选择，结果缓存在 b:claude_kitty_window：
@@ -79,13 +82,36 @@ local function command_program(cmdline)
   end
 end
 
+--- 命令行里 `zmx` 之后出现 agent，如 `zmx attach dev claude`；
+--- 按空白切词并去掉引号，ssh 把远端命令整个作为一个参数时也能认出
+--- @param cmdline string
+local function zmx_agent(cmdline)
+  local seen_zmx = false
+  for word in cmdline:gmatch '%S+' do
+    word = word:gsub('^[\'"]+', ''):gsub('[\'"]+$', '')
+    if vim.fs.basename(word) == 'zmx' then
+      seen_zmx = true
+    elseif seen_zmx and names_agent(word) then
+      return true
+    end
+  end
+  return false
+end
+
 local function is_agent(win)
+  if (win.title or ''):find('◐', 1, true) then
+    return true
+  end
   for _, proc in ipairs(win.foreground_processes or {}) do
-    if vim.iter(proc.cmdline or {}):any(names_agent) then
+    local cmdline = proc.cmdline or {}
+    if vim.iter(cmdline):any(names_agent) or zmx_agent(table.concat(cmdline, ' ')) then
       return true
     end
   end
   local remote_cmd = win.last_reported_cmdline
+  if win.at_prompt == false and type(remote_cmd) == 'string' and zmx_agent(remote_cmd) then
+    return true
+  end
   if ssh_kind(win) and win.at_prompt == false and type(remote_cmd) == 'string' then
     local program = command_program(remote_cmd)
     return program ~= nil and names_agent(program)
