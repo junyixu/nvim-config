@@ -16,7 +16,7 @@ local function tailscale_items()
     -- 跳过 "# Health check" 之类的非节点行
     if ip and (ip:match '^%d+%.%d+%.%d+%.%d+$' or ip:find ':') then
       table.insert(items, {
-        text = string.format('%-10s │ %-15s │ %s', 'tailscale', ip, hostname),
+        text = string.format('%-10s │ %-15s │ %s', 'tailscale', hostname, ip),
         target = 'junyi@' .. ip,
       })
     end
