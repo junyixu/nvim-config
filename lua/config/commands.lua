@@ -84,7 +84,7 @@ end, {
 vim.api.nvim_create_user_command(
   'DiffRemotePicker',
   require('junyi.telescope_tailscale').diff,
-  { desc = 'Pick a Tailscale node to diff the current file against' }
+  { desc = 'Pick a Tailscale node or ~/.ssh/config host to diff the current file against' }
 )
 
 vim.api.nvim_create_user_command('FixMath', require('util.re').fix_markdown_latex, { desc = 'Convert LaTeX delimiters to $ and $$ with strict spacing' })
