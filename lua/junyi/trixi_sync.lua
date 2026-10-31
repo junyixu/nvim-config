@@ -619,20 +619,11 @@ function cmd.pull(c, o)
       filters[#filters + 1] = '--exclude=' .. p:sub(2)
     end
   end
-  -- 本地改过但还没 push 的文件：还在的保护起来别被 --delete 干掉；
-  -- 本地删掉的不能再从远端拉回来
+  -- 本地改过但还没 push 的文件一律 exclude：不被远端旧版本覆盖、不被 --delete 删掉，
+  -- 本地删掉的也不会再从远端拉回来（P 只防删除、不防覆盖，所以不能用 P）。
+  -- 远端删了整个目录时，rsync 会删掉目录里其它文件、留下非空目录，不需要额外保护目录
   for _, p in ipairs(sorted_keys(st.local_only)) do
-    local rel = p:sub(3)
-    if st.loc[p] then
-      filters[#filters + 1] = '--filter=P /' .. rel
-      local d = rel:match '^(.*)/'
-      while d do
-        filters[#filters + 1] = '--filter=P /' .. d .. '/'
-        d = d:match '^(.*)/'
-      end
-    else
-      filters[#filters + 1] = '--exclude=/' .. rel
-    end
+    filters[#filters + 1] = '--exclude=/' .. p:sub(3)
   end
 
   local args = { '--delete', '--itemize-changes' }
