@@ -11,8 +11,11 @@ local timer
 local pending_cwd
 local running = false
 
+-- 可能在 vim.system 回调（fast event）里调用，要 schedule 到主循环
 local function notify(msg, level)
-  vim.notify(msg, level or vim.log.levels.INFO, { title = 'julia-gtags' })
+  vim.schedule(function()
+    vim.notify(msg, level or vim.log.levels.INFO, { title = 'julia-gtags' })
+  end)
 end
 
 local function joinpath(a, b)
