@@ -35,14 +35,7 @@ local function vmap(lhs, rhs, opts)
 end
 
 --  See `:help hlsearch`
--- 先清除待处理的 Copilot NES (见 lua/plugins/copilot-lsp.lua), 否则 nohlsearch
-nnoremap('<Esc>', function()
-  local ok, nes = pcall(require, 'copilot-lsp.nes')
-  if ok and nes.clear() then
-    return
-  end
-  vim.cmd 'nohlsearch'
-end, { desc = 'Clear Copilot NES / nohlsearch' })
+nnoremap('<Esc>', '<CMD>nohlsearch<CR>', { desc = 'Clear search highlight' })
 
 -- `clipboard=autoselect` is not implemented yet
 -- https://github.com/neovim/neovim/issues/2325.
@@ -103,10 +96,10 @@ end, { desc = 'Quit window or detach (smart)' })
 nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
--- <C-y> 让给 Copilot NES 接受 (见 lua/plugins/copilot-lsp.lua), 原本的
--- "向上滚一行" 挪到 <M-e>; <C-e> 向下滚一行保持不变.
+-- Copilot NES 已关闭 (见 lua/plugins/copilot-lsp.lua), <C-y> 恢复内置的
+-- "向上滚一行"; <M-e> 保留为同一动作的别名. <C-e> 向下滚一行保持不变.
 -- 注意 <M-e> 在 cmdline 模式另有含义 (见下方 cedit), 两者模式不同不冲突.
-vim.keymap.set({ 'n', 'x' }, '<M-e>', '<C-y>', { desc = 'Scroll up one line (was <C-y>)' })
+vim.keymap.set({ 'n', 'x' }, '<M-e>', '<C-y>', { desc = 'Scroll up one line (alias of <C-y>)' })
 
 vim.keymap.set('c', '<M-e>', '<C-f>', { noremap = true, desc = '将 vim.opt.cedit 设置为 Alt-e' })
 vim.keymap.set('c', '<C-B>', '<Left>', { desc = 'Emacs-keys: Back one character' })
@@ -559,7 +552,6 @@ vim.keymap.set(
 -- 分工 (Copilot 侧见 lua/plugins/copilot-lsp.lua):
 --   <Tab>  -> normal: 第二 leader (见下);  insert: LuaSnip 展开/跳转, 否则真 tab
 --   <F13>  -> normal: :h CTRL-I (jumplist newer);  insert: 接受 Copilot 行内补全
---   <C-y>  -> normal: 接受/walk Copilot NES (原"上滚一行"见上方 <M-e>)
 vim.keymap.set('n', '<F13>', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
 
 -- <Tab> 作为 normal 模式的第二 leader.
