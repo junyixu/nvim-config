@@ -9,31 +9,26 @@
 
 local M = {}
 
-M.subcommands = { 'status', 'pull', 'push', 'logs', 'init', 'reset' }
-M.flags = { '--dry-run', '--yes', '--force', '-n', '-y', '-f' }
-
-local FLAG_KEYS = {
-  ['-n'] = 'dry', ['--dry-run'] = 'dry',
-  ['-y'] = 'yes', ['--yes'] = 'yes',
-  ['-f'] = 'force', ['--force'] = 'force',
-  ['-h'] = 'help', ['--help'] = 'help',
-}
-
-local USAGE = {
-  ':TrixiSync init              首次拉取，并建立同步基线',
-  ':TrixiSync status            看两边相对上次同步改了什么',
-  ':TrixiSync push  [-y] [-f]   本地 -> 远端（先查远端有没有被改过）',
-  ':TrixiSync pull  [-y] [-f]   远端 -> 本地（自动跳过冲突文件）',
-  ':TrixiSync logs  [PATTERN]   只拉 logs/，单向，不动代码',
-  ':TrixiSync reset             用两边当前状态重建基线（手工解决冲突后用）',
-  '',
-  '选项：',
-  '  -n, --dry-run   只打印将要做什么，不实际传输、不更新基线',
-  '  -y, --yes       不询问（删除文件时默认会问）',
-  '  -f, --force     忽略“对面自上次同步后被改动 / 两边内容不同”的检查',
-  '',
-  '配置：环境变量 TRIXI_HOST / TRIXI_REMOTE / TRIXI_LOCAL / TRIXI_NAME / TRIXI_EXCLUDES，',
-  '      或 ~/.config/trixi-sync/<name>.conf（KEY=VALUE 行，优先于环境变量）',
+local parser = require('util.argparse').new {
+  name = 'TrixiSync',
+  commands = {
+    { 'init', '首次拉取，并建立同步基线' },
+    { 'status', '看两边相对上次同步改了什么' },
+    { 'push', '本地 -> 远端（先查远端有没有被改过）', usage = '[-y] [-f]' },
+    { 'pull', '远端 -> 本地（自动跳过冲突文件）', usage = '[-y] [-f]' },
+    { 'logs', '只拉 logs/，单向，不动代码', usage = '[PATTERN]' },
+    { 'reset', '用两边当前状态重建基线（手工解决冲突后用）' },
+    { 'help', '显示帮助' },
+  },
+  flags = {
+    { '-n', '--dry-run', key = 'dry', help = '只打印将要做什么，不实际传输、不更新基线' },
+    { '-y', '--yes', help = '不询问（删除文件时默认会问）' },
+    { '-f', '--force', help = '忽略“对面自上次同步后被改动 / 两边内容不同”的检查' },
+  },
+  epilog = {
+    '配置：环境变量 TRIXI_HOST / TRIXI_REMOTE / TRIXI_LOCAL / TRIXI_NAME / TRIXI_EXCLUDES，',
+    '      或 ~/.config/trixi-sync/<name>.conf（KEY=VALUE 行，优先于环境变量）',
+  },
 }
 
 -- 远端扫描脚本：一次 ssh 同时带回归档 HEAD（#head 行）和文件列表
@@ -603,37 +598,17 @@ end
 
 -- ---------------------------------------------------------------- 入口
 
-local function parse(fargs)
-  local o, args, rest = {}, {}, false
-  for _, a in ipairs(fargs) do
-    if rest or a:sub(1, 1) ~= '-' then
-      args[#args + 1] = a
-    elseif a == '--' then
-      rest = true
-    elseif FLAG_KEYS[a] then
-      o[FLAG_KEYS[a]] = true
-    else
-      return nil, ('未知选项: %s（:TrixiSync -h 看帮助）'):format(a)
-    end
-  end
-  return o, args
-end
-
 ---@param fargs string[] e.g. { 'pull', '-y' }
 function M.run(fargs)
-  local o, args = parse(fargs)
+  local o, err = parser:parse(fargs)
   if not o then
-    vim.notify('trixi-sync: ' .. args, vim.log.levels.ERROR)
+    vim.notify('trixi-sync: ' .. err, vim.log.levels.ERROR)
     return
   end
-  local name = args[1]
+  local name = o.cmd
   if o.help or not name or name == 'help' then
-    out = vim.deepcopy(USAGE)
+    out = parser:help()
     show()
-    return
-  end
-  if not cmd[name] then
-    vim.notify(('trixi-sync: 未知命令: %s（:TrixiSync -h 看帮助）'):format(name), vim.log.levels.ERROR)
     return
   end
   if running then
@@ -645,7 +620,7 @@ function M.run(fargs)
   out = {}
   vim.notify(('trixi-sync %s …'):format(name))
   coroutine.wrap(function()
-    local ok, err = pcall(cmd[name], config(), o, args[2])
+    local ok, err = pcall(cmd[name], config(), o, o.args[1])
     running = false
     local level = vim.log.levels.INFO
     if not ok then
@@ -667,21 +642,6 @@ function M.run(fargs)
   end)()
 end
 
-function M.complete(arglead, cmdline)
-  if arglead:sub(1, 1) == '-' then
-    return vim.tbl_filter(function(s)
-      return vim.startswith(s, arglead)
-    end, M.flags)
-  end
-  -- 子命令只补第一个位置参数
-  for w in cmdline:gmatch '%s(%S+)' do
-    if vim.tbl_contains(M.subcommands, w) and w ~= arglead then
-      return {}
-    end
-  end
-  return vim.tbl_filter(function(s)
-    return vim.startswith(s, arglead)
-  end, M.subcommands)
-end
+M.complete = parser:complete()
 
 return M
