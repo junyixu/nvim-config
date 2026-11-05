@@ -93,8 +93,12 @@ vim.api.nvim_create_user_command('Make', require('junyi.make').async_make, {})
 vim.api.nvim_create_user_command('LMake', require('junyi.make').async_lmake, {})
 
 -- 用 sudo 保存没有写权限的文件: 在命令行输入 w!! 回车
--- 原 vim 写法: ca w!! w !sudo tee "%" > /dev/null
-vim.cmd.cabbrev { 'w!!', 'w !sudo tee "%" > /dev/null' }
+-- 原 vim 写法 `ca w!! w !sudo tee "%"` 在 Neovim 里会因为没有 tty 拿不到密码,
+-- 所以改成一个命令, 需要时在浮动终端里输密码 (见 custom/sudo_write.lua)
+vim.api.nvim_create_user_command('SudoWrite', require('custom.sudo_write').write, {
+  desc = 'Write current file with sudo (password prompt in a floating terminal)',
+})
+vim.cmd.cabbrev { 'w!!', 'SudoWrite' }
 
 vim.cmd [[
 command! BufOnly execute '%bdelete|edit #|normal `"'
