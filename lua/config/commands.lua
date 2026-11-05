@@ -92,6 +92,10 @@ vim.api.nvim_create_user_command('FixMath', require('util.re').fix_markdown_late
 vim.api.nvim_create_user_command('Make', require('junyi.make').async_make, {})
 vim.api.nvim_create_user_command('LMake', require('junyi.make').async_lmake, {})
 
+-- 用 sudo 保存没有写权限的文件: 在命令行输入 w!! 回车
+-- 原 vim 写法: ca w!! w !sudo tee "%" > /dev/null
+vim.cmd.cabbrev { 'w!!', 'w !sudo tee "%" > /dev/null' }
+
 vim.cmd [[
 command! BufOnly execute '%bdelete|edit #|normal `"'
 cabbrev cc CodeCompanion
