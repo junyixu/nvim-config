@@ -124,7 +124,7 @@ local function config()
     c.excluded[e] = true
   end
   c.rsync_excludes = vim.tbl_map(function(e)
-    return '--exclude=' .. e .. '/'
+    return '--exclude=' .. e
   end, c.excludes)
   c.rsync_e = table.concat(c.ssh, ' ')
   return c
