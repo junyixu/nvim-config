@@ -29,6 +29,7 @@
 --   2. 否则提示「当前 tab 没有 agent」，用 vim.ui.select 列出候选让用户挑：
 --      所有确认 agent 和所有 ssh 窗口（未确认的也列，确认逻辑可能漏判），
 --      当前 tab 在前，其他 tab 里各 OS 窗口当前显示的 tab 优先；最后一项是手动输入 window_id
+--      列表走 snacks picker 时，右侧只预览光标所在项那一个窗口的当前屏幕（kitty @ get-text）
 --
 -- 绑定是 buffer 级的，prompt1.md / prompt2.md 可以各发各的窗口。
 -- 手动切换用 M.switch（:ClaudeKitty [id]、<space>fc）：跳过第 1 步，总是弹列表
@@ -196,6 +197,25 @@ local function ask_id(cb, guess)
   end
 end
 
+--- snacks picker 的预览函数：用终端 buffer 显示窗口当前屏幕，保留 get-text --ansi 的颜色
+--- 必须走 kitty()：snacks 的 preview.cmd 在 pty 里跑，`kitty @` 经 tty 找不到 kitty
+--- @param texts table<integer, string> 按 window_id 缓存，光标来回移动时不重复请求
+local function preview_window(ctx, texts)
+  local id = ctx.item.item.id
+  if not id then
+    return ctx.preview:reset() -- 「手动输入」那一项没有对应窗口
+  end
+  if not texts[id] then
+    local res = kitty { 'get-text', '--ansi', '--match', 'id:' .. id }
+    if res.code ~= 0 then
+      return ctx.preview:notify('`kitty @ get-text` failed: ' .. vim.trim(res.stderr or ''), 'warn', { item = false })
+    end
+    texts[id] = res.stdout:gsub('%s+$', ''):gsub('\r?\n', '\r\n')
+  end
+  local buf = ctx.preview:scratch()
+  vim.api.nvim_chan_send(vim.api.nvim_open_term(buf, {}), texts[id])
+end
+
 --- 列出候选让用户挑；用户取消则不调用 done
 --- @param current table?
 --- @param others table[]
@@ -227,8 +247,15 @@ local function pick(current, others, done, warning)
   if warning then
     vim.notify(warning, vim.log.levels.WARN)
   end
+  local texts = {}
   vim.ui.select(items, {
     prompt = 'Send to kitty window',
+    snacks = {
+      layout = { preset = 'default' },
+      preview = function(ctx)
+        preview_window(ctx, texts)
+      end,
+    },
     format_item = function(item)
       return item.label
     end,
