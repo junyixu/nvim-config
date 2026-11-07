@@ -38,13 +38,19 @@ local M = {}
 -- paste 结束到发送回车之间的等待，太短 Claude Code 可能吞掉回车
 local SUBMIT_DELAY_MS = 100
 
+-- Windows 上只用 neovide --wsl，经 tailscale 控制 archsurface 上的 kitty
+local NEOVIDE_KITTY = 'tcp:100.85.19.60:12345'
+-- archsurface 关机时不要一直卡住 nvim
+local NEOVIDE_TIMEOUT_MS = 3000
+
 local function kitty(args, stdin)
   local cmd = { 'kitty', '@' }
-  if vim.env.KITTY_LISTEN_ON and vim.env.KITTY_LISTEN_ON ~= '' then
-    vim.list_extend(cmd, { '--to', vim.env.KITTY_LISTEN_ON })
+  local to = vim.g.neovide and NEOVIDE_KITTY or vim.env.KITTY_LISTEN_ON
+  if to and to ~= '' then
+    vim.list_extend(cmd, { '--to', to })
   end
   vim.list_extend(cmd, args)
-  return vim.system(cmd, { stdin = stdin, text = true }):wait()
+  return vim.system(cmd, { stdin = stdin, text = true, timeout = vim.g.neovide and NEOVIDE_TIMEOUT_MS or nil }):wait()
 end
 
 -- 都是 TUI，bracketed paste + 回车提交的行为一致
