@@ -599,7 +599,8 @@ end
 -- ---------------------------------------------------------------- 入口
 
 ---@param fargs string[] e.g. { 'pull', '-y' }
-function M.run(fargs)
+---@param on_success? fun() 命令成功跑完后调用；中止、取消、报错都不调用
+function M.run(fargs, on_success)
   local o, err = parser:parse(fargs)
   if not o then
     vim.notify('trixi-sync: ' .. err, vim.log.levels.ERROR)
@@ -639,6 +640,9 @@ function M.run(fargs)
     end
     show()
     vim.notify(('trixi-sync %s: %s'):format(name, ok and '完成' or '中止'), level)
+    if ok and on_success then
+      on_success()
+    end
   end)()
 end
 

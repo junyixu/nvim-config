@@ -23,7 +23,12 @@ end, {
   end,
 })
 
-vim.keymap.set('n', '<leader>sl', sync 'pull', { desc = 'trixi-sync pull' })
+-- push 是异步的，必须等它成功后再 restore，否则会丢掉没推上去的改动
+vim.keymap.set('n', '<leader>sl', function()
+  require('junyi.trixi_sync').run({ 'push' }, function()
+    vim.cmd 'Git restore . | Git pull'
+  end)
+end, { desc = 'trixi-sync push, then git restore and pull' })
 vim.keymap.set('n', '<leader>sp', sync 'push', { desc = 'trixi-sync push' })
 vim.keymap.set('n', '<leader>sL', sync 'logs', { desc = 'trixi-sync logs' })
 vim.keymap.set('n', '<leader>ss', sync 'status', { desc = 'trixi-sync status' })
