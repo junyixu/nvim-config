@@ -29,6 +29,9 @@
 --   2. 否则提示「当前 tab 没有 agent」，用 vim.ui.select 列出候选让用户挑：
 --      所有确认 agent 和所有 ssh 窗口（未确认的也列，确认逻辑可能漏判），
 --      当前 tab 在前，其他 tab 里各 OS 窗口当前显示的 tab 优先；最后一项是手动输入 window_id
+--
+-- 绑定是 buffer 级的，prompt1.md / prompt2.md 可以各发各的窗口。
+-- 手动切换用 M.switch（:ClaudeKitty [id]、<space>fc）：跳过第 1 步，总是弹列表
 local M = {}
 
 -- paste 结束到发送回车之间的等待，太短 Claude Code 可能吞掉回车
@@ -192,6 +195,54 @@ local function ask_id(cb, guess)
   end
 end
 
+--- 列出候选让用户挑；用户取消则不调用 done
+--- @param current table?
+--- @param others table[]
+--- @param done fun(id: integer)
+--- @param warning? string 弹列表前的提示
+local function pick(current, others, done, warning)
+  local items = {}
+  local tabs = vim.list_extend(current and { current } or {}, others)
+  for _, tab in ipairs(tabs) do
+    for _, win in ipairs(candidates(tab)) do
+      if is_agent(win) or ssh_kind(win) then
+        table.insert(items, { id = win.id, label = describe(tab, win, tab == current) })
+      end
+    end
+  end
+  -- 最可能的：列表第一项，没有就取当前 tab 里上一个活动窗口
+  local guess = items[1]
+  if not guess and current then
+    local prev = candidates(current)[1]
+    if prev then
+      guess = { id = prev.id, label = describe(current, prev, true) }
+    end
+  end
+  if #items == 0 then
+    return ask_id(done, guess)
+  end
+  table.insert(items, { label = 'enter window_id manually', guess = guess })
+
+  if warning then
+    vim.notify(warning, vim.log.levels.WARN)
+  end
+  vim.ui.select(items, {
+    prompt = 'Send to kitty window',
+    format_item = function(item)
+      return item.label
+    end,
+  }, function(item)
+    if not item then
+      return
+    end
+    if item.id then
+      done(item.id)
+    else
+      ask_id(done, item.guess)
+    end
+  end)
+end
+
 --- @param force? boolean 忽略缓存重新确定
 --- @param cb fun(id: integer) 确定了目标窗口才会调用；用户取消则不调用
 function M.window(force, cb)
@@ -215,44 +266,23 @@ function M.window(force, cb)
     end
   end
 
-  local items = {}
-  local tabs = vim.list_extend(current and { current } or {}, others)
-  for _, tab in ipairs(tabs) do
-    for _, win in ipairs(candidates(tab)) do
-      if is_agent(win) or ssh_kind(win) then
-        table.insert(items, { id = win.id, label = describe(tab, win, tab == current) })
-      end
-    end
-  end
-  -- 最可能的：列表第一项，没有就取当前 tab 里上一个活动窗口
-  local guess = items[1]
-  if not guess and current then
-    local prev = candidates(current)[1]
-    if prev then
-      guess = { id = prev.id, label = describe(current, prev, true) }
-    end
-  end
-  if #items == 0 then
-    return ask_id(done, guess)
-  end
-  table.insert(items, { label = 'enter window_id manually', guess = guess })
+  pick(current, others, done, 'claude_kitty: no agent detected in this tab, pick a window')
+end
 
-  vim.notify('claude_kitty: no agent detected in this tab, pick a window', vim.log.levels.WARN)
-  vim.ui.select(items, {
-    prompt = 'Send to kitty window',
-    format_item = function(item)
-      return item.label
-    end,
-  }, function(item)
-    if not item then
-      return
-    end
-    if item.id then
-      done(item.id)
-    else
-      ask_id(done, item.guess)
-    end
-  end)
+--- 手动切换当前 buffer 绑定的窗口；当前 tab 有 agent 时也不自动选
+--- @param id? integer 直接绑定到这个 window_id，省略则弹列表
+function M.switch(id)
+  local buf = vim.api.nvim_get_current_buf()
+  local function done(new_id)
+    vim.b[buf].claude_kitty_window = new_id
+    vim.notify('claude_kitty: target window ' .. new_id)
+  end
+
+  if id then
+    return done(id)
+  end
+  local current, others = list_tabs()
+  pick(current, others, done)
 end
 
 local function send_text(id, text)

@@ -91,9 +91,10 @@ if vim.bo.buftype == '' then
   vim.keymap.set('n', '<space>f', op(), { buffer = true, expr = true, desc = 'Claude: Send Motion' })
   vim.keymap.set('x', '<space>f', send_visual, { buffer = true, desc = 'Claude: Send Region' })
   vim.keymap.set('n', '<space>fc', function()
-    require('custom.claude_kitty').window(true, function(id)
-      vim.notify('claude_kitty: target window ' .. id)
-    end)
+    require('custom.claude_kitty').switch()
   end, { buffer = true, desc = 'Claude: Pick Kitty Window' })
+  vim.api.nvim_buf_create_user_command(0, 'ClaudeKitty', function(opts)
+    require('custom.claude_kitty').switch(tonumber(opts.args))
+  end, { nargs = '?', desc = 'Switch kitty window bound to this buffer ([window_id] or pick)' })
 end
 -- ===================== end send to claude ======================
