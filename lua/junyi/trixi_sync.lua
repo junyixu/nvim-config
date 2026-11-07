@@ -598,6 +598,11 @@ end
 
 -- ---------------------------------------------------------------- 入口
 
+---@return string # 同步的本地目录
+function M.local_dir()
+  return config().local_dir
+end
+
 ---@param fargs string[] e.g. { 'pull', '-y' }
 ---@param on_success? fun() 命令成功跑完后调用；中止、取消、报错都不调用
 function M.run(fargs, on_success)
