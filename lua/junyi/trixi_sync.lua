@@ -38,9 +38,10 @@ cd "$dir" 2>/dev/null || { echo "trixi-sync: 远端目录不存在: $dir" >&2; e
 if [ -d .git ]; then
   printf '#head\t%s\n' "$(git rev-parse --short HEAD 2>/dev/null || echo none)"
 fi
-cond=""
-for e in "$@"; do cond="${cond:+$cond -o }-name $e"; done
-find . \( $cond \) -prune -o -type f -printf '%p\t%s\t%T@\n' \
+# 用数组拼条件，模式（如 prompt*.md）原样交给 find，不被 shell 展开
+cond=()
+for e in "$@"; do cond+=(${cond[0]+-o} -name "$e"); done
+find . \( "${cond[@]}" \) -prune -o -type f -printf '%p\t%s\t%T@\n' \
   | awk -F'\t' -v OFS='\t' '{ sub(/\..*/, "", $3); print }'
 ]=]
 
@@ -119,10 +120,8 @@ local function config()
       '-o', 'Compression=no',
     },
   }
-  c.excluded = {}
-  for _, e in ipairs(c.excludes) do
-    c.excluded[e] = true
-  end
+  -- 每项都是 glob（如 prompt*.md），与 find -name / rsync --exclude 一样只匹配文件名
+  c.exclude_pats = vim.tbl_map(vim.glob.to_lpeg, c.excludes)
   c.rsync_excludes = vim.tbl_map(function(e)
     return '--exclude=' .. e
   end, c.excludes)
@@ -202,7 +201,13 @@ local function scan_local(c)
   end
   -- 与 find -prune -name 一致：同名的目录和文件都排除
   local function excluded(rel)
-    return c.excluded[vim.fs.basename(rel)]
+    local name = vim.fs.basename(rel)
+    for _, pat in ipairs(c.exclude_pats) do
+      if pat:match(name) then
+        return true
+      end
+    end
+    return false
   end
   local files = {}
   local walk = vim.fs.dir(c.local_dir, {
