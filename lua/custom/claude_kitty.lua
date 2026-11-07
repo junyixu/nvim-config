@@ -20,7 +20,7 @@
 --          （若在远端手动装了 kitty shell integration，则同 B1，确认不了时仍算未确认）
 --   C. 经 zmx 会话跑的 agent：前台进程 cmdline 或 last_reported_cmdline（at_prompt == false）
 --      里 `zmx` 之后出现 agent，如 `zmx attach dev claude`、`ssh vps -t 'zmx a dev claude'` → 确认是 agent
---   D. 窗口标题含 ◐                                                         → 确认是 agent
+--   D. 窗口标题含 ◐ 或 ✳（Claude Code 设置的标题）                          → 确认是 agent
 --   E. 其他（本地 zsh、本地 vim……）                                        → 排除，
 --      以免把 markdown 当命令执行
 --
@@ -102,7 +102,8 @@ local function zmx_agent(cmdline)
 end
 
 local function is_agent(win)
-  if (win.title or ''):find('◐', 1, true) then
+  local title = win.title or ''
+  if title:find('◐', 1, true) or title:find('✳', 1, true) then
     return true
   end
   for _, proc in ipairs(win.foreground_processes or {}) do
