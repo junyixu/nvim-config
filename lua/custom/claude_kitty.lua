@@ -29,7 +29,7 @@
 --   2. 否则提示「当前 tab 没有 agent」，用 vim.ui.select 列出候选让用户挑：
 --      所有确认 agent 和所有 ssh 窗口（未确认的也列，确认逻辑可能漏判），
 --      当前 tab 在前，其他 tab 里各 OS 窗口当前显示的 tab 优先；最后一项是手动输入 window_id
---      列表走 snacks picker 时，右侧只预览光标所在项那一个窗口的当前屏幕（kitty @ get-text）
+--      列表走 snacks picker 时，下方只预览光标所在项那一个窗口的当前屏幕（kitty @ get-text）
 --
 -- 绑定是 buffer 级的，prompt1.md / prompt2.md 可以各发各的窗口。
 -- 手动切换用 M.switch（:ClaudeKitty [id]、<space>fc）：跳过第 1 步，总是弹列表
@@ -251,7 +251,20 @@ local function pick(current, others, done, warning)
   vim.ui.select(items, {
     prompt = 'Send to kitty window',
     snacks = {
-      layout = { preset = 'default' },
+      layout = {
+        preset = 'vertical',
+        layout = { width = 0.8, height = 0.9 },
+        -- 列表高度随项数，其余都给预览
+        config = function(layout)
+          for _, box in ipairs(layout.layout) do
+            if box.win == 'list' then
+              box.height = math.min(#items, 10)
+            elseif box.win == 'preview' then
+              box.height = nil
+            end
+          end
+        end,
+      },
       preview = function(ctx)
         preview_window(ctx, texts)
       end,
