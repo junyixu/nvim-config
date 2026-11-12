@@ -72,13 +72,15 @@ local function activate_env(path)
   end
 end
 
--- TODO:
--- /home/junyi 应该用 vim.extend('~') 来替换
+-- NOTE: 这里的 cmd 会被 after/lsp/julials.lua 整体替换掉，实际生效的是那一份（它用
+-- `--project=~/.julia/environments/lsp<ver>` 加可选的 julials.so sysimage 启动）。
+-- 下面这份只在本机没有 after/ 那份配置时才会用到，因此仍然保留，方便对照上游 julials 的写法。
+local trace_compile_file = vim.fs.joinpath(vim.fn.expand '~/.julia', 'environments', 'nvim-lspconfig', 'tracecompilelsp.jl')
 local cmd = {
   'julia',
   '--startup-file=no',
   '--history-file=no',
-  '--trace-compile=/home/junyi/.julia/environments/nvim-lspconfig/tracecompilelsp.jl',
+  '--trace-compile=' .. trace_compile_file,
   '-e',
   [[
     # Load LanguageServer.jl: attempt to load from ~/.julia/environments/nvim-lspconfig
