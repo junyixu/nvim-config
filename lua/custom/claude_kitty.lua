@@ -43,14 +43,35 @@ local NEOVIDE_KITTY = 'tcp:100.85.19.60:12345'
 -- archsurface 关机时不要一直卡住 nvim
 local NEOVIDE_TIMEOUT_MS = 3000
 
+-- Linux desktop 上的 neovide 照常走 KITTY_LISTEN_ON
+local function remote_kitty()
+  return vim.g.neovide and vim.g.is_wsl
+end
+
+-- 从桌面启动器打开的 neovide 没有 KITTY_LISTEN_ON；
+-- kitty.conf 的 listen_on unix:/tmp/kitty 会被自动加上 -PID，只能 glob 出最新的那个 socket
+local function newest_kitty_socket()
+  local newest, newest_mtime
+  for _, path in ipairs(vim.fn.glob('/tmp/kitty-*', false, true)) do
+    local stat = vim.uv.fs_stat(path)
+    if stat and stat.type == 'socket' and (not newest_mtime or stat.mtime.sec > newest_mtime) then
+      newest, newest_mtime = path, stat.mtime.sec
+    end
+  end
+  return newest and 'unix:' .. newest
+end
+
 local function kitty(args, stdin)
   local cmd = { 'kitty', '@' }
-  local to = vim.g.neovide and NEOVIDE_KITTY or vim.env.KITTY_LISTEN_ON
+  local to = remote_kitty() and NEOVIDE_KITTY or vim.env.KITTY_LISTEN_ON
+  if (not to or to == '') and vim.g.neovide then
+    to = newest_kitty_socket()
+  end
   if to and to ~= '' then
     vim.list_extend(cmd, { '--to', to })
   end
   vim.list_extend(cmd, args)
-  return vim.system(cmd, { stdin = stdin, text = true, timeout = vim.g.neovide and NEOVIDE_TIMEOUT_MS or nil }):wait()
+  return vim.system(cmd, { stdin = stdin, text = true, timeout = remote_kitty() and NEOVIDE_TIMEOUT_MS or nil }):wait()
 end
 
 -- 都是 TUI，bracketed paste + 回车提交的行为一致
