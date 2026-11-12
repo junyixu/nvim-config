@@ -9,10 +9,18 @@ Claude Code 等 agent。本文记录 `<addr>` 的选择逻辑，以及这样设�
 
 | 场景 | 判定 | `--to` | 超时 |
 | --- | --- | --- | --- |
-| Windows 上的 `neovide --wsl` | `vim.g.neovide and vim.g.is_wsl` | `NEOVIDE_KITTY`（经 tailscale 连 archsurface 的 TCP 地址） | 3 s |
+| Windows 上的 `neovide --wsl` | `vim.g.neovide and vim.g.is_wsl` | `NEOVIDE_KITTY`（默认经 tailscale 连 archsurface，可用同名环境变量覆盖） | 3 s |
 | 在 kitty 里运行的 nvim / neovide | `KITTY_LISTEN_ON` 非空 | `KITTY_LISTEN_ON` | 无 |
 | 从 Linux 桌面启动器打开的 neovide | 以上都不满足且 `vim.g.neovide` | `/tmp/kitty-*` 中最新的 socket | 无 |
 | 其他 | — | 不加 `--to`（交给 kitty 自己判断） | 无 |
+
+## 覆盖 `NEOVIDE_KITTY`
+
+环境变量 `NEOVIDE_KITTY` 非空时，用它代替默认的 `tcp:100.85.19.60:12345`；没设置或为空字符串时用默认值。
+
+- 只在模块加载时读取一次，nvim 启动后再改不会生效。
+- 从 Windows 启动器打开 `neovide --wsl` 时，变量要能在 WSL 里读到：写进 WSL 的 shell 配置，
+  或在 Windows 侧设置后通过 `WSLENV` 转发。
 
 ## 为什么用 `is_wsl` 而不是只看 `vim.g.neovide`
 

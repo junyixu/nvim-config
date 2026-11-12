@@ -38,8 +38,9 @@ local M = {}
 -- paste 结束到发送回车之间的等待，太短 Claude Code 可能吞掉回车
 local SUBMIT_DELAY_MS = 100
 
--- Windows 上只用 neovide --wsl，经 tailscale 控制 archsurface 上的 kitty
-local NEOVIDE_KITTY = 'tcp:100.85.19.60:12345'
+-- Windows 上只用 neovide --wsl，经 tailscale 控制 archsurface 上的 kitty；
+-- 环境变量 NEOVIDE_KITTY 非空时用它覆盖
+local NEOVIDE_KITTY = vim.env.NEOVIDE_KITTY ~= '' and vim.env.NEOVIDE_KITTY or 'tcp:100.85.19.60:12345'
 -- archsurface 关机时不要一直卡住 nvim
 local NEOVIDE_TIMEOUT_MS = 3000
 
