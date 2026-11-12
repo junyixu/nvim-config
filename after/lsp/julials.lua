@@ -68,9 +68,11 @@ vim.list_extend(final_cmd, {
             ## 2. Look for a Project.toml file in the current working directory,
             ##    or parent directories, with $HOME as an upper boundary
             Base.current_project(),
-            ## 3. First entry in the load path
+            ## 3. Sandbox env for standalone scripts (~/.julia/environments/sandbox), if it exists
+            (p = Base.load_path_expand("@sandbox"); p !== nothing && isfile(p) ? p : nothing),
+            ## 4. First entry in the load path
             get(Base.load_path(), 1, nothing),
-            ## 4. Fallback to default global environment,
+            ## 5. Fallback to default global environment,
             ##    this is more or less unreachable
             Base.load_path_expand("@v#.#"),
         ))
