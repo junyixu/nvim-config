@@ -97,8 +97,8 @@ and Quarto/Markdown (`quarto-nvim`, `render-markdown.nvim`, `prettier`).
 ## Design notes for tricky subsystems
 
 `doc/*.md` holds the user's own write-ups for non-obvious internals — check here before re-deriving
-behavior from scratch: `codecompanion-source-code-analysis.md`, `indent-notes.md`,
-`julia-stacktrace-gF.md`, `luasnip-latex-snippets-overview.md`, `luasnip-tex-condition-fix.md`,
+behavior from scratch: `claude-kitty-connection.md`, `codecompanion-source-code-analysis.md`,
+`indent-notes.md`, `julia-lsp-sandbox-env.md`, `julia-stacktrace-gF.md`, `luasnip-latex-snippets-overview.md`, `luasnip-tex-condition-fix.md`,
 `luasnip-ultisnips-fraction.md`, `mini-ai-default-textobjects.md`, `snacks_img.md`/`snacks_img2.md`,
 `tabline.md`.
 
