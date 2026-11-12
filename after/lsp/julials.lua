@@ -56,7 +56,23 @@ vim.list_extend(final_cmd, {
   [[
     using LanguageServer, SymbolServer, StaticLint
     depot_path = get(ENV, "JULIA_DEPOT_PATH", "")
-    project_path = dirname(something(Base.current_project(pwd()), Base.load_path_expand(LOAD_PATH[2])))
+    project_path = let
+        dirname(something(
+            ## 1. Finds an explicitly set project (JULIA_PROJECT)
+            Base.load_path_expand((
+                p = get(ENV, "JULIA_PROJECT", nothing);
+                p === nothing ? nothing : isempty(p) ? nothing : p
+            )),
+            ## 2. Look for a Project.toml file in the current working directory,
+            ##    or parent directories, with $HOME as an upper boundary
+            Base.current_project(),
+            ## 3. First entry in the load path
+            get(Base.load_path(), 1, nothing),
+            ## 4. Fallback to default global environment,
+            ##    this is more or less unreachable
+            Base.load_path_expand("@v#.#"),
+        ))
+    end
     @info "LSP Started" project_path depot_path
     server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, depot_path);
     server.runlinter = true;
