@@ -55,6 +55,8 @@ vim.list_extend(final_cmd, {
   '-e',
   [[
     using LanguageServer, SymbolServer, StaticLint
+    ## Clear --project=<lsp_env> so "@" in LOAD_PATH does not resolve to the LSP environment
+    Base.set_active_project(nothing)
     depot_path = get(ENV, "JULIA_DEPOT_PATH", "")
     project_path = let
         dirname(something(
