@@ -96,8 +96,7 @@ end, { desc = 'Quit window or detach (smart)' })
 nnoremap('<M-Q>', '<CMD>tabc<CR>', { desc = 'Close the current tab' })
 nnoremap('<M-z>', '<CMD>wq<CR>', { desc = 'Save and quit the current window' })
 nnoremap('<C-s>', '<CMD>w<CR>', { desc = 'Save current buffer' })
--- Copilot NES 已关闭 (见 lua/plugins/copilot-lsp.lua), <C-y> 恢复内置的
--- "向上滚一行"; <M-e> 保留为同一动作的别名. <C-e> 向下滚一行保持不变.
+-- <C-y> 使用内置的 "向上滚一行"; <M-e> 保留为同一动作的别名. <C-e> 向下滚一行保持不变.
 -- 注意 <M-e> 在 cmdline 模式另有含义 (见下方 cedit), 两者模式不同不冲突.
 vim.keymap.set({ 'n', 'x' }, '<M-e>', '<C-y>', { desc = 'Scroll up one line (alias of <C-y>)' })
 
@@ -549,9 +548,9 @@ vim.keymap.set(
 -- vim/nvim key model 把 <C-i> 归一为 <Tab> (同字节 0x09).
 -- kitty.conf 把 ctrl+i 重映射为 \e[25~ (vt220 F13), 物理 <Tab> 仍发 \t,
 -- nvim TUI 把前者解码成独立的 <F13> keystroke, 于是两键可分别绑定.
--- 分工 (Copilot 侧见 lua/plugins/copilot-lsp.lua):
+-- 分工 (行内补全侧见 lua/plugins/minuet.lua):
 --   <Tab>  -> normal: 第二 leader (见下);  insert: LuaSnip 展开/跳转, 否则真 tab
---   <F13>  -> normal: :h CTRL-I (jumplist newer);  insert: 接受 Copilot 行内补全
+--   <F13>  -> normal: :h CTRL-I (jumplist newer);  insert: 接受 AI 行内补全
 vim.keymap.set('n', '<F13>', '<C-i>', { desc = 'Jumplist newer (original C-i)' })
 
 -- <Tab> 作为 normal 模式的第二 leader.
@@ -561,8 +560,8 @@ vim.keymap.set('n', '<F13>', '<C-i>', { desc = 'Jumplist newer (original C-i)' }
 vim.keymap.set('n', '<Tab>', '<Nop>', { desc = 'Tab leader' })
 -- 往这里加 <Tab>x 系列, 例如:
 --   vim.keymap.set('n', '<Tab>h', '<C-w>h', { desc = 'Window left' })
--- <Tab> (insert): LuaSnip expand/jump > literal tab. No Copilot here on
--- purpose; ftplugin/markdown.lua extends this chain with table-cell nav.
+-- <Tab> (insert): LuaSnip expand/jump > literal tab. No inline AI completion
+-- here on purpose; ftplugin/markdown.lua extends this chain with table-cell nav.
 vim.keymap.set('i', '<Tab>', function()
   if require('luasnip').expand_or_locally_jumpable() then
     return '<Plug>luasnip-expand-or-jump'

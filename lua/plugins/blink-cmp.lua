@@ -15,7 +15,7 @@ return {
     end,
     keymap = {
       -- NOTE: Keep Blink's default preset but let the plain Neovim mappings in
-      -- lua/plugins/copilot-lsp.lua own <Tab>/<S-Tab>, so snippet expansion/jumps
+      -- lua/config/keymaps.lua own <Tab>/<S-Tab>, so snippet expansion/jumps
       -- still work even when the completion menu is visible.
       preset = 'default',
       ['<Tab>'] = false,
@@ -27,7 +27,7 @@ return {
       ['<C-d>'] = { 'scroll_signature_down', 'fallback' },
 
       -- <C-y>: 补全菜单开着就接受候选, 否则回落内置 i_CTRL-Y
-      -- (插入上一行同列字符). Copilot NES 已关闭, 见 lua/plugins/copilot-lsp.lua.
+      -- (插入上一行同列字符).
       ['<C-y>'] = { 'select_and_accept', 'fallback' },
 
       -- default in all keymap presets

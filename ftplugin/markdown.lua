@@ -65,8 +65,8 @@ vim.keymap.set('i', '<Tab>', function()
     table_next_cell()
     return
   end
-  -- 注意: copilot 行内补全不在这条链上, 它归 <F13> (物理 <C-i>),
-  -- 见 lua/plugins/copilot-lsp.lua
+  -- 注意: AI 行内补全不在这条链上, 它归 <F13> (物理 <C-i>),
+  -- 见 lua/plugins/minuet.lua
 
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, false, true), 'n', false)
 end, { buffer = true, noremap = true, silent = true })
